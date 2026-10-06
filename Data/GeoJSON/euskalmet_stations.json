@@ -1,0 +1,2501 @@
+[
+  {
+    "stationId": "B090",
+    "type": "BUOY",
+    "name": "Puerto de Bilbao",
+    "municipality": "Santurtzi",
+    "province": "Bizkaia",
+    "lat": 43.3774903,
+    "lon": -3.08474,
+    "sensors": [
+      "MO05",
+      "PA05",
+      "SP05",
+      "TA05",
+      "DV05",
+      "VV05",
+      "HA05"
+    ]
+  },
+  {
+    "stationId": "B091",
+    "type": "BUOY",
+    "name": "Puerto de Armintza",
+    "municipality": "Lemoiz",
+    "province": "Bizkaia",
+    "lat": 43.4357871,
+    "lon": -2.89916,
+    "sensors": [
+      "MO04",
+      "MI04",
+      "RN04",
+      "SP04",
+      "CT24",
+      "VV04",
+      "CT23",
+      "CT22",
+      "CT21",
+      "CT20",
+      "DV04",
+      "TA04",
+      "CB29",
+      "CB28",
+      "CB27",
+      "CB26",
+      "HA04",
+      "CB25",
+      "CB24"
+    ]
+  },
+  {
+    "stationId": "B092",
+    "type": "BUOY",
+    "name": "Puerto de Bermeo",
+    "municipality": "Bermeo",
+    "province": "Bizkaia",
+    "lat": 43.4223435,
+    "lon": -2.70981,
+    "sensors": [
+      "CB00",
+      "MO00",
+      "VV00",
+      "CT04",
+      "TA00",
+      "CT03",
+      "CT02",
+      "CT01",
+      "CT00",
+      "DV00",
+      "RA02",
+      "HA00",
+      "MI00",
+      "RN00",
+      "CB05",
+      "SP00",
+      "CB04",
+      "CB03",
+      "CB02",
+      "CB01"
+    ]
+  },
+  {
+    "stationId": "B093",
+    "type": "BUOY",
+    "name": "Puerto de Ondarroa",
+    "municipality": "Ondarroa",
+    "province": "Bizkaia",
+    "lat": 43.325,
+    "lon": -2.4157,
+    "sensors": [
+      "CB22",
+      "MO03",
+      "CB21",
+      "CB20",
+      "CT19",
+      "SP03",
+      "CT18",
+      "CT17",
+      "CT16",
+      "CT15",
+      "VV03",
+      "DV03",
+      "TA03",
+      "CB19",
+      "CB18",
+      "RN03",
+      "MI03",
+      "HA03",
+      "CB23"
+    ]
+  },
+  {
+    "stationId": "B094",
+    "type": "BUOY",
+    "name": "Puerto de Getaria",
+    "municipality": "Getaria",
+    "province": "Gipuzkoa",
+    "lat": 43.30559,
+    "lon": -2.1968,
+    "sensors": [
+      "MO02",
+      "TA02",
+      "VV02",
+      "CT14",
+      "CT13",
+      "CT12",
+      "CT11",
+      "CT10",
+      "DV02",
+      "MI00",
+      "RN02",
+      "SP02",
+      "CB17",
+      "HA02",
+      "CB16",
+      "CB15",
+      "CB14",
+      "CB13",
+      "CB12"
+    ]
+  },
+  {
+    "stationId": "B096",
+    "type": "BUOY",
+    "name": "Puerto de Pasaia",
+    "municipality": "Pasaia",
+    "province": "Gipuzkoa",
+    "lat": 43.3370283,
+    "lon": -1.92752,
+    "sensors": [
+      "PA05",
+      "TA06",
+      "SP06",
+      "AWA1",
+      "DV06",
+      "MO06",
+      "CB36",
+      "HA06",
+      "VV06"
+    ]
+  },
+  {
+    "stationId": "B097",
+    "type": "BUOY",
+    "name": "Puerto de Hondarribia",
+    "municipality": "Hondarribia",
+    "province": "Gipuzkoa",
+    "lat": 43.3882,
+    "lon": -1.78955,
+    "sensors": [
+      "CB11",
+      "CB10",
+      "CT09",
+      "CT08",
+      "MO01",
+      "CT07",
+      "CT06",
+      "CT05",
+      "TA01",
+      "VV01",
+      "RA07",
+      "DV01",
+      "CB09",
+      "CB08",
+      "SP01",
+      "CB07",
+      "MI01",
+      "CB06",
+      "HA01",
+      "RN01"
+    ]
+  },
+  {
+    "stationId": "B098",
+    "type": "BUOY",
+    "name": "Mutriku",
+    "municipality": "Mutriku",
+    "province": "Gipuzkoa",
+    "lat": 43.31218,
+    "lon": -2.376872,
+    "sensors": [
+      "Y0BX",
+      "K0S2",
+      "R0CB"
+    ]
+  },
+  {
+    "stationId": "C001",
+    "type": "METEOROLOGICAL",
+    "name": "Arkaute I",
+    "municipality": "Vitoria-Gasteiz",
+    "province": "Álava",
+    "lat": 42.8518,
+    "lon": -2.62701,
+    "sensors": [
+      "G4RG",
+      "S005",
+      "Y0RH",
+      "G444",
+      "K614",
+      "G465",
+      "G4AC",
+      "Y0BQ",
+      "K0AM",
+      "Y0AH",
+      "S001",
+      "S0AC",
+      "G4AP",
+      "R052"
+    ]
+  },
+  {
+    "stationId": "C002",
+    "type": "METEOROLOGICAL",
+    "name": "Arteaga",
+    "municipality": "Gautegiz Arteaga",
+    "province": "Bizkaia",
+    "lat": 43.347,
+    "lon": -2.65714,
+    "sensors": [
+      "G4RE",
+      "R0RY",
+      "K0R3",
+      "Y0AL"
+    ]
+  },
+  {
+    "stationId": "C003",
+    "type": "METEOROLOGICAL",
+    "name": "Derio",
+    "municipality": "Derio",
+    "province": "Bizkaia",
+    "lat": 43.2911,
+    "lon": -2.87342,
+    "sensors": [
+      "R008",
+      "Y0AH",
+      "G4R2"
+    ]
+  },
+  {
+    "stationId": "C004",
+    "type": "GAUGING",
+    "name": "Bakio",
+    "municipality": "Bakio",
+    "province": "Bizkaia",
+    "lat": 43.4168,
+    "lon": -2.8124,
+    "sensors": [
+      "IS98"
+    ]
+  },
+  {
+    "stationId": "C005",
+    "type": "GAUGING",
+    "name": "Gatika",
+    "municipality": "Gatika",
+    "province": "Bizkaia",
+    "lat": 43.3723,
+    "lon": -2.90829,
+    "sensors": [
+      "RA05",
+      "UI05"
+    ]
+  },
+  {
+    "stationId": "C006",
+    "type": "GAUGING",
+    "name": "Markina",
+    "municipality": "Markina-Xemein",
+    "province": "Bizkaia",
+    "lat": 43.2655,
+    "lon": -2.49565,
+    "sensors": [
+      "UR06",
+      "UI06"
+    ]
+  },
+  {
+    "stationId": "C007",
+    "type": "METEOROLOGICAL",
+    "name": "Santa Clara",
+    "municipality": "Donostia / San Sebastián",
+    "province": "Gipuzkoa",
+    "lat": 43.3218,
+    "lon": -1.99834,
+    "sensors": [
+      "R0FY",
+      "K0AA",
+      "Y094"
+    ]
+  },
+  {
+    "stationId": "C008",
+    "type": "GAUGING",
+    "name": "Zeanuri",
+    "municipality": "Zeanuri",
+    "province": "Bizkaia",
+    "lat": 43.09858,
+    "lon": -2.74988,
+    "sensors": [
+      "UL08",
+      "UI08"
+    ]
+  },
+  {
+    "stationId": "C009",
+    "type": "GAUGING",
+    "name": "Galdakao",
+    "municipality": "Galdakao",
+    "province": "Bizkaia",
+    "lat": 43.2342345,
+    "lon": -2.8703215,
+    "sensors": [
+      "UR09",
+      "R0EL",
+      "UI09",
+      "G477"
+    ]
+  },
+  {
+    "stationId": "C00A",
+    "type": "METEOROLOGICAL",
+    "name": "Kanpezu",
+    "municipality": "Campezo/Kanpezu",
+    "province": "Álava",
+    "lat": 42.6754,
+    "lon": -2.34147,
+    "sensors": [
+      "G458",
+      "K0AQ",
+      "R0II",
+      "Y0AJ"
+    ]
+  },
+  {
+    "stationId": "C00B",
+    "type": "GAUGING",
+    "name": "Tobillas",
+    "municipality": "Valdegovía/Gaubea",
+    "province": "Álava",
+    "lat": 42.8992411,
+    "lon": -3.1828238,
+    "sensors": [
+      "R0DZ",
+      "G439",
+      "K0AR",
+      "ISCM",
+      "Y041"
+    ]
+  },
+  {
+    "stationId": "C00C",
+    "type": "GAUGING",
+    "name": "Goiain",
+    "municipality": "Legutio",
+    "province": "Álava",
+    "lat": 42.9444721,
+    "lon": -2.6415097,
+    "sensors": [
+      "G403",
+      "K0AO",
+      "Y012",
+      "R0R9",
+      "UL0C",
+      "IS0C"
+    ]
+  },
+  {
+    "stationId": "C010",
+    "type": "GAUGING",
+    "name": "Abetxuko-CHE",
+    "municipality": "Vitoria-Gasteiz",
+    "province": "Álava",
+    "lat": 42.8729023,
+    "lon": -2.6765434,
+    "sensors": [
+      "CHP10",
+      "CHN10",
+      "UR10"
+    ]
+  },
+  {
+    "stationId": "C011",
+    "type": "GAUGING",
+    "name": "Mungia-Lauaxeta",
+    "municipality": "Mungia",
+    "province": "Bizkaia",
+    "lat": 43.3561131,
+    "lon": -2.8499509,
+    "sensors": [
+      "UI11",
+      "RA11"
+    ]
+  },
+  {
+    "stationId": "C012",
+    "type": "GAUGING",
+    "name": "Zurbano-Alegría-CHE",
+    "municipality": "Vitoria-Gasteiz",
+    "province": "Álava",
+    "lat": 42.8668213,
+    "lon": -2.6371255,
+    "sensors": [
+      "CHN12",
+      "UR12"
+    ]
+  },
+  {
+    "stationId": "C016",
+    "type": "METEOROLOGICAL",
+    "name": "Arkauti",
+    "municipality": "Vitoria-Gasteiz",
+    "province": "Álava",
+    "lat": 42.854275,
+    "lon": -2.621833,
+    "sensors": [
+      "S008",
+      "K0AM",
+      "Y0AT",
+      "G471",
+      "R0EV"
+    ]
+  },
+  {
+    "stationId": "C017",
+    "type": "METEOROLOGICAL",
+    "name": "Miramon",
+    "municipality": "Donostia / San Sebastián",
+    "province": "Gipuzkoa",
+    "lat": 43.2868,
+    "lon": -1.97121,
+    "sensors": [
+      "K0RA",
+      "Y008",
+      "G4DB",
+      "R0D0"
+    ]
+  },
+  {
+    "stationId": "C018",
+    "type": "METEOROLOGICAL",
+    "name": "Higer",
+    "municipality": "Hondarribia",
+    "province": "Gipuzkoa",
+    "lat": 43.3913,
+    "lon": -1.79615,
+    "sensors": [
+      "K0AS",
+      "Y093",
+      "R0SM"
+    ]
+  },
+  {
+    "stationId": "C019",
+    "type": "METEOROLOGICAL",
+    "name": "Matxitxako",
+    "municipality": "Bermeo",
+    "province": "Bizkaia",
+    "lat": 43.4375,
+    "lon": -2.7636,
+    "sensors": [
+      "Y0BT",
+      "R0FM",
+      "K048",
+      "G455"
+    ]
+  },
+  {
+    "stationId": "C020",
+    "type": "METEOROLOGICAL",
+    "name": "Trebiño",
+    "municipality": "Condado de Treviño",
+    "province": "Burgos",
+    "lat": 42.7180163,
+    "lon": -2.70141,
+    "sensors": [
+      "G426",
+      "R026",
+      "Y0RI",
+      "K0AE"
+    ]
+  },
+  {
+    "stationId": "C021",
+    "type": "METEOROLOGICAL",
+    "name": "Roitegi",
+    "municipality": "Arraia-Maeztu",
+    "province": "Álava",
+    "lat": 42.7817,
+    "lon": -2.371,
+    "sensors": [
+      "Y001",
+      "R0FY"
+    ]
+  },
+  {
+    "stationId": "C022",
+    "type": "METEOROLOGICAL",
+    "name": "Urkiola",
+    "municipality": "Abadiño",
+    "province": "Bizkaia",
+    "lat": 43.1,
+    "lon": -2.64658,
+    "sensors": [
+      "G416",
+      "G411",
+      "K0AJ",
+      "Y064"
+    ]
+  },
+  {
+    "stationId": "C023",
+    "type": "METEOROLOGICAL",
+    "name": "Arrasate",
+    "municipality": "Arrasate / Mondragón",
+    "province": "Gipuzkoa",
+    "lat": 43.0695849,
+    "lon": -2.49308,
+    "sensors": [
+      "Y024",
+      "R0CY",
+      "K0S8",
+      "G4AS"
+    ]
+  },
+  {
+    "stationId": "C024",
+    "type": "METEOROLOGICAL",
+    "name": "Iturrieta",
+    "municipality": "Agurain/Salvatierra",
+    "province": "Álava",
+    "lat": 42.7935945,
+    "lon": -2.34575,
+    "sensors": [
+      "R0BV",
+      "K038",
+      "G4AL",
+      "S042",
+      "Y0RB"
+    ]
+  },
+  {
+    "stationId": "C025",
+    "type": "METEOROLOGICAL",
+    "name": "Beluntza",
+    "municipality": "Urkabustaiz",
+    "province": "Álava",
+    "lat": 42.9615782,
+    "lon": -2.89361,
+    "sensors": [
+      "R0HJ",
+      "Y0CM",
+      "PTAE"
+    ]
+  },
+  {
+    "stationId": "C026",
+    "type": "METEOROLOGICAL",
+    "name": "Berastegi",
+    "municipality": "Berastegi",
+    "province": "Gipuzkoa",
+    "lat": 43.1248,
+    "lon": -1.98168,
+    "sensors": [
+      "K026",
+      "R0IE",
+      "Y0DB",
+      "G4B3"
+    ]
+  },
+  {
+    "stationId": "C027",
+    "type": "METEOROLOGICAL",
+    "name": "Llodio",
+    "municipality": "Laudio/Llodio",
+    "province": "Álava",
+    "lat": 43.1423,
+    "lon": -2.95079,
+    "sensors": [
+      "G4RG",
+      "R0AV",
+      "Y0AV",
+      "R0BD",
+      "K610",
+      "G453",
+      "G4AO",
+      "R0CR"
+    ]
+  },
+  {
+    "stationId": "C028",
+    "type": "METEOROLOGICAL",
+    "name": "Zegama",
+    "municipality": "Zegama",
+    "province": "Gipuzkoa",
+    "lat": 42.9588,
+    "lon": -2.29852,
+    "sensors": [
+      "G4AF",
+      "Y0R8",
+      "R0IC"
+    ]
+  },
+  {
+    "stationId": "C029",
+    "type": "METEOROLOGICAL",
+    "name": "Zizurkil",
+    "municipality": "Zizurkil",
+    "province": "Gipuzkoa",
+    "lat": 43.1901,
+    "lon": -2.06181,
+    "sensors": [
+      "K041",
+      "R0GG",
+      "G4AB",
+      "Y0AP"
+    ]
+  },
+  {
+    "stationId": "C030",
+    "type": "METEOROLOGICAL",
+    "name": "Salvatierra",
+    "municipality": "Agurain/Salvatierra",
+    "province": "Álava",
+    "lat": 42.8582,
+    "lon": -2.39538,
+    "sensors": [
+      "G447",
+      "R0DY",
+      "Y064"
+    ]
+  },
+  {
+    "stationId": "C031",
+    "type": "METEOROLOGICAL",
+    "name": "Moreda",
+    "municipality": "Moreda de Álava/Moreda Araba",
+    "province": "Álava",
+    "lat": 42.5303,
+    "lon": -2.41023,
+    "sensors": [
+      "G4D2",
+      "R0SM",
+      "K612",
+      "Y0DD"
+    ]
+  },
+  {
+    "stationId": "C032",
+    "type": "GAUGING",
+    "name": "Areta",
+    "municipality": "Orozko",
+    "province": "Bizkaia",
+    "lat": 43.1394,
+    "lon": -2.93531,
+    "sensors": [
+      "UL32",
+      "R0HO",
+      "I032",
+      "G450",
+      "Y064"
+    ]
+  },
+  {
+    "stationId": "C033",
+    "type": "METEOROLOGICAL",
+    "name": "Igorre",
+    "municipality": "Igorre",
+    "province": "Bizkaia",
+    "lat": 43.1686,
+    "lon": -2.7842,
+    "sensors": [
+      "Y005",
+      "R0RU",
+      "K033",
+      "G499"
+    ]
+  },
+  {
+    "stationId": "C034",
+    "type": "METEOROLOGICAL",
+    "name": "Espejo",
+    "municipality": "Valdegovía/Gaubea",
+    "province": "Álava",
+    "lat": 42.8078,
+    "lon": -3.04103,
+    "sensors": [
+      "Y048",
+      "R0IH",
+      "K0AX",
+      "G4AR"
+    ]
+  },
+  {
+    "stationId": "C035",
+    "type": "METEOROLOGICAL",
+    "name": "Altube",
+    "municipality": "Zuia",
+    "province": "Álava",
+    "lat": 42.9661,
+    "lon": -2.86795,
+    "sensors": [
+      "R0DL",
+      "Y0BF",
+      "G4AF",
+      "R0AX",
+      "S001",
+      "K0AD"
+    ]
+  },
+  {
+    "stationId": "C036",
+    "type": "METEOROLOGICAL",
+    "name": "Iurreta",
+    "municipality": "Iurreta",
+    "province": "Bizkaia",
+    "lat": 43.1769,
+    "lon": -2.622,
+    "sensors": [
+      "R0BJ",
+      "Y0RG",
+      "K0AP",
+      "G467"
+    ]
+  },
+  {
+    "stationId": "C037",
+    "type": "METEOROLOGICAL",
+    "name": "Venta Alta",
+    "municipality": "Arrigorriaga",
+    "province": "Bizkaia",
+    "lat": 43.2145,
+    "lon": -2.89976,
+    "sensors": [
+      "G4AE",
+      "R0BF",
+      "K093",
+      "Y030"
+    ]
+  },
+  {
+    "stationId": "C038",
+    "type": "METEOROLOGICAL",
+    "name": "Galindo",
+    "municipality": "Sestao",
+    "province": "Bizkaia",
+    "lat": 43.3042,
+    "lon": -2.99878,
+    "sensors": [
+      "Y0W1",
+      "G442",
+      "R0ED"
+    ]
+  },
+  {
+    "stationId": "C039",
+    "type": "METEOROLOGICAL",
+    "name": "Deusto",
+    "municipality": "Bilbao",
+    "province": "Bizkaia",
+    "lat": 43.2834,
+    "lon": -2.96791,
+    "sensors": [
+      "S009",
+      "K0AN",
+      "Y0BH",
+      "NT39",
+      "G4AM",
+      "R0GB"
+    ]
+  },
+  {
+    "stationId": "C03A",
+    "type": "METEOROLOGICAL",
+    "name": "Zorrotza",
+    "municipality": "Bilbao",
+    "province": "Bizkaia",
+    "lat": 43.284979,
+    "lon": -2.968458,
+    "sensors": [
+      "Y0B4",
+      "CS3A",
+      "S0AG",
+      "R0BB",
+      "G4E7",
+      "K0AY"
+    ]
+  },
+  {
+    "stationId": "C040",
+    "type": "METEOROLOGICAL",
+    "name": "Gasteiz",
+    "municipality": "Vitoria-Gasteiz",
+    "province": "Álava",
+    "lat": 42.8604,
+    "lon": -2.68899,
+    "sensors": [
+      "Y045",
+      "K026",
+      "R0GC"
+    ]
+  },
+  {
+    "stationId": "C041",
+    "type": "METEOROLOGICAL",
+    "name": "Navarrete",
+    "municipality": "Bernedo",
+    "province": "Álava",
+    "lat": 42.638,
+    "lon": -2.52321,
+    "sensors": [
+      "Y005",
+      "G497",
+      "R0GF",
+      "K602"
+    ]
+  },
+  {
+    "stationId": "C042",
+    "type": "METEOROLOGICAL",
+    "name": "Punta Galea",
+    "municipality": "Getxo",
+    "province": "Bizkaia",
+    "lat": 43.3752,
+    "lon": -3.03608,
+    "sensors": [
+      "Y0DG",
+      "S0AC",
+      "K0S9",
+      "R0HG"
+    ]
+  },
+  {
+    "stationId": "C043",
+    "type": "METEOROLOGICAL",
+    "name": "Ordizia",
+    "municipality": "Ordizia",
+    "province": "Gipuzkoa",
+    "lat": 43.0484,
+    "lon": -2.17755,
+    "sensors": [
+      "G4AG",
+      "R0FU",
+      "K612",
+      "Y0AQ",
+      "S040"
+    ]
+  },
+  {
+    "stationId": "C044",
+    "type": "METEOROLOGICAL",
+    "name": "Gorbea",
+    "municipality": "Zigoitia",
+    "province": "Álava",
+    "lat": 42.9995,
+    "lon": -2.73515,
+    "sensors": [
+      "G403",
+      "R0BF",
+      "ISA3"
+    ]
+  },
+  {
+    "stationId": "C045",
+    "type": "METEOROLOGICAL",
+    "name": "La Garbea",
+    "municipality": "Balmaseda",
+    "province": "Bizkaia",
+    "lat": 43.217,
+    "lon": -3.19368,
+    "sensors": [
+      "G4RF",
+      "R0GE",
+      "Y0BR"
+    ]
+  },
+  {
+    "stationId": "C046",
+    "type": "METEOROLOGICAL",
+    "name": "Oiz",
+    "municipality": "Munitibar-Arbatzegi Gerrikaitz",
+    "province": "Bizkaia",
+    "lat": 43.2304,
+    "lon": -2.5954,
+    "sensors": [
+      "G414",
+      "R0FZ",
+      "Y0BP"
+    ]
+  },
+  {
+    "stationId": "C047",
+    "type": "METEOROLOGICAL",
+    "name": "Kapildui",
+    "municipality": "Bernedo",
+    "province": "Álava",
+    "lat": 42.768,
+    "lon": -2.53785,
+    "sensors": [
+      "Y0BX",
+      "R0BS",
+      "G4RA"
+    ]
+  },
+  {
+    "stationId": "C048",
+    "type": "METEOROLOGICAL",
+    "name": "Herrera",
+    "municipality": "Lagrán",
+    "province": "Álava",
+    "lat": 42.5978,
+    "lon": -2.67616,
+    "sensors": [
+      "R0EY",
+      "K0AZ",
+      "G4R2",
+      "Y0BO"
+    ]
+  },
+  {
+    "stationId": "C049",
+    "type": "METEOROLOGICAL",
+    "name": "Subijana",
+    "municipality": "Erriberagoitia/Ribera Alta",
+    "province": "Álava",
+    "lat": 42.8196,
+    "lon": -2.89328,
+    "sensors": [
+      "K0AL",
+      "R0RY",
+      "G4R9",
+      "Y033"
+    ]
+  },
+  {
+    "stationId": "C050",
+    "type": "METEOROLOGICAL",
+    "name": "Zambrana",
+    "municipality": "Berantevilla",
+    "province": "Álava",
+    "lat": 42.6751,
+    "lon": -2.8869,
+    "sensors": [
+      "R0R2",
+      "YE17",
+      "G410",
+      "K613"
+    ]
+  },
+  {
+    "stationId": "C051",
+    "type": "GAUGING",
+    "name": "Saratxo",
+    "municipality": "Amurrio",
+    "province": "Álava",
+    "lat": 43.0342,
+    "lon": -3.00398,
+    "sensors": [
+      "RM51",
+      "ISAJ",
+      "Y0R5",
+      "R0RE",
+      "K0AT",
+      "G4B1"
+    ]
+  },
+  {
+    "stationId": "C052",
+    "type": "GAUGING",
+    "name": "Ameraun",
+    "municipality": "Berastegi",
+    "province": "Gipuzkoa",
+    "lat": 43.1417,
+    "lon": -1.95085,
+    "sensors": [
+      "R0CC",
+      "G4AL",
+      "ISR7"
+    ]
+  },
+  {
+    "stationId": "C053",
+    "type": "METEOROLOGICAL",
+    "name": "Barazar",
+    "municipality": "Zeanuri",
+    "province": "Bizkaia",
+    "lat": 43.0703,
+    "lon": -2.71048,
+    "sensors": [
+      "R008",
+      "Y0R5",
+      "K045",
+      "G444"
+    ]
+  },
+  {
+    "stationId": "C054",
+    "type": "GAUGING",
+    "name": "Otxandio",
+    "municipality": "Otxandio",
+    "province": "Bizkaia",
+    "lat": 43.0423,
+    "lon": -2.65763,
+    "sensors": [
+      "UL54",
+      "IS74",
+      "K054",
+      "G4AQ",
+      "Y0AN",
+      "R0DO"
+    ]
+  },
+  {
+    "stationId": "C055",
+    "type": "GAUGING",
+    "name": "Ozaeta",
+    "municipality": "Barrundia",
+    "province": "Álava",
+    "lat": 42.913,
+    "lon": -2.49313,
+    "sensors": [
+      "UL55",
+      "IS55",
+      "R0DE",
+      "G4RB"
+    ]
+  },
+  {
+    "stationId": "C056",
+    "type": "GAUGING",
+    "name": "Alegría",
+    "municipality": "Alegría-Dulantzi",
+    "province": "Álava",
+    "lat": 42.8447,
+    "lon": -2.52402,
+    "sensors": [
+      "G4AI",
+      "R0HZ",
+      "Y0BN"
+    ]
+  },
+  {
+    "stationId": "C057",
+    "type": "GAUGING",
+    "name": "Mungia",
+    "municipality": "Mungia",
+    "province": "Bizkaia",
+    "lat": 43.363,
+    "lon": -2.84702,
+    "sensors": [
+      "NP57",
+      "OR57",
+      "NR57",
+      "NM57",
+      "NO57",
+      "NT57",
+      "NA57",
+      "NC57",
+      "RC57",
+      "G4D0",
+      "NI57",
+      "K0AU",
+      "R0GF",
+      "Y011"
+    ]
+  },
+  {
+    "stationId": "C058",
+    "type": "METEOROLOGICAL",
+    "name": "Bidania",
+    "municipality": "Bidania-Goiatz",
+    "province": "Gipuzkoa",
+    "lat": 43.146,
+    "lon": -2.15502,
+    "sensors": [
+      "K607",
+      "Y0BE",
+      "G460",
+      "R0GB"
+    ]
+  },
+  {
+    "stationId": "C059",
+    "type": "METEOROLOGICAL",
+    "name": "Ordunte",
+    "municipality": "Valle de Mena",
+    "province": "Burgos",
+    "lat": 43.1623,
+    "lon": -3.28404,
+    "sensors": [
+      "G458",
+      "Y0CJ",
+      "R0SA",
+      "UL59",
+      "K0R9"
+    ]
+  },
+  {
+    "stationId": "C060",
+    "type": "METEOROLOGICAL",
+    "name": "Páganos",
+    "municipality": "Laguardia",
+    "province": "Álava",
+    "lat": 42.5605,
+    "lon": -2.60055,
+    "sensors": [
+      "R0GO",
+      "Y0R5",
+      "S0AE",
+      "K0S6",
+      "G4E5"
+    ]
+  },
+  {
+    "stationId": "C061",
+    "type": "METEOROLOGICAL",
+    "name": "Arboleda",
+    "municipality": "Valle de Trápaga-Trapagaran",
+    "province": "Bizkaia",
+    "lat": 43.2967,
+    "lon": -3.06747,
+    "sensors": [
+      "R0CE",
+      "Y029",
+      "K0AW",
+      "G498"
+    ]
+  },
+  {
+    "stationId": "C062",
+    "type": "METEOROLOGICAL",
+    "name": "Garai",
+    "municipality": "Garai",
+    "province": "Bizkaia",
+    "lat": 43.2125,
+    "lon": -2.6002777,
+    "sensors": [
+      "PTAD",
+      "R0IT"
+    ]
+  },
+  {
+    "stationId": "C063",
+    "type": "QUALITY",
+    "name": "Muxika",
+    "municipality": "Muxika",
+    "province": "Bizkaia",
+    "lat": 43.2897,
+    "lon": -2.68914,
+    "sensors": [
+      "G4R7",
+      "ISAM",
+      "NR63",
+      "OR63",
+      "NC63",
+      "R0BT",
+      "NT63",
+      "NM63",
+      "NO63",
+      "NP63",
+      "NI63",
+      "RM63"
+    ]
+  },
+  {
+    "stationId": "C064",
+    "type": "METEOROLOGICAL",
+    "name": "Zarautz",
+    "municipality": "Zarautz",
+    "province": "Gipuzkoa",
+    "lat": 43.293,
+    "lon": -2.14542,
+    "sensors": [
+      "K057",
+      "R0ES",
+      "Y0AQ"
+    ]
+  },
+  {
+    "stationId": "C065",
+    "type": "METEOROLOGICAL",
+    "name": "Cerroja",
+    "municipality": "Karrantza Harana/Valle de Carranza",
+    "province": "Bizkaia",
+    "lat": 43.2112,
+    "lon": -3.40713,
+    "sensors": [
+      "R0GM",
+      "S0AD",
+      "G4AN",
+      "Y0BR"
+    ]
+  },
+  {
+    "stationId": "C066",
+    "type": "METEOROLOGICAL",
+    "name": "Untzueta",
+    "municipality": "Orozko",
+    "province": "Bizkaia",
+    "lat": 43.1372,
+    "lon": -2.9071,
+    "sensors": [
+      "R0FL",
+      "Y0DK"
+    ]
+  },
+  {
+    "stationId": "C067",
+    "type": "QUALITY",
+    "name": "Gardea",
+    "municipality": "Laudio/Llodio",
+    "province": "Álava",
+    "lat": 43.1272,
+    "lon": -2.98025,
+    "sensors": [
+      "NA67",
+      "ISAY",
+      "NR67",
+      "NC67",
+      "G4R8",
+      "NT67",
+      "NM67",
+      "NO67",
+      "NP67",
+      "RM67",
+      "Y0DR",
+      "R0W1"
+    ]
+  },
+  {
+    "stationId": "C068",
+    "type": "METEOROLOGICAL",
+    "name": "Ilarduia",
+    "municipality": "Asparrena",
+    "province": "Álava",
+    "lat": 42.87395,
+    "lon": -2.28623,
+    "sensors": [
+      "R0RW",
+      "Y0BZ",
+      "G4R1"
+    ]
+  },
+  {
+    "stationId": "C069",
+    "type": "METEOROLOGICAL",
+    "name": "Almike (Bermeo)",
+    "municipality": "Bermeo",
+    "province": "Bizkaia",
+    "lat": 43.4137,
+    "lon": -2.73229,
+    "sensors": [
+      "R014",
+      "K0R7",
+      "Y033",
+      "G4AR"
+    ]
+  },
+  {
+    "stationId": "C070",
+    "type": "METEOROLOGICAL",
+    "name": "Zaldiaran",
+    "municipality": "Vitoria-Gasteiz",
+    "province": "Álava",
+    "lat": 42.7966,
+    "lon": -2.73642,
+    "sensors": [
+      "R0EN",
+      "Y0DG",
+      "G411"
+    ]
+  },
+  {
+    "stationId": "C071",
+    "type": "METEOROLOGICAL",
+    "name": "Jaizkibel",
+    "municipality": "Lezo",
+    "province": "Gipuzkoa",
+    "lat": 43.3446,
+    "lon": -1.85972,
+    "sensors": [
+      "R0FN",
+      "Y0BT"
+    ]
+  },
+  {
+    "stationId": "C072",
+    "type": "METEOROLOGICAL",
+    "name": "Orduña",
+    "municipality": "Urduña/Orduña",
+    "province": "Bizkaia",
+    "lat": 42.9837,
+    "lon": -3.03726,
+    "sensors": [
+      "G4AD",
+      "Y028",
+      "R0SC"
+    ]
+  },
+  {
+    "stationId": "C073",
+    "type": "METEOROLOGICAL",
+    "name": "Mallabia",
+    "municipality": "Mallabia",
+    "province": "Bizkaia",
+    "lat": 43.1926263,
+    "lon": -2.5295246,
+    "sensors": [
+      "Y0CW",
+      "G470",
+      "R0FR"
+    ]
+  },
+  {
+    "stationId": "C074",
+    "type": "QUALITY",
+    "name": "Elorrio",
+    "municipality": "Elorrio",
+    "province": "Bizkaia",
+    "lat": 43.1306,
+    "lon": -2.55853,
+    "sensors": [
+      "R0BK",
+      "NA74",
+      "NR74",
+      "G418",
+      "NC74",
+      "NT74",
+      "NM74",
+      "NO74",
+      "NP74",
+      "ISBT"
+    ]
+  },
+  {
+    "stationId": "C075",
+    "type": "METEOROLOGICAL",
+    "name": "Eitzaga",
+    "municipality": "Zaldibar",
+    "province": "Bizkaia",
+    "lat": 43.1761,
+    "lon": -2.50096,
+    "sensors": [
+      "G4AG",
+      "Y037",
+      "R0SG",
+      "R0AF",
+      "R0DI",
+      "R0EJ",
+      "R003",
+      "R0BM",
+      "G4AB"
+    ]
+  },
+  {
+    "stationId": "C076",
+    "type": "GAUGING",
+    "name": "Abetxuko",
+    "municipality": "Vitoria-Gasteiz",
+    "province": "Álava",
+    "lat": 42.8755,
+    "lon": -2.66879,
+    "sensors": [
+      "IS70",
+      "G428",
+      "R0EQ"
+    ]
+  },
+  {
+    "stationId": "C077",
+    "type": "QUALITY",
+    "name": "Andoain",
+    "municipality": "Andoain",
+    "province": "Gipuzkoa",
+    "lat": 43.2109,
+    "lon": -2.01559,
+    "sensors": [
+      "NR77",
+      "NC77",
+      "NT77",
+      "NO77",
+      "NP77",
+      "R0RU",
+      "RM77",
+      "ISAC",
+      "G4C4"
+    ]
+  },
+  {
+    "stationId": "C078",
+    "type": "QUALITY",
+    "name": "Altzola",
+    "municipality": "Elgoibar",
+    "province": "Gipuzkoa",
+    "lat": 43.2419,
+    "lon": -2.39784,
+    "sensors": [
+      "NR78",
+      "OR78",
+      "NT78",
+      "NM78",
+      "NO78",
+      "NP78",
+      "SS78",
+      "R0SB",
+      "NA78",
+      "NC78",
+      "ISBO",
+      "RM78",
+      "G4RC"
+    ]
+  },
+  {
+    "stationId": "C079",
+    "type": "QUALITY",
+    "name": "Amorebieta",
+    "municipality": "Amorebieta-Etxano",
+    "province": "Bizkaia",
+    "lat": 43.2185,
+    "lon": -2.73304,
+    "sensors": [
+      "NP79",
+      "NA79",
+      "ISAZ",
+      "NR79",
+      "NC79",
+      "NM79",
+      "R016",
+      "NO79",
+      "NI79",
+      "G4EC",
+      "RM79",
+      "NT79"
+    ]
+  },
+  {
+    "stationId": "C080",
+    "type": "QUALITY",
+    "name": "Añarbe",
+    "municipality": "Oiartzun",
+    "province": "Gipuzkoa",
+    "lat": 43.2276,
+    "lon": -1.84981,
+    "sensors": [
+      "IS80",
+      "G4B6",
+      "R0CY"
+    ]
+  },
+  {
+    "stationId": "C081",
+    "type": "GAUGING",
+    "name": "Martutene",
+    "municipality": "Donostia / San Sebastián",
+    "province": "Gipuzkoa",
+    "lat": 43.297,
+    "lon": -1.95634,
+    "sensors": [
+      "UL81"
+    ]
+  },
+  {
+    "stationId": "C082",
+    "type": "GAUGING",
+    "name": "Txomin Enea",
+    "municipality": "Donostia / San Sebastián",
+    "province": "Gipuzkoa",
+    "lat": 43.3076,
+    "lon": -1.96198,
+    "sensors": [
+      "CS82",
+      "UL82"
+    ]
+  },
+  {
+    "stationId": "C083",
+    "type": "GAUGING",
+    "name": "Jaizubia",
+    "municipality": "Irun",
+    "province": "Gipuzkoa",
+    "lat": 43.3402,
+    "lon": -1.82138,
+    "sensors": [
+      "I083",
+      "UL83"
+    ]
+  },
+  {
+    "stationId": "C084",
+    "type": "GAUGING",
+    "name": "Behobia",
+    "municipality": "Irun",
+    "province": "Gipuzkoa",
+    "lat": 43.346,
+    "lon": -1.76117,
+    "sensors": [
+      "R0RY",
+      "RA01",
+      "G4AM"
+    ]
+  },
+  {
+    "stationId": "C085",
+    "type": "GAUGING",
+    "name": "Eibar",
+    "municipality": "Eibar",
+    "province": "Gipuzkoa",
+    "lat": 43.1921,
+    "lon": -2.4542,
+    "sensors": [
+      "IS99",
+      "RA85"
+    ]
+  },
+  {
+    "stationId": "C086",
+    "type": "GAUGING",
+    "name": "Inurritza",
+    "municipality": "Zarautz",
+    "province": "Gipuzkoa",
+    "lat": 43.2779811,
+    "lon": -2.1693568,
+    "sensors": [
+      "UL86",
+      "R0GX",
+      "IS86",
+      "G465"
+    ]
+  },
+  {
+    "stationId": "C087",
+    "type": "METEOROLOGICAL",
+    "name": "Urduliz",
+    "municipality": "Urduliz",
+    "province": "Bizkaia",
+    "lat": 43.3841289,
+    "lon": -2.9568635,
+    "sensors": [
+      "R0GK",
+      "G2AL"
+    ]
+  },
+  {
+    "stationId": "C0A0",
+    "type": "GAUGING",
+    "name": "Sarria",
+    "municipality": "Zuia",
+    "province": "Álava",
+    "lat": 42.9798,
+    "lon": -2.8302,
+    "sensors": [
+      "R0HQ",
+      "ISB9",
+      "G429"
+    ]
+  },
+  {
+    "stationId": "C0A1",
+    "type": "GAUGING",
+    "name": "Pagoeta",
+    "municipality": "Peñacerrada-Urizaharra",
+    "province": "Álava",
+    "lat": 42.64782,
+    "lon": -2.72441,
+    "sensors": [
+      "ISA1",
+      "URA1",
+      "R0W1"
+    ]
+  },
+  {
+    "stationId": "C0A2",
+    "type": "GAUGING",
+    "name": "Egino",
+    "municipality": "Asparrena",
+    "province": "Álava",
+    "lat": 42.86831,
+    "lon": -2.25319,
+    "sensors": [
+      "ISA2",
+      "R030"
+    ]
+  },
+  {
+    "stationId": "C0A3",
+    "type": "GAUGING",
+    "name": "Antoñana",
+    "municipality": "Campezo/Kanpezu",
+    "province": "Álava",
+    "lat": 42.6784637,
+    "lon": -2.3901665,
+    "sensors": [
+      "R0BR",
+      "ISBS"
+    ]
+  },
+  {
+    "stationId": "C0A4",
+    "type": "GAUGING",
+    "name": "Albaina",
+    "municipality": "Condado de Treviño",
+    "province": "Burgos",
+    "lat": 42.692483,
+    "lon": -2.631363,
+    "sensors": [
+      "R0EH",
+      "IS23"
+    ]
+  },
+  {
+    "stationId": "C0AA",
+    "type": "GAUGING",
+    "name": "Etura",
+    "municipality": "Barrundia",
+    "province": "Álava",
+    "lat": 42.8878,
+    "lon": -2.50361,
+    "sensors": [
+      "NRAA",
+      "NCAA",
+      "G458",
+      "NTAA",
+      "NOAA",
+      "R0A6",
+      "NPAA",
+      "NAAA",
+      "SRAA",
+      "ISP4",
+      "K091",
+      "Y0DC"
+    ]
+  },
+  {
+    "stationId": "C0AB",
+    "type": "GAUGING",
+    "name": "Nanclares",
+    "municipality": "Iruña Oka/Iruña de Oca",
+    "province": "Álava",
+    "lat": 42.7934863,
+    "lon": -2.8239093,
+    "sensors": [
+      "Y037",
+      "PTAC",
+      "K0AV",
+      "ISAB",
+      "R0EC",
+      "ULAB"
+    ]
+  },
+  {
+    "stationId": "C0B0",
+    "type": "GAUGING",
+    "name": "La Merced",
+    "municipality": "Bilbao",
+    "province": "Bizkaia",
+    "lat": 43.2596,
+    "lon": -2.92679,
+    "sensors": [
+      "PR02",
+      "ISB0"
+    ]
+  },
+  {
+    "stationId": "C0B1",
+    "type": "QUALITY",
+    "name": "Abusu",
+    "municipality": "Arrigorriaga",
+    "province": "Bizkaia",
+    "lat": 43.2474,
+    "lon": -2.91364,
+    "sensors": [
+      "NCB1",
+      "NTB1",
+      "NOB1",
+      "G4AI",
+      "NPB1",
+      "NAB1",
+      "NRB1",
+      "ISCT",
+      "NMB1",
+      "RMB1",
+      "NIB1",
+      "R0FP"
+    ]
+  },
+  {
+    "stationId": "C0B2",
+    "type": "QUALITY",
+    "name": "Zaratamo",
+    "municipality": "Zaratamo",
+    "province": "Bizkaia",
+    "lat": 43.22,
+    "lon": -2.87935,
+    "sensors": [
+      "NRB2",
+      "NCB2",
+      "NTB2",
+      "NOB2",
+      "NPB2",
+      "NAB2",
+      "ISB2",
+      "NMB2",
+      "RMB2",
+      "NIB2"
+    ]
+  },
+  {
+    "stationId": "C0B3",
+    "type": "GAUGING",
+    "name": "Urkizu",
+    "municipality": "Igorre",
+    "province": "Bizkaia",
+    "lat": 43.1849,
+    "lon": -2.7721,
+    "sensors": [
+      "ISAJ",
+      "R0AO",
+      "RMR1"
+    ]
+  },
+  {
+    "stationId": "C0B4",
+    "type": "GAUGING",
+    "name": "Orozko",
+    "municipality": "Orozko",
+    "province": "Bizkaia",
+    "lat": 43.0864,
+    "lon": -2.91543,
+    "sensors": [
+      "R0AG",
+      "G417",
+      "Y0R5"
+    ]
+  },
+  {
+    "stationId": "C0B5",
+    "type": "GAUGING",
+    "name": "Oromino",
+    "municipality": "Iurreta",
+    "province": "Bizkaia",
+    "lat": 43.1920372,
+    "lon": -2.6767982,
+    "sensors": [
+      "IS20"
+    ]
+  },
+  {
+    "stationId": "C0B6",
+    "type": "METEOROLOGICAL",
+    "name": "Berna",
+    "municipality": "Iurreta",
+    "province": "Bizkaia",
+    "lat": 43.1871,
+    "lon": -2.67238,
+    "sensors": [
+      "RMB6",
+      "R0W1",
+      "G467"
+    ]
+  },
+  {
+    "stationId": "C0B7",
+    "type": "QUALITY",
+    "name": "Mañaria",
+    "municipality": "Izurtza",
+    "province": "Bizkaia",
+    "lat": 43.1437,
+    "lon": -2.64657,
+    "sensors": [
+      "RMB7",
+      "ISF7",
+      "R012",
+      "G4C2"
+    ]
+  },
+  {
+    "stationId": "C0B8",
+    "type": "GAUGING",
+    "name": "Larrainazubi",
+    "municipality": "Getxo",
+    "province": "Bizkaia",
+    "lat": 43.3463,
+    "lon": -2.99932,
+    "sensors": [
+      "RA03",
+      "R0HJ",
+      "G4DB",
+      "ULB8"
+    ]
+  },
+  {
+    "stationId": "C0B9",
+    "type": "GAUGING",
+    "name": "Sangroniz",
+    "municipality": "Sondika",
+    "province": "Bizkaia",
+    "lat": 43.2893,
+    "lon": -2.9308,
+    "sensors": [
+      "ISAY",
+      "R007",
+      "ISF7",
+      "G4AC"
+    ]
+  },
+  {
+    "stationId": "C0BA",
+    "type": "QUALITY",
+    "name": "Oleta",
+    "municipality": "Amoroto",
+    "province": "Bizkaia",
+    "lat": 43.3448,
+    "lon": -2.5088,
+    "sensors": [
+      "NTBA",
+      "ISCY",
+      "NOBA",
+      "NPBA",
+      "NRBA",
+      "ORBA",
+      "NCBA",
+      "R0CX",
+      "G418",
+      "NABA",
+      "NMBA",
+      "RM02",
+      "NIBA"
+    ]
+  },
+  {
+    "stationId": "C0BD",
+    "type": "GAUGING",
+    "name": "Iruzubieta",
+    "municipality": "Ziortza-Bolibar",
+    "province": "Bizkaia",
+    "lat": 43.2584,
+    "lon": -2.526,
+    "sensors": [
+      "G458",
+      "R0SI",
+      "IEAD",
+      "ISBW"
+    ]
+  },
+  {
+    "stationId": "C0BE",
+    "type": "QUALITY",
+    "name": "Berriatua",
+    "municipality": "Berriatua",
+    "province": "Bizkaia",
+    "lat": 43.3063,
+    "lon": -2.47616,
+    "sensors": [
+      "NOBE",
+      "NPBE",
+      "PABE",
+      "NRBE",
+      "ORBE",
+      "NMBE",
+      "NIBE",
+      "NCBE",
+      "NTBE",
+      "ISAF",
+      "R0FA",
+      "G478"
+    ]
+  },
+  {
+    "stationId": "C0C0",
+    "type": "GAUGING",
+    "name": "Zalla",
+    "municipality": "Zalla",
+    "province": "Bizkaia",
+    "lat": 43.2140004,
+    "lon": -3.13522,
+    "sensors": [
+      "ISC0",
+      "R0IY",
+      "G4D0",
+      "RAC0"
+    ]
+  },
+  {
+    "stationId": "C0C1",
+    "type": "GAUGING",
+    "name": "Aranguren",
+    "municipality": "Zalla",
+    "province": "Bizkaia",
+    "lat": 43.2117,
+    "lon": -3.12755,
+    "sensors": [
+      "ISCZ",
+      "RMC1"
+    ]
+  },
+  {
+    "stationId": "C0C2",
+    "type": "QUALITY",
+    "name": "Balmaseda",
+    "municipality": "Balmaseda",
+    "province": "Bizkaia",
+    "lat": 43.1771,
+    "lon": -3.21913,
+    "sensors": [
+      "NCC2",
+      "ISAY",
+      "NTC2",
+      "ULC2",
+      "NOC2",
+      "NPC2",
+      "NRC2",
+      "R0EQ",
+      "ISCW",
+      "G467"
+    ]
+  },
+  {
+    "stationId": "C0C3",
+    "type": "QUALITY",
+    "name": "Sodupe-Cadagua",
+    "municipality": "Güeñes",
+    "province": "Bizkaia",
+    "lat": 43.2025,
+    "lon": -3.0493,
+    "sensors": [
+      "NRC3",
+      "NCC3",
+      "NTC3",
+      "NOC3",
+      "Y0RG",
+      "NPC3",
+      "G4AO",
+      "NMC3",
+      "R0DQ",
+      "NIC3"
+    ]
+  },
+  {
+    "stationId": "C0C4",
+    "type": "QUALITY",
+    "name": "Sodupe-Herrerias",
+    "municipality": "Güeñes",
+    "province": "Bizkaia",
+    "lat": 43.2024,
+    "lon": -3.04461,
+    "sensors": [
+      "NRC4",
+      "NCC4",
+      "NTC4",
+      "NMC4",
+      "ISFB",
+      "NOC4",
+      "NPC4",
+      "RMC4"
+    ]
+  },
+  {
+    "stationId": "C0C5",
+    "type": "GAUGING",
+    "name": "Arenao",
+    "municipality": "Galdames",
+    "province": "Bizkaia",
+    "lat": 43.2807248,
+    "lon": -3.1394712,
+    "sensors": [
+      "UIC5",
+      "RAC5"
+    ]
+  },
+  {
+    "stationId": "C0C6",
+    "type": "METEOROLOGICAL",
+    "name": "Jarralta",
+    "municipality": "Sopuerta",
+    "province": "Bizkaia",
+    "lat": 43.2792301,
+    "lon": -3.1687352,
+    "sensors": [
+      "R085",
+      "PUC6"
+    ]
+  },
+  {
+    "stationId": "C0C7",
+    "type": "METEOROLOGICAL",
+    "name": "Cueto",
+    "municipality": "Trucios-Turtzioz",
+    "province": "Bizkaia",
+    "lat": 43.2776135,
+    "lon": -3.2742476,
+    "sensors": [
+      "R0DD",
+      "PUC7"
+    ]
+  },
+  {
+    "stationId": "C0C8",
+    "type": "METEOROLOGICAL",
+    "name": "Aulesti",
+    "municipality": "Aulesti",
+    "province": "Bizkaia",
+    "lat": 43.2985761,
+    "lon": -2.5585943,
+    "sensors": [
+      "RAC8",
+      "URC8"
+    ]
+  },
+  {
+    "stationId": "C0C9",
+    "type": "GAUGING",
+    "name": "Karrantza",
+    "municipality": "Karrantza Harana/Valle de Carranza",
+    "province": "Bizkaia",
+    "lat": 43.2517077,
+    "lon": -3.3927446,
+    "sensors": [
+      "ISC9",
+      "IS11"
+    ]
+  },
+  {
+    "stationId": "C0CA",
+    "type": "GAUGING",
+    "name": "Arbina",
+    "municipality": "Amoroto",
+    "province": "Bizkaia",
+    "lat": 43.333341,
+    "lon": -2.497656,
+    "sensors": [
+      "ULCA",
+      "ISCA"
+    ]
+  },
+  {
+    "stationId": "C0CB",
+    "type": "GAUGING",
+    "name": "Pando",
+    "municipality": "Trucios-Turtzioz",
+    "province": "Bizkaia",
+    "lat": 43.2756913,
+    "lon": -3.2584079,
+    "sensors": [
+      "IS53",
+      "IS59"
+    ]
+  },
+  {
+    "stationId": "C0D0",
+    "type": "GAUGING",
+    "name": "Urkulu",
+    "municipality": "Aretxabaleta",
+    "province": "Gipuzkoa",
+    "lat": 43.013,
+    "lon": -2.47239,
+    "sensors": [
+      "R0SK",
+      "G451",
+      "RMD1"
+    ]
+  },
+  {
+    "stationId": "C0D1",
+    "type": "QUALITY",
+    "name": "Oñati",
+    "municipality": "Oñati",
+    "province": "Gipuzkoa",
+    "lat": 43.0621,
+    "lon": -2.43755,
+    "sensors": [
+      "G404",
+      "NRD1",
+      "NCD1",
+      "NTD1",
+      "NMD1",
+      "NOD1",
+      "PRD1",
+      "R0IG",
+      "NPD1",
+      "RMD1"
+    ]
+  },
+  {
+    "stationId": "C0D2",
+    "type": "QUALITY",
+    "name": "San Prudentzio",
+    "municipality": "Bergara",
+    "province": "Gipuzkoa",
+    "lat": 43.0835,
+    "lon": -2.44745,
+    "sensors": [
+      "NTD2",
+      "NPD2",
+      "ORD2",
+      "NAD2",
+      "G4R9",
+      "NRD2",
+      "NCD2",
+      "NMD2",
+      "ISD2",
+      "NOD2",
+      "R0GD",
+      "RMD2"
+    ]
+  },
+  {
+    "stationId": "C0D3",
+    "type": "GAUGING",
+    "name": "Aixola",
+    "municipality": "Elgeta",
+    "province": "Gipuzkoa",
+    "lat": 43.1547,
+    "lon": -2.50123,
+    "sensors": [
+      "G4AE",
+      "RMD3",
+      "R0RN",
+      "ISBF"
+    ]
+  },
+  {
+    "stationId": "C0DB",
+    "type": "QUALITY",
+    "name": "Aitzu",
+    "municipality": "Zumarraga",
+    "province": "Gipuzkoa",
+    "lat": 43.1141,
+    "lon": -2.323,
+    "sensors": [
+      "R0AH",
+      "G480",
+      "ISBN",
+      "RMDB"
+    ]
+  },
+  {
+    "stationId": "C0DC",
+    "type": "QUALITY",
+    "name": "Ibai Eder",
+    "municipality": "Azpeitia",
+    "province": "Gipuzkoa",
+    "lat": 43.1751,
+    "lon": -2.25601,
+    "sensors": [
+      "IS06",
+      "R0Z1",
+      "K011",
+      "G496",
+      "RMDC"
+    ]
+  },
+  {
+    "stationId": "C0DD",
+    "type": "QUALITY",
+    "name": "Aizarnazabal",
+    "municipality": "Zestoa",
+    "province": "Gipuzkoa",
+    "lat": 43.2553,
+    "lon": -2.24219,
+    "sensors": [
+      "NRDD",
+      "NTDD",
+      "R0RY",
+      "NODD",
+      "NPDD",
+      "ORDD",
+      "SSDD",
+      "PRDD",
+      "NCDD",
+      "NADD",
+      "G4F4",
+      "NMDD",
+      "RMDD"
+    ]
+  },
+  {
+    "stationId": "C0DE",
+    "type": "GAUGING",
+    "name": "Matxinbenta",
+    "municipality": "Beasain",
+    "province": "Gipuzkoa",
+    "lat": 43.1135,
+    "lon": -2.23513,
+    "sensors": [
+      "R0SA",
+      "ISBP",
+      "PTAK"
+    ]
+  },
+  {
+    "stationId": "C0E1",
+    "type": "GAUGING",
+    "name": "Amundarain",
+    "municipality": "Zaldibia",
+    "province": "Gipuzkoa",
+    "lat": 43.0335,
+    "lon": -2.15086,
+    "sensors": [
+      "NRE1",
+      "ULE1",
+      "NCE1",
+      "G4F0",
+      "NTD1",
+      "NOE1",
+      "R0FG",
+      "NPE1",
+      "SSE1",
+      "DRE1"
+    ]
+  },
+  {
+    "stationId": "C0E5",
+    "type": "GAUGING",
+    "name": "Agauntza",
+    "municipality": "Ataun",
+    "province": "Gipuzkoa",
+    "lat": 43.0179,
+    "lon": -2.17748,
+    "sensors": [
+      "PRE5",
+      "R0CD",
+      "RME5",
+      "G4AP"
+    ]
+  },
+  {
+    "stationId": "C0E7",
+    "type": "QUALITY",
+    "name": "Estanda",
+    "municipality": "Beasain",
+    "province": "Gipuzkoa",
+    "lat": 43.052,
+    "lon": -2.21877,
+    "sensors": [
+      "PRE7",
+      "R0HN",
+      "RME7",
+      "G457"
+    ]
+  },
+  {
+    "stationId": "C0E8",
+    "type": "GAUGING",
+    "name": "Araxes",
+    "municipality": "Lizartza",
+    "province": "Gipuzkoa",
+    "lat": 43.1148,
+    "lon": -2.04772,
+    "sensors": [
+      "NOE8",
+      "NPE8",
+      "NRE8",
+      "R0RG",
+      "ISBQ",
+      "G433",
+      "NCE8",
+      "NTE8",
+      "ULE8"
+    ]
+  },
+  {
+    "stationId": "C0E9",
+    "type": "QUALITY",
+    "name": "Alegia",
+    "municipality": "Alegia",
+    "province": "Gipuzkoa",
+    "lat": 43.1018,
+    "lon": -2.10488,
+    "sensors": [
+      "NOE9",
+      "NPE9",
+      "SSE9",
+      "NAE9",
+      "PRE9",
+      "NME9",
+      "G4D0",
+      "RME9",
+      "R0RP",
+      "NRE9",
+      "NCE9",
+      "NTE9"
+    ]
+  },
+  {
+    "stationId": "C0EA",
+    "type": "QUALITY",
+    "name": "Belauntza",
+    "municipality": "Belauntza",
+    "province": "Gipuzkoa",
+    "lat": 43.1424,
+    "lon": -2.04845,
+    "sensors": [
+      "RMEA",
+      "NREA",
+      "NCEA",
+      "NTEA",
+      "NOEA",
+      "NPEA",
+      "G4D2",
+      "ISR1",
+      "R0FQ"
+    ]
+  },
+  {
+    "stationId": "C0EC",
+    "type": "QUALITY",
+    "name": "Lasarte",
+    "municipality": "Lasarte-Oria",
+    "province": "Gipuzkoa",
+    "lat": 43.2527,
+    "lon": -2.02109,
+    "sensors": [
+      "NPEC",
+      "NREC",
+      "ISEC",
+      "G415",
+      "Y0BD",
+      "K605",
+      "NAEC",
+      "NCEC",
+      "SSEC",
+      "NMEC",
+      "R0BC",
+      "NOEC",
+      "RMEC"
+    ]
+  },
+  {
+    "stationId": "C0F0",
+    "type": "QUALITY",
+    "name": "Ereñozu",
+    "municipality": "Hernani",
+    "province": "Gipuzkoa",
+    "lat": 43.242,
+    "lon": -1.93922,
+    "sensors": [
+      "Y0R4",
+      "R0Z0",
+      "NTF0",
+      "NPF0",
+      "PRF0",
+      "NRF0",
+      "G4DB",
+      "NCF0",
+      "SSF0",
+      "NOF0"
+    ]
+  },
+  {
+    "stationId": "C0F1",
+    "type": "GAUGING",
+    "name": "Eskas",
+    "municipality": "Goizueta",
+    "province": "Navarra",
+    "lat": 43.239387,
+    "lon": -1.8033242,
+    "sensors": [
+      "R0RU",
+      "GIF1"
+    ]
+  },
+  {
+    "stationId": "C0F4",
+    "type": "QUALITY",
+    "name": "Oiartzun",
+    "municipality": "Errenteria",
+    "province": "Gipuzkoa",
+    "lat": 43.3087,
+    "lon": -1.88459,
+    "sensors": [
+      "NTF4",
+      "G4RG",
+      "NPF4",
+      "NRF4",
+      "NCF4",
+      "SSF4",
+      "ISF4",
+      "NOF4",
+      "RMF4",
+      "R0RM"
+    ]
+  },
+  {
+    "stationId": "E000",
+    "type": "GAUGING",
+    "name": "Olabarria",
+    "municipality": "Zeanuri",
+    "province": "Bizkaia",
+    "lat": 43.0763,
+    "lon": -2.74107,
+    "sensors": [
+      "NIE0",
+      "CAE0"
+    ]
+  },
+  {
+    "stationId": "E001",
+    "type": "GAUGING",
+    "name": "Undurraga",
+    "municipality": "Zeanuri",
+    "province": "Bizkaia",
+    "lat": 43.089018,
+    "lon": -2.747956,
+    "sensors": [
+      "RME1",
+      "CAE1"
+    ]
+  },
+  {
+    "stationId": "E04A",
+    "type": "GAUGING",
+    "name": "Embalse de Urkulu",
+    "municipality": "Aretxabaleta",
+    "province": "Gipuzkoa",
+    "lat": 43.0225361,
+    "lon": -2.470625,
+    "sensors": [
+      "UE4A"
+    ]
+  },
+  {
+    "stationId": "E04B",
+    "type": "GAUGING",
+    "name": "Embalse de Ibai Eder",
+    "municipality": "Azpeitia",
+    "province": "Gipuzkoa",
+    "lat": 43.127975,
+    "lon": -2.228272,
+    "sensors": [
+      "UE4B"
+    ]
+  },
+  {
+    "stationId": "E04C",
+    "type": "GAUGING",
+    "name": "Embalse Barrendiola",
+    "municipality": null,
+    "province": "Gipuzkoa",
+    "lat": 43.010722,
+    "lon": -2.3431916,
+    "sensors": [
+      "UE4C"
+    ]
+  },
+  {
+    "stationId": "E04D",
+    "type": "GAUGING",
+    "name": "Embalse de Aixola",
+    "municipality": "Elgeta",
+    "province": "Gipuzkoa",
+    "lat": 43.161123,
+    "lon": -2.508639,
+    "sensors": [
+      "UE4D"
+    ]
+  },
+  {
+    "stationId": "M09A",
+    "type": "GAUGING",
+    "name": "Mareógrafo Bermeo",
+    "municipality": "Bermeo",
+    "province": "Bizkaia",
+    "lat": 43.4189241,
+    "lon": -2.7184411,
+    "sensors": [
+      "UL9A"
+    ]
+  },
+  {
+    "stationId": "M09B",
+    "type": "GAUGING",
+    "name": "Mareógrafo Erandio",
+    "municipality": "Erandio",
+    "province": "Bizkaia",
+    "lat": 43.302611,
+    "lon": -2.977206,
+    "sensors": [
+      "UL9B"
+    ]
+  }
+]
