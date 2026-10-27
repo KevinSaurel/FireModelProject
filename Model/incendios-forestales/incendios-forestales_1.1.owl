@@ -1,0 +1,2632 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     ontologyIRI="https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales#"
+     versionIRI="https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales/1.1">
+    <Prefix name="" IRI="https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales#"/>
+    <Prefix name="dc" IRI="http://purl.org/dc/elements/1.1/"/>
+    <Prefix name="dbo" IRI="http://dbpedia.org/ontology/"/>
+    <Prefix name="dct" IRI="http://purl.org/dc/terms/"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="dcat" IRI="http://www.w3.org/ns/dcat#"/>
+    <Prefix name="foaf" IRI="http://xmlns.com/foaf/0.1/"/>
+    <Prefix name="owl2" IRI="https://www.w3.org/2002/07/owl#"/>
+    <Prefix name="prov" IRI="http://www.w3.org/ns/prov#"/>
+    <Prefix name="qudt" IRI="http://qudt.org/schema/qudt/"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Prefix name="skos" IRI="http://www.w3.org/2004/02/skos/core#"/>
+    <Prefix name="time" IRI="http://www.w3.org/2006/time#"/>
+    <Prefix name="vann" IRI="http://purl.org/vocab/vann/"/>
+    <Prefix name="esadm" IRI="http://vocab.linkeddata.es/datosabiertos/def/sector-publico/territorio#"/>
+    <Prefix name="event" IRI="http://purl.org/NET/c4dm/event.owl#"/>
+    <Prefix name="btn100" IRI="https://datos.ign.es/def/btn100#"/>
+    <Prefix name="uneskos" IRI="http://purl.org/umu/uneskos#"/>
+    <Prefix name="geonames" IRI="http://www.geonames.org/ontology#"/>
+    <Prefix name="geosparql" IRI="http://www.opengis.net/ont/geosparql#"/>
+    <Prefix name="malla-espacial" IRI="https://datos.iepnb.es/def/sector-publico/territorio/malla-espacial#"/>
+    <Prefix name="incendios-forestales" IRI="https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales#"/>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="dc:creator"/>
+        <Literal>Tragsatec</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="dc:date"/>
+        <Literal>2021-06-03</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="dc:description"/>
+        <Literal xml:lang="en">An RDF/OWL vocabulary to represent spatial information on forest fires in Spain and Portugal within the european Cross-Forest project (INEA/CEF/ICT/A2017/156673).</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="dc:description"/>
+        <Literal xml:lang="es">Un vocabulario RDF/OWL para representar información espacial sobre incendios forestales de España y Portugal en el seno del proyecto europeo Cross-Forest (INEA/CEF/ICT/A2017/156673).</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="dc:title"/>
+        <Literal xml:lang="en">Forest fire ontology of the Cross-Forest project.</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="dc:title"/>
+        <Literal xml:lang="es">Ontología de incendios forestales del proyecto Cross-Forest.</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="vann:preferredNamespacePrefix"/>
+        <Literal>incendios-forestales</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="vann:preferredNamespaceUri"/>
+        <IRI></IRI>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="owl:versionInfo"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1.1</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="skos:changeNote"/>
+        <Literal xml:lang="es">2021-06-03 - Cambiado dataProperty time:year a la subclase Año de prov:Collection, para agrupar los incendios por años.
+2021-03-15 - Creación de la ontología OWL de incendios forestales.</Literal>
+    </Annotation>
+    <Declaration>
+        <Class abbreviatedIRI="dbo:Country"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dbo:District"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dbo:GovernmentalAdministrativeRegion"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dbo:Municipality"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="event:Event"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dct:Agent"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dct:LicenseDocument"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dct:LinguisticSystem"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dct:Location"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dct:PeriodOfTime"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dct:ProvenanceStatement"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dct:RightsStatement"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dct:Standard"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="qudt:Quantity"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="qudt:QuantityValue"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="qudt:Unit"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://schema.org/AdministrativeArea"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://schema.org/Country"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="esadm:Municipio"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="esadm:Pais"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="esadm:Provincia"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="geosparql:Feature"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="geosparql:Geometry"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="skos:Concept"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="skos:ConceptScheme"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="time:Instant"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="time:Interval"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://www.w3.org/2006/vcard/ns#Kind"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dcat:Catalog"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dcat:Dataset"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dcat:Distribution"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dcat:MediaType"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="dcat:Resource"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="prov:Collection"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="prov:Entity"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="Area"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="Año"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="IncendioForestal"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="SuperficieAgricola"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="SuperficieArbolada"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="SuperficieForestal"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="SuperficieNoArbolada"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="SuperficieNoForestal"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dct:conformsTo"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dct:hasPart"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dct:language"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dct:license"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dct:provenance"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dct:publisher"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dct:rights"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dct:spatial"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dct:temporal"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dct:type"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="uneskos:contains"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="qudt:hasQuantity"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="qudt:unit"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="esadm:provincia"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="geosparql:hasGeometry"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="geosparql:sfContains"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="geosparql:sfWithin"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="skos:exactMatch"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="skos:inScheme"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="time:hasBeginning"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="time:hasEnd"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dcat:accessURL"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dcat:contactPoint"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dcat:dataset"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dcat:distribution"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dcat:mediaType"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="dcat:theme"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="prov:hadDerivation"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="prov:hadMember"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="prov:wasDerivedFrom"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="prov:wasMemberOf"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="malla-espacial:sistemaReferenciaEspacial"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="tiempoExposicion"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="tieneFechaIncendio"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="tieneSuperficieAgricola"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="tieneSuperficieArbolada"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="tieneSuperficieForestal"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="tieneSuperficieNoArbolada"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="tieneSuperficieNoForestal"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="dct:identifier"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="qudt:code"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="qudt:numericValue"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="qudt:ucumCode"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="qudt:uneceCommonCode"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="esadm:codigoINE"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="geonames:officialName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="geosparql:asWKT"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="time:inXSDDate"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="time:year"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="dcat:bbox"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="dcat:keyword"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="IdIncendio"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="http://datos.gob.es/recurso/sector-publico/territorio/Pais/España"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="http://inspire.ec.europa.eu/codelist/NaturalHazardCategoryValue/forestFireWildfire"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="http://qudt.org/vocab/unit/HA"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25827"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25828"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25829"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25830"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25831"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales/Coleccion/ColeccionIncendiosForestalesEspaña"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dc:contributor"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dc:creator"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dc:date"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dc:description"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dc:source"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dc:title"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dct:description"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="dct:title"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="vann:preferredNamespacePrefix"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="vann:preferredNamespaceUri"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="skos:changeNote"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="skos:scopeNote"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="prov:definition"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="owl2:sameAs"/>
+    </Declaration>
+    <Declaration>
+        <Datatype abbreviatedIRI="geosparql:wktLiteral"/>
+    </Declaration>
+    <Declaration>
+        <Datatype abbreviatedIRI="rdf:HTML"/>
+    </Declaration>
+    <Declaration>
+        <Datatype abbreviatedIRI="xsd:date"/>
+    </Declaration>
+    <Declaration>
+        <Datatype abbreviatedIRI="xsd:gYear"/>
+    </Declaration>
+    <EquivalentClasses>
+        <Class abbreviatedIRI="dbo:Country"/>
+        <Class IRI="http://schema.org/Country"/>
+    </EquivalentClasses>
+    <EquivalentClasses>
+        <Class abbreviatedIRI="dbo:GovernmentalAdministrativeRegion"/>
+        <Class IRI="http://schema.org/AdministrativeArea"/>
+    </EquivalentClasses>
+    <SubClassOf>
+        <Class abbreviatedIRI="dbo:Country"/>
+        <Class IRI="http://schema.org/AdministrativeArea"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="dbo:District"/>
+        <Class abbreviatedIRI="dbo:GovernmentalAdministrativeRegion"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="dbo:Municipality"/>
+        <Class abbreviatedIRI="dbo:GovernmentalAdministrativeRegion"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="qudt:Unit"/>
+        <DataMaxCardinality cardinality="1">
+            <DataProperty abbreviatedIRI="qudt:uneceCommonCode"/>
+        </DataMaxCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://schema.org/AdministrativeArea"/>
+        <Class abbreviatedIRI="geosparql:Feature"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://schema.org/Country"/>
+        <Class IRI="http://schema.org/AdministrativeArea"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="esadm:Municipio"/>
+        <Class IRI="http://schema.org/AdministrativeArea"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="esadm:Municipio"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty abbreviatedIRI="esadm:provincia"/>
+            <Class abbreviatedIRI="esadm:Provincia"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="esadm:Municipio"/>
+        <DataAllValuesFrom>
+            <DataProperty abbreviatedIRI="esadm:codigoINE"/>
+            <Datatype abbreviatedIRI="xsd:string"/>
+        </DataAllValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="esadm:Pais"/>
+        <Class abbreviatedIRI="dbo:Country"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="esadm:Pais"/>
+        <Class IRI="http://schema.org/AdministrativeArea"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="esadm:Provincia"/>
+        <Class IRI="http://schema.org/AdministrativeArea"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="esadm:Provincia"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty abbreviatedIRI="esadm:provincia"/>
+            <Class abbreviatedIRI="esadm:Pais"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="esadm:Provincia"/>
+        <DataAllValuesFrom>
+            <DataProperty abbreviatedIRI="esadm:codigoINE"/>
+            <Datatype abbreviatedIRI="xsd:string"/>
+        </DataAllValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="geosparql:Geometry"/>
+        <Class abbreviatedIRI="geosparql:Feature"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="dcat:Catalog"/>
+        <Class abbreviatedIRI="dcat:Dataset"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="dcat:Catalog"/>
+        <ObjectAllValuesFrom>
+            <ObjectProperty abbreviatedIRI="dct:hasPart"/>
+            <Class abbreviatedIRI="dcat:Resource"/>
+        </ObjectAllValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="dcat:Dataset"/>
+        <Class abbreviatedIRI="dcat:Resource"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="prov:Collection"/>
+        <Class abbreviatedIRI="prov:Entity"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="prov:Entity"/>
+        <Class abbreviatedIRI="dcat:Distribution"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="Area"/>
+        <Class abbreviatedIRI="qudt:Quantity"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="Area"/>
+        <ObjectHasValue>
+            <ObjectProperty abbreviatedIRI="qudt:unit"/>
+            <NamedIndividual IRI="http://qudt.org/vocab/unit/HA"/>
+        </ObjectHasValue>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="Año"/>
+        <Class abbreviatedIRI="prov:Collection"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="IncendioForestal"/>
+        <Class abbreviatedIRI="event:Event"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="IncendioForestal"/>
+        <Class abbreviatedIRI="geosparql:Feature"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="IncendioForestal"/>
+        <Class abbreviatedIRI="prov:Entity"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="IncendioForestal"/>
+        <ObjectMaxCardinality cardinality="1">
+            <ObjectProperty IRI="tieneSuperficieForestal"/>
+            <Class IRI="SuperficieForestal"/>
+        </ObjectMaxCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="SuperficieAgricola"/>
+        <Class IRI="Area"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="SuperficieArbolada"/>
+        <Class IRI="SuperficieForestal"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="SuperficieForestal"/>
+        <Class IRI="Area"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="SuperficieNoArbolada"/>
+        <Class IRI="SuperficieForestal"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="SuperficieNoForestal"/>
+        <Class IRI="Area"/>
+    </SubClassOf>
+    <DisjointClasses>
+        <Class abbreviatedIRI="esadm:Municipio"/>
+        <Class abbreviatedIRI="esadm:Provincia"/>
+    </DisjointClasses>
+    <ClassAssertion>
+        <Class abbreviatedIRI="esadm:Pais"/>
+        <NamedIndividual IRI="http://datos.gob.es/recurso/sector-publico/territorio/Pais/España"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="skos:Concept"/>
+        <NamedIndividual IRI="http://inspire.ec.europa.eu/codelist/NaturalHazardCategoryValue/forestFireWildfire"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="skos:ConceptScheme"/>
+        <NamedIndividual IRI="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="qudt:Unit"/>
+        <NamedIndividual IRI="http://qudt.org/vocab/unit/HA"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="skos:ConceptScheme"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="dct:Standard"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25827"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="skos:Concept"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25827"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="dct:Standard"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25828"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="skos:Concept"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25828"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="dct:Standard"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25829"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="skos:Concept"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25829"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="dct:Standard"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25830"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="skos:Concept"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25830"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="dct:Standard"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25831"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="skos:Concept"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25831"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class abbreviatedIRI="prov:Collection"/>
+        <NamedIndividual IRI="https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales/Coleccion/ColeccionIncendiosForestalesEspaña"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty abbreviatedIRI="dct:type"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25827"/>
+        <NamedIndividual IRI="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty abbreviatedIRI="dct:type"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25828"/>
+        <NamedIndividual IRI="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty abbreviatedIRI="dct:type"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25829"/>
+        <NamedIndividual IRI="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty abbreviatedIRI="dct:type"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25830"/>
+        <NamedIndividual IRI="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty abbreviatedIRI="dct:type"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25831"/>
+        <NamedIndividual IRI="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty abbreviatedIRI="qudt:ucumCode"/>
+        <NamedIndividual IRI="http://qudt.org/vocab/unit/HA"/>
+        <Literal>har</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty abbreviatedIRI="qudt:uneceCommonCode"/>
+        <NamedIndividual IRI="http://qudt.org/vocab/unit/HA"/>
+        <Literal>HAR</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty abbreviatedIRI="dct:identifier"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25827"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#anyURI">http://www.opengis.net/def/crs/EPSG/0/25827</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty abbreviatedIRI="dct:identifier"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25828"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#anyURI">http://www.opengis.net/def/crs/EPSG/0/25828</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty abbreviatedIRI="dct:identifier"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25829"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#anyURI">http://www.opengis.net/def/crs/EPSG/0/25829</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty abbreviatedIRI="dct:identifier"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25830"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#anyURI">http://www.opengis.net/def/crs/EPSG/0/25830</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty abbreviatedIRI="dct:identifier"/>
+        <NamedIndividual IRI="http://www.opengis.net/def/crs/EPSG/0/25831"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#anyURI">http://www.opengis.net/def/crs/EPSG/0/25831</Literal>
+    </DataPropertyAssertion>
+    <SubObjectPropertyOf>
+        <ObjectProperty abbreviatedIRI="esadm:provincia"/>
+        <ObjectProperty abbreviatedIRI="geosparql:sfWithin"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty abbreviatedIRI="dcat:dataset"/>
+        <ObjectProperty abbreviatedIRI="dct:hasPart"/>
+    </SubObjectPropertyOf>
+    <InverseObjectProperties>
+        <ObjectProperty abbreviatedIRI="uneskos:contains"/>
+        <ObjectProperty abbreviatedIRI="skos:inScheme"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty abbreviatedIRI="geosparql:sfContains"/>
+        <ObjectProperty abbreviatedIRI="geosparql:sfWithin"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty abbreviatedIRI="prov:hadDerivation"/>
+        <ObjectProperty abbreviatedIRI="prov:hadDerivation"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty abbreviatedIRI="prov:hadMember"/>
+        <ObjectProperty abbreviatedIRI="prov:wasMemberOf"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty abbreviatedIRI="prov:wasDerivedFrom"/>
+        <ObjectProperty abbreviatedIRI="prov:wasDerivedFrom"/>
+    </InverseObjectProperties>
+    <SymmetricObjectProperty>
+        <ObjectProperty abbreviatedIRI="skos:exactMatch"/>
+    </SymmetricObjectProperty>
+    <TransitiveObjectProperty>
+        <ObjectProperty abbreviatedIRI="skos:exactMatch"/>
+    </TransitiveObjectProperty>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="dct:language"/>
+        <Class abbreviatedIRI="dcat:Dataset"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="dct:spatial"/>
+        <Class abbreviatedIRI="dcat:Dataset"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="dct:temporal"/>
+        <Class abbreviatedIRI="dcat:Dataset"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="uneskos:contains"/>
+        <Class abbreviatedIRI="skos:ConceptScheme"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="geosparql:hasGeometry"/>
+        <Class IRI="IncendioForestal"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="geosparql:sfWithin"/>
+        <Class IRI="http://schema.org/AdministrativeArea"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="skos:exactMatch"/>
+        <Class abbreviatedIRI="prov:Collection"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="skos:inScheme"/>
+        <Class abbreviatedIRI="skos:Concept"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="time:hasBeginning"/>
+        <Class abbreviatedIRI="time:Interval"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="time:hasEnd"/>
+        <Class abbreviatedIRI="time:Interval"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="dcat:accessURL"/>
+        <Class abbreviatedIRI="dcat:Distribution"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="dcat:dataset"/>
+        <Class abbreviatedIRI="dcat:Catalog"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="dcat:distribution"/>
+        <Class abbreviatedIRI="dcat:Dataset"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="dcat:mediaType"/>
+        <Class abbreviatedIRI="dcat:Distribution"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="prov:hadDerivation"/>
+        <Class abbreviatedIRI="prov:Entity"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="prov:hadMember"/>
+        <Class abbreviatedIRI="prov:Collection"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="prov:wasDerivedFrom"/>
+        <Class abbreviatedIRI="prov:Entity"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="prov:wasMemberOf"/>
+        <Class IRI="IncendioForestal"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="malla-espacial:sistemaReferenciaEspacial"/>
+        <Class abbreviatedIRI="geosparql:Geometry"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="tiempoExposicion"/>
+        <Class IRI="IncendioForestal"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="tieneFechaIncendio"/>
+        <Class IRI="IncendioForestal"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="tieneSuperficieAgricola"/>
+        <Class IRI="IncendioForestal"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="tieneSuperficieArbolada"/>
+        <Class IRI="IncendioForestal"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="tieneSuperficieForestal"/>
+        <Class IRI="IncendioForestal"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="tieneSuperficieNoArbolada"/>
+        <Class IRI="IncendioForestal"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="tieneSuperficieNoForestal"/>
+        <Class IRI="IncendioForestal"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dct:conformsTo"/>
+        <Class abbreviatedIRI="dct:Standard"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dct:language"/>
+        <Class abbreviatedIRI="dct:LinguisticSystem"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dct:license"/>
+        <Class abbreviatedIRI="dct:LicenseDocument"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dct:provenance"/>
+        <Class abbreviatedIRI="dct:ProvenanceStatement"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dct:publisher"/>
+        <Class abbreviatedIRI="dct:Agent"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dct:rights"/>
+        <Class abbreviatedIRI="dct:RightsStatement"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dct:spatial"/>
+        <Class abbreviatedIRI="dct:Location"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dct:temporal"/>
+        <Class abbreviatedIRI="dct:PeriodOfTime"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="qudt:hasQuantity"/>
+        <Class abbreviatedIRI="qudt:QuantityValue"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="esadm:provincia"/>
+        <Class abbreviatedIRI="esadm:Provincia"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="geosparql:hasGeometry"/>
+        <Class abbreviatedIRI="geosparql:Geometry"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="geosparql:sfContains"/>
+        <Class IRI="http://schema.org/AdministrativeArea"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="skos:exactMatch"/>
+        <Class abbreviatedIRI="dcat:Dataset"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="skos:inScheme"/>
+        <Class abbreviatedIRI="skos:ConceptScheme"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="time:hasBeginning"/>
+        <Class abbreviatedIRI="time:Instant"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="time:hasEnd"/>
+        <Class abbreviatedIRI="time:Instant"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dcat:accessURL"/>
+        <Class abbreviatedIRI="dcat:Resource"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dcat:contactPoint"/>
+        <Class IRI="http://www.w3.org/2006/vcard/ns#Kind"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dcat:dataset"/>
+        <Class abbreviatedIRI="dcat:Dataset"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dcat:distribution"/>
+        <Class abbreviatedIRI="dcat:Distribution"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dcat:mediaType"/>
+        <Class abbreviatedIRI="dcat:MediaType"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="dcat:theme"/>
+        <Class abbreviatedIRI="skos:Concept"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="prov:hadDerivation"/>
+        <Class abbreviatedIRI="prov:Entity"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="prov:hadMember"/>
+        <Class IRI="IncendioForestal"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="prov:wasDerivedFrom"/>
+        <Class abbreviatedIRI="prov:Entity"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="prov:wasMemberOf"/>
+        <Class abbreviatedIRI="prov:Collection"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="malla-espacial:sistemaReferenciaEspacial"/>
+        <Class abbreviatedIRI="skos:Concept"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="tiempoExposicion"/>
+        <Class abbreviatedIRI="time:Interval"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="tieneSuperficieAgricola"/>
+        <Class IRI="SuperficieAgricola"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="tieneSuperficieArbolada"/>
+        <Class IRI="SuperficieArbolada"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="tieneSuperficieForestal"/>
+        <Class IRI="SuperficieForestal"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="tieneSuperficieNoArbolada"/>
+        <Class IRI="SuperficieNoArbolada"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="tieneSuperficieNoForestal"/>
+        <Class IRI="SuperficieNoForestal"/>
+    </ObjectPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="esadm:codigoINE"/>
+        <Class abbreviatedIRI="esadm:Municipio"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="esadm:codigoINE"/>
+        <Class abbreviatedIRI="esadm:Provincia"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="geosparql:asWKT"/>
+        <Class abbreviatedIRI="geosparql:Geometry"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="time:inXSDDate"/>
+        <Class abbreviatedIRI="time:Instant"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="dcat:bbox"/>
+        <Class abbreviatedIRI="dct:Location"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="dcat:keyword"/>
+        <Class abbreviatedIRI="dcat:Dataset"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="IdIncendio"/>
+        <Class IRI="IncendioForestal"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="qudt:numericValue"/>
+        <Datatype abbreviatedIRI="xsd:float"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="esadm:codigoINE"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="geonames:officialName"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="geosparql:asWKT"/>
+        <Datatype abbreviatedIRI="geosparql:wktLiteral"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="time:inXSDDate"/>
+        <Datatype abbreviatedIRI="xsd:date"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="time:year"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="dcat:bbox"/>
+        <Datatype abbreviatedIRI="geosparql:wktLiteral"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="dcat:keyword"/>
+        <Datatype abbreviatedIRI="rdfs:Literal"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="IdIncendio"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://datos.gob.es/recurso/sector-publico/territorio/Pais/España</IRI>
+        <Literal xml:lang="es">España</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://datos.gob.es/recurso/sector-publico/territorio/Pais/España</IRI>
+        <Literal>Spain</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dbo:District</AbbreviatedIRI>
+        <Literal xml:lang="en">District</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dbo:District</AbbreviatedIRI>
+        <Literal xml:lang="es">Distrito</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dbo:GovernmentalAdministrativeRegion</AbbreviatedIRI>
+        <Literal xml:lang="en">An administrative body governing some territorial unity, in this case a governmental administrative body</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dbo:GovernmentalAdministrativeRegion</AbbreviatedIRI>
+        <Literal xml:lang="es">Órgano administrativo que rige alguna unidad territorial, en este caso un órgano administrativo gubernamental</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dbo:Municipality</AbbreviatedIRI>
+        <Literal xml:lang="en">Municipality</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dbo:Municipality</AbbreviatedIRI>
+        <Literal xml:lang="es">Municipio</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="dc:description"/>
+        <IRI>http://inspire.ec.europa.eu/codelist/NaturalHazardCategoryValue/forestFireWildfire</IRI>
+        <Literal xml:lang="en">Forest fire means fire which breaks out and spreads on forest and other wooded land or which breaks out on other land and spreads to forest and other wooded land. The definition of forest fire excludes prescribed or controlled burning, usually with the aim of reducing or eliminating the quantity of accumulated fuel on the ground (Regulation EC 2152/2003 - Forest Focus). Wildland Fire: Any fire occurring on wildland regardless of ignition sources, damages or benefits (FAO, 2011, Wildland Fire Management Terminology, FAO, updated September 2010).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://inspire.ec.europa.eu/codelist/NaturalHazardCategoryValue/forestFireWildfire</IRI>
+        <Literal xml:lang="en">forest fires or wild fires</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="dc:description"/>
+        <IRI>http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem</IRI>
+        <Literal xml:lang="en">System for identifying position in the real world [ISO 19112]</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="dct:title"/>
+        <IRI>http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem</IRI>
+        <Literal xml:lang="en">Spatial reference system</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="owl2:sameAs"/>
+        <IRI>http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem</IRI>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#anyURI">http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem:2&quot;</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>event:Event</AbbreviatedIRI>
+        <Literal xml:lang="en">An arbitrary classification of a space/time region, by a cognitive agent. An event may have actively participating agents, passive factors, products, and a location in space/time.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>event:Event</AbbreviatedIRI>
+        <Literal xml:lang="es">Una clasificación arbitraria de una región del espacio/tiempo, por parte de un agente cognitivo. Un evento puede tener agentes que participan activamente, factores pasivos, productos y una ubicación en el espacio/tiempo.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>event:Event</AbbreviatedIRI>
+        <Literal>Event</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:Agent</AbbreviatedIRI>
+        <Literal xml:lang="en">A resource that acts or has the power to act.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:Agent</AbbreviatedIRI>
+        <Literal xml:lang="es">Un recurso que actúa o tiene el poder de actuar.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:LicenseDocument</AbbreviatedIRI>
+        <Literal xml:lang="en">A legal document giving official permission to do something with a resource.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:LicenseDocument</AbbreviatedIRI>
+        <Literal xml:lang="es">Un documento legal que da permiso oficial para hacer algo con un recurso.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:LinguisticSystem</AbbreviatedIRI>
+        <Literal xml:lang="en">A system of signs, symbols, sounds, gestures, or rules used in communication.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:LinguisticSystem</AbbreviatedIRI>
+        <Literal xml:lang="es">Sistema de signos, símbolos, sonidos, gestos o reglas utilizados en la comunicación.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:Location</AbbreviatedIRI>
+        <Literal xml:lang="en">A spatial region or named place.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:Location</AbbreviatedIRI>
+        <Literal xml:lang="es">Una región espacial o un lugar con nombre.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:PeriodOfTime</AbbreviatedIRI>
+        <Literal xml:lang="en">An interval of time that is named or defined by its start and end dates.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:PeriodOfTime</AbbreviatedIRI>
+        <Literal xml:lang="es">Un intervalo de tiempo que se nombra o define por sus fechas de inicio y fin.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:ProvenanceStatement</AbbreviatedIRI>
+        <Literal xml:lang="en">A statement of any changes in ownership and custody of a resource since its creation that are significant for its authenticity, integrity, and interpretation.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:ProvenanceStatement</AbbreviatedIRI>
+        <Literal xml:lang="es">Una declaración de cualquier cambio en la propiedad y custodia de un recurso desde su creación que sea significativo para su autenticidad, integridad e interpretación.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:RightsStatement</AbbreviatedIRI>
+        <Literal xml:lang="en">A statement about the intellectual property rights (IPR) held in or over a resource, a legal document giving official permission to do something with a resource, or a statement about access rights.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:RightsStatement</AbbreviatedIRI>
+        <Literal xml:lang="es">Una declaración sobre los derechos de propiedad intelectual (DPI) que se tienen sobre un recurso, un documento legal que da permiso oficial para hacer algo con un recurso o una declaración sobre los derechos de acceso.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:Standard</AbbreviatedIRI>
+        <Literal xml:lang="en">A reference point against which other things can be evaluated or compared.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:Standard</AbbreviatedIRI>
+        <Literal xml:lang="es">Un punto de referencia con el que se pueden evaluar o comparar otras cosas.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:conformsTo</AbbreviatedIRI>
+        <Literal xml:lang="en">An established standard to which the described resource conforms.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:conformsTo</AbbreviatedIRI>
+        <Literal xml:lang="es">Norma establecida a la que se ajusta el recurso descrito.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:identifier</AbbreviatedIRI>
+        <Literal xml:lang="en">An unambiguous reference to the resource within a given context.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:identifier</AbbreviatedIRI>
+        <Literal xml:lang="es">Una referencia inequívoca al recurso dentro de un contexto determinado.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dct:identifier</AbbreviatedIRI>
+        <Literal xml:lang="es">identificador</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dct:identifier</AbbreviatedIRI>
+        <Literal xml:lang="en">identifier</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:language</AbbreviatedIRI>
+        <Literal xml:lang="es">Un lenguaje del recurso.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:license</AbbreviatedIRI>
+        <Literal xml:lang="en">A legal document under which the resource is made available.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:license</AbbreviatedIRI>
+        <Literal xml:lang="es">Documento legal en virtud del cual se pone a disposición el recurso.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:provenance</AbbreviatedIRI>
+        <Literal xml:lang="en">A statement of any changes in ownership and custody of the resource since its creation that are significant for its authenticity, integrity, and interpretation.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:provenance</AbbreviatedIRI>
+        <Literal xml:lang="es">Una declaración de cualquier cambio en la propiedad y custodia del recurso desde su creación que sea significativo para su autenticidad, integridad e interpretación.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:publisher</AbbreviatedIRI>
+        <Literal xml:lang="es">Algunos ejemplos de editor son una persona, una organización o un servicio. Normalmente, el nombre de un editor debe utilizarse para indicar la entidad.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:publisher</AbbreviatedIRI>
+        <Literal xml:lang="en">Examples of a Publisher include a person, an organization, or a service. Typically, the name of a Publisher should be used to indicate the entity.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:rights</AbbreviatedIRI>
+        <Literal xml:lang="en">A statement that concerns all rights not addressed with dct:license or dcterms:accessRights, such as copyright statements.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:rights</AbbreviatedIRI>
+        <Literal xml:lang="es">Una declaración que se refiere a todos los derechos no abordados con dct:license o dcterms:accessRights, como las declaraciones de derechos de autor.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:spatial</AbbreviatedIRI>
+        <Literal xml:lang="es">Características espaciales del recurso.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:spatial</AbbreviatedIRI>
+        <Literal>Spatial characteristics of the resource.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:temporal</AbbreviatedIRI>
+        <Literal xml:lang="es">Características temporales del recurso.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:temporal</AbbreviatedIRI>
+        <Literal>Temporal characteristics of the resource.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:type</AbbreviatedIRI>
+        <Literal xml:lang="es">La naturaleza o el género del recurso.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dct:type</AbbreviatedIRI>
+        <Literal>The nature or genre of the resource.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>uneskos:contains</AbbreviatedIRI>
+        <Literal xml:lang="es">El modelo SKOS define la propiedad skos:inScheme como un mecanismo para vincular un Concepto con uno o varios Esquemas Conceptuales. Sin embargo, SKOS no incluye una propiedad inversa que permita definir los elementos que contiene un esquema conceptual.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>uneskos:contains</AbbreviatedIRI>
+        <Literal xml:lang="en">The SKOS model define the skos:inScheme property as a mechanism to link a Concept with one or serveral Concept Schemes. However, SKOS does not include an inverse property that allows to define the elements that are contained by a Concept Scheme.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>uneskos:contains</AbbreviatedIRI>
+        <IRI>https://skos.um.es/TR/uneskos/#contains</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:Quantity</AbbreviatedIRI>
+        <Literal xml:lang="es">Cantidad</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:Quantity</AbbreviatedIRI>
+        <Literal xml:lang="en">Quantity</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>qudt:QuantityValue</AbbreviatedIRI>
+        <Literal datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML">A &lt;i&gt;Quantity Value&lt;/i&gt; expresses the magnitude and kind of a quantity and is given by the product of a numerical value &lt;code&gt;n&lt;/code&gt; and a unit of measure &lt;code&gt;U&lt;/code&gt;. The number multiplying the unit is referred to as the numerical value of the quantity expressed in that unit. Refer to &lt;a href=\&quot;http://physics.nist.gov/Pubs/SP811/sec07.html\&quot;&gt;NIST SP 811 section 7&lt;/a&gt; for more on quantity values.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>qudt:QuantityValue</AbbreviatedIRI>
+        <IRI>http://qudt.org/2.1/schema/qudt</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:QuantityValue</AbbreviatedIRI>
+        <Literal xml:lang="en">Quantity value</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:QuantityValue</AbbreviatedIRI>
+        <Literal xml:lang="es">Valor de la cantidad</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>qudt:Unit</AbbreviatedIRI>
+        <Literal datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML">A unit of measure, or unit, is a particular quantity value that has been chosen as a scale for measuring other quantities the same kind (more generally of equivalent dimension). For example, the meter is a quantity of length that has been rigorously defined and standardized by the BIPM (International Board of Weights and Measures). Any measurement of the length can be expressed as a number multiplied by the unit meter. More formally, the value of a physical quantity Q with respect to a unit (U) is expressed as the scalar multiple of a real number (n) and U, as  \\(Q = nU\\).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>qudt:Unit</AbbreviatedIRI>
+        <IRI>http://qudt.org/2.1/schema/qudt</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:Unit</AbbreviatedIRI>
+        <Literal xml:lang="es">Unidad</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:Unit</AbbreviatedIRI>
+        <Literal xml:lang="en">Unit</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>qudt:code</AbbreviatedIRI>
+        <Literal xml:lang="en">A code is a string that uniquely identifies a QUDT concept. The code is constructed from the designator. The use of this property has been deprecated</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>qudt:code</AbbreviatedIRI>
+        <Literal xml:lang="es">Un código es una cadena que identifica de forma exclusiva un concepto QUDT. El código se construye a partir del designador. El uso de esta propiedad ha quedado obsoleto</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:code</AbbreviatedIRI>
+        <Literal xml:lang="en">code</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:code</AbbreviatedIRI>
+        <Literal xml:lang="es">código</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>qudt:hasQuantity</AbbreviatedIRI>
+        <IRI>http://qudt.org/2.1/schema/qudt</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:hasQuantity</AbbreviatedIRI>
+        <Literal>has quantity</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:hasQuantity</AbbreviatedIRI>
+        <Literal xml:lang="es">tiene una cantidad</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>qudt:numericValue</AbbreviatedIRI>
+        <IRI>http://qudt.org/2.1/schema/qudt</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:numericValue</AbbreviatedIRI>
+        <Literal>numeric value</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:numericValue</AbbreviatedIRI>
+        <Literal xml:lang="es">valor númerico</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>qudt:ucumCode</AbbreviatedIRI>
+        <Literal xml:lang="es">ucumCode asocia una unidad QUDT con su código UCUM (distingue entre mayúsculas y minúsculas).
+
+En SHACL los valores se derivan de las propiedades ucum específicas utilizando &apos;sh:values&apos;.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>qudt:ucumCode</AbbreviatedIRI>
+        <Literal xml:lang="en">ucumCode associates a QUDT unit with its UCUM code (case-sensitive).
+
+In SHACL the values are derived from specifi ucum properties using &apos;sh:values&apos;.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:ucumCode</AbbreviatedIRI>
+        <Literal xml:lang="es">código ucum</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:ucumCode</AbbreviatedIRI>
+        <Literal xml:lang="en">ucum code</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:uneceCommonCode</AbbreviatedIRI>
+        <Literal xml:lang="es">código común unece</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:uneceCommonCode</AbbreviatedIRI>
+        <Literal xml:lang="en">unece common code</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>qudt:unit</AbbreviatedIRI>
+        <Literal xml:lang="en">A reference to the unit of measure of a quantity (variable or constant) of interest.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>qudt:unit</AbbreviatedIRI>
+        <Literal xml:lang="es">Referencia a la unidad de medida de una cantidad (variable o constante) de interés.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>qudt:unit</AbbreviatedIRI>
+        <IRI>http://qudt.org/2.1/schema/qudt</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:unit</AbbreviatedIRI>
+        <Literal xml:lang="es">unidad</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>qudt:unit</AbbreviatedIRI>
+        <Literal>unit</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="dct:description"/>
+        <IRI>http://qudt.org/vocab/unit/HA</IRI>
+        <Literal xml:lang="en">The customary metric unit of land area, equal to 100 ares. One hectare is a square hectometer, that is, the area of a square 100 meters on each side: exactly 10 000 square meters or approximately 107 639.1 square feet, 11 959.9 square yards, or 2.471 054 acres.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <IRI>http://qudt.org/vocab/unit/HA</IRI>
+        <IRI>http://qudt.org/2.1/vocab/unit</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://qudt.org/vocab/unit/HA</IRI>
+        <Literal xml:lang="en">Hectare</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>esadm:Municipio</AbbreviatedIRI>
+        <Literal xml:lang="es">Un Municipio es el ente local definido en el artículo 140 de la Constitución española y la entidad básica de la organización territorial del Estado según el artículo 1 de la Ley 7/1985, de 2 de abril, Reguladora de las Bases del Régimen Local. Tiene personalidad jurídica y plena capacidad para el cumplimiento de sus fines. La delimitación territorial de Municipio está recogida del REgistro Central de Cartografía del IGN. Su nombre, que se especifica con la propiedad dct:title, es el proporcionado por el Registro de Entidades Locales del Ministerio de Política Territorial, en http://www.ine.es/nomen2/index.do</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>esadm:Municipio</AbbreviatedIRI>
+        <IRI>http://vocab.linkeddata.es/datosabiertos/def/sector-publico/territorio</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>esadm:Municipio</AbbreviatedIRI>
+        <Literal>Municipio</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>esadm:Pais</AbbreviatedIRI>
+        <IRI>http://vocab.linkeddata.es/datosabiertos/def/sector-publico/territorio</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>esadm:Pais</AbbreviatedIRI>
+        <Literal xml:lang="es">Un país</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>esadm:Provincia</AbbreviatedIRI>
+        <Literal xml:lang="es">Cada una de las grandes divisiones de un territorio o Estado, sujeta por lo común a una autoridad administrativa [fuente: Diccionario de la lengua española (DRAE) 2011]</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>esadm:Provincia</AbbreviatedIRI>
+        <IRI>http://vocab.linkeddata.es/datosabiertos/def/sector-publico/territorio</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>esadm:Provincia</AbbreviatedIRI>
+        <IRI>http://www.ign.es/ign/resources/acercaDe/tablon/ModeloDireccionesAGE.pdf%E2%80%8E</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>esadm:Provincia</AbbreviatedIRI>
+        <Literal xml:lang="en">Province</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>esadm:Provincia</AbbreviatedIRI>
+        <Literal xml:lang="es">Provincia</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>esadm:codigoINE</AbbreviatedIRI>
+        <Literal xml:lang="es">Código de la entidad territorial del INE. Por ejemplo, para municipios este código es de tres dígitos y está definido en http://www.ine.es/daco/daco42/codmun/codmun09/09codmun.xls</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>esadm:codigoINE</AbbreviatedIRI>
+        <IRI>http://vocab.linkeddata.es/datosabiertos/def/sector-publico/territorio</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>esadm:codigoINE</AbbreviatedIRI>
+        <IRI>http://www.ign.es/ign/resources/acercaDe/tablon/ModeloDireccionesAGE.pdf%E2%80%8E</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>esadm:codigoINE</AbbreviatedIRI>
+        <Literal xml:lang="en">code of the territorial entity according to INE (National Statistics Institute of Spain)</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>esadm:codigoINE</AbbreviatedIRI>
+        <Literal xml:lang="es">código de la entidad territorial según el INE</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>esadm:provincia</AbbreviatedIRI>
+        <Literal xml:lang="es">Provincia a la que pertenece un fenómeno geográfico o una entidad administrativa.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>esadm:provincia</AbbreviatedIRI>
+        <IRI>http://vocab.linkeddata.es/datosabiertos/def/sector-publico/territorio</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>esadm:provincia</AbbreviatedIRI>
+        <Literal xml:lang="en">belongs to province</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>esadm:provincia</AbbreviatedIRI>
+        <Literal xml:lang="es">pertenece a provincia</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geonames:officialName</AbbreviatedIRI>
+        <Literal xml:lang="en">Un nombre en el idioma oficial local</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geonames:officialName</AbbreviatedIRI>
+        <Literal xml:lang="es">Un nombre en el idioma oficial local</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geonames:officialName</AbbreviatedIRI>
+        <Literal xml:lang="es">nombre oficial</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geonames:officialName</AbbreviatedIRI>
+        <Literal xml:lang="en">official name</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <IRI>http://www.opengis.net/def/crs/EPSG/0/</IRI>
+        <IRI>http://www.opengis.net/def/crs/EPSG/0/</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.opengis.net/def/crs/EPSG/0/</IRI>
+        <Literal>EPSG-0</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.opengis.net/def/crs/EPSG/0/25827</IRI>
+        <Literal>ETRS89 / UTM zone 27N</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.opengis.net/def/crs/EPSG/0/25828</IRI>
+        <Literal>ETRS89 / UTM zone 28N</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.opengis.net/def/crs/EPSG/0/25829</IRI>
+        <Literal>ETRS89 / UTM zone 29N</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.opengis.net/def/crs/EPSG/0/25830</IRI>
+        <Literal>ETRS89 / UTM zone 30N</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.opengis.net/def/crs/EPSG/0/25831</IRI>
+        <Literal>ETRS89 / UTM zone 31N</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:Feature</AbbreviatedIRI>
+        <Literal xml:lang="es">Esta clase representa el tipo de característica de nivel superior. Esta clase es equivalente a GFI_Feature, definida en la norma ISO 19156:2011, y es la superclase de todos los tipos de características.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:Feature</AbbreviatedIRI>
+        <Literal xml:lang="en">This class represents the top-level feature type. This class is equivalent to GFI_Feature defined in ISO 19156:2011, and it is superclass of all feature types.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>geosparql:Feature</AbbreviatedIRI>
+        <IRI>http://www.opengis.net/ont/geosparql</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:Feature</AbbreviatedIRI>
+        <Literal>Feature</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:Geometry</AbbreviatedIRI>
+        <Literal xml:lang="en">The class represents the top-level geometry type. This class is  equivalent to the UML class GM_Object defined in ISO 19107, and  it is superclass of all geometry types.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <AbbreviatedIRI>geosparql:Geometry</AbbreviatedIRI>
+        <IRI>http://www.opengis.net/ont/geosparql</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:Geometry</AbbreviatedIRI>
+        <Literal>Geometry</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:asWKT</AbbreviatedIRI>
+        <Literal xml:lang="en">The WKT serialization of a geometry</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:asWKT</AbbreviatedIRI>
+        <Literal>asWKT</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:asWKT</AbbreviatedIRI>
+        <Literal xml:lang="es">como WKT</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:hasGeometry</AbbreviatedIRI>
+        <Literal xml:lang="en">A spatial representation for a given feature.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:hasGeometry</AbbreviatedIRI>
+        <Literal xml:lang="es">Una representación espacial para una característica determinada.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:hasGeometry</AbbreviatedIRI>
+        <Literal xml:lang="en">hasGeometry</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:hasGeometry</AbbreviatedIRI>
+        <Literal xml:lang="es">tiene geometría</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:sfContains</AbbreviatedIRI>
+        <Literal xml:lang="es">Existe si el sujeto SpatialObject contiene espacialmente el objeto SpatialObject.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:sfContains</AbbreviatedIRI>
+        <Literal xml:lang="en">Exists if the subject SpatialObject spatially contains the object SpatialObject.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:sfContains</AbbreviatedIRI>
+        <Literal>contains</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:sfContains</AbbreviatedIRI>
+        <Literal xml:lang="es">contiene</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:sfWithin</AbbreviatedIRI>
+        <Literal xml:lang="es">Existe si el sujeto SpatialObject está espacialmente dentro del objeto SpatialObject.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:sfWithin</AbbreviatedIRI>
+        <Literal xml:lang="en">Exists if the subject SpatialObject is spatially within the object SpatialObject.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:sfWithin</AbbreviatedIRI>
+        <Literal xml:lang="es">dentro de</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:sfWithin</AbbreviatedIRI>
+        <Literal>within</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>geosparql:wktLiteral</AbbreviatedIRI>
+        <Literal xml:lang="en">A Well-known Text serialization of a geometry object.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>geosparql:wktLiteral</AbbreviatedIRI>
+        <Literal>Well-known Text Literal</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="dc:description"/>
+        <AbbreviatedIRI>skos:Concept</AbbreviatedIRI>
+        <Literal xml:lang="en">A SKOS concept can be viewed as an idea or notion; a unit of thought. However, what constitutes a unit of thought is subjective, and this definition is meant to be suggestive, rather than restrictive.
+
+The notion of a SKOS concept is useful when describing the conceptual or intellectual structure of a knowledge organization system, and when referring to specific ideas or meanings established within a KOS.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>skos:Concept</AbbreviatedIRI>
+        <Literal xml:lang="es">Un concepto SKOS puede considerarse una idea o noción, una unidad de pensamiento. Sin embargo, lo que constituye una unidad de pensamiento es subjetivo, y esta definición pretende ser sugerente, más que restrictiva.
+
+La noción de concepto SKOS es útil para describir la estructura conceptual o intelectual de un sistema de organización del conocimiento, y para referirse a ideas o significados específicos establecidos dentro de un KOS.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>skos:Concept</AbbreviatedIRI>
+        <Literal xml:lang="en">Concept</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>skos:Concept</AbbreviatedIRI>
+        <Literal xml:lang="es">Concepto</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="dc:description"/>
+        <AbbreviatedIRI>skos:ConceptScheme</AbbreviatedIRI>
+        <Literal xml:lang="en">A SKOS concept scheme can be viewed as an aggregation of one or more SKOS concepts. Semantic relationships (links) between those concepts may also be viewed as part of a concept scheme. This definition is, however, meant to be suggestive rather than restrictive, and there is some flexibility in the formal data model stated below.
+
+The notion of a concept scheme is useful when dealing with data from an unknown source, and when dealing with data that describes two or more different knowledge organization systems.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>skos:ConceptScheme</AbbreviatedIRI>
+        <Literal xml:lang="es">Un esquema de conceptos SKOS puede verse como una agregación de uno o más conceptos SKOS. Las relaciones semánticas (enlaces) entre esos conceptos también pueden considerarse parte de un esquema de conceptos. Sin embargo, esta definición pretende ser sugerente y no restrictiva, y existe cierta flexibilidad en el modelo de datos formal que se expone a continuación.
+
+La noción de esquema conceptual es útil cuando se trata de datos de una fuente desconocida y cuando se trata de datos que describen dos o más sistemas de organización del conocimiento diferentes.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>skos:ConceptScheme</AbbreviatedIRI>
+        <Literal xml:lang="en">Concept schema</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>skos:ConceptScheme</AbbreviatedIRI>
+        <Literal xml:lang="es">Esquema conceptual</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>skos:exactMatch</AbbreviatedIRI>
+        <Literal>has exact match</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>skos:exactMatch</AbbreviatedIRI>
+        <Literal xml:lang="es">tiene coincidencia exacta</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>skos:inScheme</AbbreviatedIRI>
+        <Literal xml:lang="es">está en el esquema</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>skos:inScheme</AbbreviatedIRI>
+        <Literal xml:lang="en">is in scheme</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:Instant</AbbreviatedIRI>
+        <Literal xml:lang="en">A temporal entity with zero extent or duration</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:Instant</AbbreviatedIRI>
+        <Literal xml:lang="es">Una entidad temporal con extensión o duración cero</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:Instant</AbbreviatedIRI>
+        <Literal xml:lang="es">Instante temporal</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:Instant</AbbreviatedIRI>
+        <Literal xml:lang="en">Time instant</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:Interval</AbbreviatedIRI>
+        <Literal xml:lang="en">A temporal entity with an extent or duration</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:Interval</AbbreviatedIRI>
+        <Literal xml:lang="es">Una entidad temporal con una extensión o duración</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:Interval</AbbreviatedIRI>
+        <Literal xml:lang="es">Intervalo temporal</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:Interval</AbbreviatedIRI>
+        <Literal xml:lang="en">Time interval</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:hasBeginning</AbbreviatedIRI>
+        <Literal xml:lang="en">Beginning of a temporal entity.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:hasBeginning</AbbreviatedIRI>
+        <Literal xml:lang="es">Inicio de una entidad temporal.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:hasBeginning</AbbreviatedIRI>
+        <Literal xml:lang="en">has beginning</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:hasBeginning</AbbreviatedIRI>
+        <Literal xml:lang="es">tiene principio</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:hasEnd</AbbreviatedIRI>
+        <Literal xml:lang="en">End of a temporal entity.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:hasEnd</AbbreviatedIRI>
+        <Literal xml:lang="es">Fin de una entidad temporal.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:hasEnd</AbbreviatedIRI>
+        <Literal xml:lang="en">has end</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:hasEnd</AbbreviatedIRI>
+        <Literal xml:lang="es">tiene fin</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="dc:description"/>
+        <AbbreviatedIRI>time:inXSDDate</AbbreviatedIRI>
+        <Literal xml:lang="en">This datatype is modeled after the calendar dates defined in Chapter 5.2.1 of ISO (International Organization for Standardization) 8601. Its value space is the set of Gregorian calendar dates as defined by this standard; i.e., a one-day-long period of time. Its lexical space is the ISO 8601 extended format:
+
+[-]CCYY-MM-DD[Z|(+|-)hh:mm]
+
+with an optional time zone. Time zones that aren&apos;t specified are considered undetermined.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="dct:description"/>
+        <AbbreviatedIRI>time:inXSDDate</AbbreviatedIRI>
+        <Literal xml:lang="es">Este tipo de datos se inspira en las fechas del calendario definidas en el capítulo 5.2.1 de la norma ISO 8601 (Organización Internacional de Normalización). Su espacio de valores es el conjunto de fechas del calendario gregoriano definido por esta norma, es decir, un período de tiempo de un día. Su espacio léxico es el formato extendido de la ISO 8601:
+
+[-]CCYY-MM-DD[Z|(+|-)hh:mm]
+
+con una zona horaria opcional. Las zonas horarias que no se especifican se consideran indeterminadas.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:inXSDDate</AbbreviatedIRI>
+        <Literal xml:lang="es"></Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:inXSDDate</AbbreviatedIRI>
+        <Literal xml:lang="en">Position of an instant, expressed using xsd:date</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:inXSDDate</AbbreviatedIRI>
+        <Literal xml:lang="es">en fecha XSD</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:inXSDDate</AbbreviatedIRI>
+        <Literal xml:lang="en">in XSD date</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:year</AbbreviatedIRI>
+        <Literal xml:lang="es">Año en que se produjo el incendio forestal.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>time:year</AbbreviatedIRI>
+        <Literal xml:lang="en">Year in which the Forest Fire occurred.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:year</AbbreviatedIRI>
+        <Literal xml:lang="es">año</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>time:year</AbbreviatedIRI>
+        <Literal>year</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.w3.org/2006/vcard/ns#Kind</IRI>
+        <Literal xml:lang="es">La clase padre de todos los objetos</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.w3.org/2006/vcard/ns#Kind</IRI>
+        <Literal xml:lang="en">The parent class for all objects</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:Catalog</AbbreviatedIRI>
+        <Literal xml:lang="en">A curated collection of metadata about resources (e.g., datasets and data services in the context of a data catalog).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:Catalog</AbbreviatedIRI>
+        <Literal xml:lang="es">Una colección curada de metadatos sobre recursos (por ejemplo, conjuntos de datos y servicios de datos en el contexto de un catálogo de datos).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:Catalog</AbbreviatedIRI>
+        <Literal>Catalog</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:Catalog</AbbreviatedIRI>
+        <Literal xml:lang="es">Catálogo</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:Dataset</AbbreviatedIRI>
+        <Literal xml:lang="en">A collection of data, published or curated by a single agent, and available for access or download in one or more representations.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:Dataset</AbbreviatedIRI>
+        <Literal xml:lang="es">Una colección de datos, publicada o comisariada por un único agente, y disponible para su acceso o descarga en una o varias representaciones.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:Dataset</AbbreviatedIRI>
+        <Literal xml:lang="es">Conjunto de datos</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:Dataset</AbbreviatedIRI>
+        <Literal>Dataset</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:Distribution</AbbreviatedIRI>
+        <Literal xml:lang="en">A specific representation of a dataset. A dataset might be available in multiple serializations that may differ in various ways, including natural language, media-type or format, schematic organization, temporal and spatial resolution, level of detail or profiles (which might specify any or all of the above).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:Distribution</AbbreviatedIRI>
+        <Literal xml:lang="es">Una representación específica de un conjunto de datos. Un conjunto de datos puede estar disponible en múltiples serializaciones que pueden diferir en varios aspectos, como el lenguaje natural, el tipo de medio o el formato, la organización esquemática, la resolución temporal y espacial, el nivel de detalle o los perfiles (que pueden especificar alguno o todos los anteriores).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:Distribution</AbbreviatedIRI>
+        <Literal xml:lang="es">Distribución</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:Distribution</AbbreviatedIRI>
+        <Literal xml:lang="en">Distribution</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:MediaType</AbbreviatedIRI>
+        <Literal xml:lang="en">A file format or physical medium.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:MediaType</AbbreviatedIRI>
+        <Literal xml:lang="es">Un formato de archivo o soporte físico.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:Resource</AbbreviatedIRI>
+        <Literal xml:lang="es">Recurso publicado o comisariado por un único agente.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:Resource</AbbreviatedIRI>
+        <Literal xml:lang="en">Resource published or curated by a single agent.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:Resource</AbbreviatedIRI>
+        <Literal xml:lang="es">Recurso</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:Resource</AbbreviatedIRI>
+        <Literal>Resource</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="skos:scopeNote"/>
+        <AbbreviatedIRI>dcat:Resource</AbbreviatedIRI>
+        <Literal xml:lang="es">La clase de todos los recursos catalogados, la superclase de dcat:Dataset, dcat:DataService, dcat:Catalog y cualquier otro miembro de un dcat:Catalog. Esta clase contiene propiedades comunes a todos los recursos catalogados, incluidos los conjuntos de datos y los servicios de datos. Se recomienda encarecidamente utilizar una subclase más específica. Cuando se describa un recurso que no sea un dcat:Dataset o dcat:DataService, se recomienda crear una subclase adecuada de dcat:Resource, o utilizar dcat:Resource con la propiedad dct:type para indicar el tipo específico.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="skos:scopeNote"/>
+        <AbbreviatedIRI>dcat:Resource</AbbreviatedIRI>
+        <Literal xml:lang="en">The class of all cataloged resources, the super-class of dcat:Dataset, dcat:DataService, dcat:Catalog and any other member of a dcat:Catalog. This class carries properties common to all cataloged resources, including datasets and data services. It is strongly recommended to use a more specific sub-class. When describing a resource which is not a dcat:Dataset or dcat:DataService, it is recommended to create a suitable sub-class of dcat:Resource, or use dcat:Resource with the dct:type property to indicate the specific type.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="dct:description"/>
+        <AbbreviatedIRI>dcat:accessURL</AbbreviatedIRI>
+        <Literal xml:lang="en">dcat:accessURL SHOULD be used for the URL of a service or location that can provide access to this distribution, typically through a Web form, query or API call.
+
+dcat:downloadURL is preferred for direct links to downloadable resources.
+
+If the distribution(s) are accessible only through a landing page (i.e. direct download URLs are not known), then the landing page URL associated with the dcat:Dataset SHOULD be duplicated as access URL on a distribution (see § 5.7 Dataset available only behind some Web page).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:accessURL</AbbreviatedIRI>
+        <Literal xml:lang="en">A URL of the resource that gives access to a distribution of the dataset. E.g. landing page, feed, SPARQL endpoint.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:accessURL</AbbreviatedIRI>
+        <Literal xml:lang="es">Una URL del recurso que da acceso a una distribución del conjunto de datos. Por ejemplo, página de aterrizaje, feed, punto final SPARQL.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:bbox</AbbreviatedIRI>
+        <Literal xml:lang="es">El rango de esta propiedad es intencionadamente genérico, con el fin de permitir diferentes codificaciones de la geometría. Por ejemplo, la geometría podría codificarse como WKT (geosparql:wktLiteral [GeoSPARQL]) o [GML] (geosparql:asGML [GeoSPARQL]).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:bbox</AbbreviatedIRI>
+        <Literal xml:lang="en">bounding box</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:bbox</AbbreviatedIRI>
+        <Literal xml:lang="es">cuadro delimitador</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="skos:scopeNote"/>
+        <AbbreviatedIRI>dcat:bbox</AbbreviatedIRI>
+        <Literal xml:lang="en">The range of this property is intentionally generic, with the purpose of allowing different geometry encodings. E.g., the geometry could be encoded with as WKT (geosparql:wktLiteral [GeoSPARQL]) or [GML] (geosparql:asGML [GeoSPARQL]).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:contactPoint</AbbreviatedIRI>
+        <Literal xml:lang="es">Información de contacto relevante para el recurso catalogado. Se recomienda el uso de vCard.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:contactPoint</AbbreviatedIRI>
+        <Literal xml:lang="en">Relevant contact information for the cataloged resource. Use of vCard is recommended.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:dataset</AbbreviatedIRI>
+        <Literal>A collection of data that is listed in the catalog.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:dataset</AbbreviatedIRI>
+        <Literal xml:lang="es">Una colección de datos que aparece en el catálogo.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:distribution</AbbreviatedIRI>
+        <Literal>An available distribution of the dataset.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:distribution</AbbreviatedIRI>
+        <Literal xml:lang="es">Una distribución disponible del conjunto de datos.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:keyword</AbbreviatedIRI>
+        <Literal xml:lang="en">A keyword or tag describing the resource.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:keyword</AbbreviatedIRI>
+        <Literal xml:lang="es">Una palabra clave o etiqueta que describe el recurso.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:keyword</AbbreviatedIRI>
+        <Literal xml:lang="en">keyword</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>dcat:keyword</AbbreviatedIRI>
+        <Literal xml:lang="es">palabra clave</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:mediaType</AbbreviatedIRI>
+        <Literal xml:lang="es">El tipo de medio de la distribución definido por la IANA.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:mediaType</AbbreviatedIRI>
+        <Literal xml:lang="en">The media type of the distribution as defined by IANA.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="skos:scopeNote"/>
+        <AbbreviatedIRI>dcat:mediaType</AbbreviatedIRI>
+        <IRI>https://publications.europa.eu/resource/authority/file-type</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="skos:scopeNote"/>
+        <AbbreviatedIRI>dcat:mediaType</AbbreviatedIRI>
+        <Literal xml:lang="en">This property SHOULD be used when the media type of the distribution is defined in IANA https://www.w3.org/TR/vocab-dcat-2/#bib-iana-media-types, otherwise dct:format MAY be used with different values.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:theme</AbbreviatedIRI>
+        <Literal>A main category of the resource. A resource can have multiple themes.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>dcat:theme</AbbreviatedIRI>
+        <Literal xml:lang="es">Una categoría principal del recurso. Un recurso puede tener varios temas.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>prov:Collection</AbbreviatedIRI>
+        <Literal xml:lang="en">A collection is an entity that provides a structure to some constituents, which are themselves entities. These constituents are said to be member of the collections.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>prov:Collection</AbbreviatedIRI>
+        <Literal xml:lang="es">Una colección es una entidad que proporciona una estructura a algunos constituyentes, que son a su vez entidades. Se dice que estos constituyentes son miembros de las colecciones.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>prov:Collection</AbbreviatedIRI>
+        <Literal xml:lang="es">Colección</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>prov:Collection</AbbreviatedIRI>
+        <Literal>Collection</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>prov:Entity</AbbreviatedIRI>
+        <Literal xml:lang="en">An entity is a physical, digital, conceptual, or other kind of thing with some fixed aspects; entities may be real or imaginary.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>prov:Entity</AbbreviatedIRI>
+        <Literal xml:lang="es">Una entidad es una cosa física, digital, conceptual o de otro tipo con algunos aspectos fijos; las entidades pueden ser reales o imaginarias.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>prov:Entity</AbbreviatedIRI>
+        <Literal xml:lang="en">Entity</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>prov:Entity</AbbreviatedIRI>
+        <Literal xml:lang="es">Entity</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>prov:hadDerivation</AbbreviatedIRI>
+        <Literal xml:lang="en">A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>prov:hadDerivation</AbbreviatedIRI>
+        <Literal xml:lang="es">Una derivación es una transformación de una entidad en otra, una actualización de una entidad que da lugar a una nueva, o la construcción de una nueva entidad basada en una entidad preexistente.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>prov:hadMember</AbbreviatedIRI>
+        <Literal xml:lang="en">A collection is an entity that provides a structure to some constituents, which are themselves entities. These constituents are said to be member of the collections.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>prov:hadMember</AbbreviatedIRI>
+        <Literal xml:lang="es">Una colección es una entidad que proporciona una estructura a algunos constituyentes, que son a su vez entidades. Se dice que estos constituyentes son miembros de las colecciones.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>prov:wasDerivedFrom</AbbreviatedIRI>
+        <Literal xml:lang="en">A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <AbbreviatedIRI>prov:wasDerivedFrom</AbbreviatedIRI>
+        <Literal xml:lang="es">Una derivación es una transformación de una entidad en otra, una actualización de una entidad que da lugar a una nueva, o la construcción de una nueva entidad basada en una entidad preexistente.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>prov:wasMemberOf</AbbreviatedIRI>
+        <Literal xml:lang="es">es miembro de</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>prov:wasMemberOf</AbbreviatedIRI>
+        <Literal xml:lang="en">was member of</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>malla-espacial:sistemaReferenciaEspacial</AbbreviatedIRI>
+        <Literal xml:lang="es">Sistema de referencia espacial</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <AbbreviatedIRI>malla-espacial:sistemaReferenciaEspacial</AbbreviatedIRI>
+        <Literal>Spatial Reference System</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>Area</IRI>
+        <Literal xml:lang="es">Área</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>Area</IRI>
+        <Literal xml:lang="en">Area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>Año</IRI>
+        <Literal xml:lang="es">Año del incendio forestal</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>Año</IRI>
+        <Literal xml:lang="en">Forest fire year</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>Año</IRI>
+        <Literal xml:lang="es">Año</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>Año</IRI>
+        <Literal xml:lang="en">Year</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>IdIncendio</IRI>
+        <Literal xml:lang="es">Relaciona un Incendio Forestal con su identificador de incendio nacional.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>IdIncendio</IRI>
+        <Literal xml:lang="en">Relates a Forest Fire with its country fire identifier.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>IdIncendio</IRI>
+        <Literal xml:lang="en">Forest fire ID</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>IdIncendio</IRI>
+        <Literal xml:lang="es">ID de incendio forestal</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>IncendioForestal</IRI>
+        <Literal xml:lang="en">A Forest Fire or wildfire represents a fire occurrence and spreading on vegetated land.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>IncendioForestal</IRI>
+        <Literal xml:lang="es">Un ForestFire o incendio forestal representa la aparición y propagación de un fuego en un terreno con vegetación.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <IRI>IncendioForestal</IRI>
+        <IRI>http://inspire.ec.europa.eu/codelist/NaturalHazardCategoryValue/forestFireWildfire</IRI>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:isDefinedBy"/>
+        <IRI>IncendioForestal</IRI>
+        <Literal>stable</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>IncendioForestal</IRI>
+        <Literal xml:lang="en">Forest fire or wildfire</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>IncendioForestal</IRI>
+        <Literal xml:lang="es">Incendio forestal</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>SuperficieAgricola</IRI>
+        <Literal xml:lang="es">Una zona formada por superficie agrícola.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>SuperficieAgricola</IRI>
+        <Literal xml:lang="en">Agricultural area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>SuperficieAgricola</IRI>
+        <Literal xml:lang="es">Superficie agrícola</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>SuperficieArbolada</IRI>
+        <Literal xml:lang="es">Superficie arbolada</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>SuperficieArbolada</IRI>
+        <Literal xml:lang="en">Wooded area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>SuperficieForestal</IRI>
+        <Literal xml:lang="es">Suma de la superficie total arbolada y no arbolada.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>SuperficieForestal</IRI>
+        <Literal xml:lang="en">Forest area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>SuperficieForestal</IRI>
+        <Literal xml:lang="es">Superficie forestal</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>SuperficieNoArbolada</IRI>
+        <Literal xml:lang="es">Superficie no arbolada</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>SuperficieNoArbolada</IRI>
+        <Literal xml:lang="en">Treeless area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>SuperficieNoForestal</IRI>
+        <Literal xml:lang="es">Suma de la superficie total no forestal.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>SuperficieNoForestal</IRI>
+        <Literal xml:lang="en">Non Forest area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>SuperficieNoForestal</IRI>
+        <Literal xml:lang="es">Superficie no forestal</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tiempoExposicion</IRI>
+        <Literal xml:lang="es">Relaciona un incendio forestal con el intervalo de tiempo entre la detección y la extinción del fuego.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tiempoExposicion</IRI>
+        <Literal xml:lang="en">Relates a Forest Fire to the time interval between detection and extinguishment of the fire.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tiempoExposicion</IRI>
+        <Literal xml:lang="es">tiempo de exposición</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tiempoExposicion</IRI>
+        <Literal xml:lang="en">time exposure</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tieneFechaIncendio</IRI>
+        <Literal xml:lang="es">Relaciona un incendio forestal con el año en que se produjo.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tieneFechaIncendio</IRI>
+        <Literal xml:lang="en">Relate a Forest Fire with the year in which it occurred.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneFechaIncendio</IRI>
+        <Literal xml:lang="en">has fire year</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneFechaIncendio</IRI>
+        <Literal xml:lang="es">tiene fecha de incendio</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tieneSuperficieAgricola</IRI>
+        <Literal xml:lang="es">Relaciona un incendio forestal con la superficie agrícola quemada.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tieneSuperficieAgricola</IRI>
+        <Literal xml:lang="en">Relates a Forest Fire to the agricultural area burned.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieAgricola</IRI>
+        <Literal xml:lang="en">has agricultural area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieAgricola</IRI>
+        <Literal xml:lang="es">tiene superficie agrícola</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tieneSuperficieArbolada</IRI>
+        <Literal xml:lang="es">Relaciona un incendio forestal con la superficie arbolada quemada.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieArbolada</IRI>
+        <Literal xml:lang="en">Relates a Forest Fire to the wooded area burned.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieArbolada</IRI>
+        <Literal>has wooded area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieArbolada</IRI>
+        <Literal xml:lang="es">tiene superficie arbolada</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tieneSuperficieForestal</IRI>
+        <Literal xml:lang="es">Relaciona un incendio forestal con la superficie forestal quemada.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tieneSuperficieForestal</IRI>
+        <Literal xml:lang="en">Relates a Forest Fire to the forest area burned.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieForestal</IRI>
+        <Literal xml:lang="en">has forestal area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieForestal</IRI>
+        <Literal xml:lang="es">tiene superficie forestal</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tieneSuperficieNoArbolada</IRI>
+        <Literal xml:lang="es">Relaciona un incendio forestal con la superficie no arbolada quemada.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieNoArbolada</IRI>
+        <Literal xml:lang="en">Relates a Forest Fire to the treeless area burned.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieNoArbolada</IRI>
+        <Literal xml:lang="en">has treeless area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieNoArbolada</IRI>
+        <Literal xml:lang="es">tiene superficie no arbolada</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tieneSuperficieNoForestal</IRI>
+        <Literal xml:lang="es">Relaciona un incendio forestal con la superficie no forestal quemada.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>tieneSuperficieNoForestal</IRI>
+        <Literal xml:lang="en">Relates a Forest Fire to the non-forest area burned.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieNoForestal</IRI>
+        <Literal xml:lang="en">has non forest area</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>tieneSuperficieNoForestal</IRI>
+        <Literal xml:lang="es">tiene superficie no forestal</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales/Coleccion/ColeccionIncendiosForestalesEspaña</IRI>
+        <Literal xml:lang="es">Colección que contiene todas las entidades de Incendios Forestales de España con su información y geometrías.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales/Coleccion/ColeccionIncendiosForestalesEspaña</IRI>
+        <Literal xml:lang="en">Collection containing all the Forest Fire entities of Spain with their information and geometries.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales/Coleccion/ColeccionIncendiosForestalesEspaña</IRI>
+        <Literal xml:lang="es">Colección de incendios forestales de España</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>https://datos.iepnb.es/recurso/sector-publico/sector/medio-ambiente/incendios-forestales/Coleccion/ColeccionIncendiosForestalesEspaña</IRI>
+        <Literal xml:lang="en">Spain Forest Fire Collection</Literal>
+    </AnnotationAssertion>
+    <AnnotationPropertyRange>
+        <AnnotationProperty abbreviatedIRI="dct:title"/>
+        <AbbreviatedIRI>rdfs:Literal</AbbreviatedIRI>
+    </AnnotationPropertyRange>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+
