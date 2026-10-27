@@ -1,6 +1,14 @@
 """
 Servicio Plan B: Ingesta meteorológica desde Open-Meteo por coordenadas.
 Se activa para los municipios sin estación Euskalmet o con datos incompletos.
+Alineado exactamente con el conjunto de variables de Euskalmet:
+  - temperature
+  - humidity
+  - wind_speed
+  - max_wind_speed (racha máxima)
+  - wind_direction (dirección media del viento)
+  - precip_7d
+  - fwi_proxy
 """
 
 import datetime
@@ -107,7 +115,7 @@ def fetch_open_meteo_fallback(
     missing_municipalities: list[str],
     target_day: datetime.date | None = None,
 ) -> pd.DataFrame:
-    """Consulta Open-Meteo por coordenadas en modo batch."""
+    """Consulta Open-Meteo por coordenadas en modo batch devolviendo las mismas variables que Euskalmet."""
     if not missing_municipalities:
         return pd.DataFrame()
 
@@ -143,7 +151,7 @@ def fetch_open_meteo_fallback(
             "daily": (
                 "temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum"
             ),
-            "hourly": "wind_speed_10m",
+            "hourly": "wind_speed_10m,wind_gusts_10m,wind_direction_10m",
             "wind_speed_unit": "kmh",
             "timezone": "Europe/Berlin",
         }
@@ -191,27 +199,67 @@ def fetch_open_meteo_fallback(
                 temps = daily.get("temperature_2m_mean", [])
                 hums = daily.get("relative_humidity_2m_mean", [])
                 precips = daily.get("precipitation_sum", [])
+
                 hourly = data.get("hourly", {})
                 hourly_times = hourly.get("time", [])
                 hourly_winds = hourly.get("wind_speed_10m", [])
+                hourly_gusts = hourly.get("wind_gusts_10m", [])
+                hourly_dirs = hourly.get("wind_direction_10m", [])
 
                 temp = temps[-1] if (temps and temps[-1] is not None) else None
                 hum = hums[-1] if (hums and hums[-1] is not None) else None
-                valid_winds = [
-                    float(value)
-                    for timestamp, value in zip(hourly_times, hourly_winds)
-                    if isinstance(timestamp, str)
-                    and timestamp.startswith(day.isoformat())
-                    and isinstance(value, (int, float))
-                    and not isinstance(value, bool)
-                    and math.isfinite(value)
+
+                # Filtrar valores horarios para el día objetivo
+                valid_indices = [
+                    i for i, ts in enumerate(hourly_times)
+                    if isinstance(ts, str) and ts.startswith(day.isoformat())
                 ]
+
+                valid_winds = [
+                    float(hourly_winds[i]) for i in valid_indices
+                    if i < len(hourly_winds)
+                    and isinstance(hourly_winds[i], (int, float))
+                    and not isinstance(hourly_winds[i], bool)
+                    and math.isfinite(hourly_winds[i])
+                ]
+
+                valid_gusts = [
+                    float(hourly_gusts[i]) for i in valid_indices
+                    if i < len(hourly_gusts)
+                    and isinstance(hourly_gusts[i], (int, float))
+                    and not isinstance(hourly_gusts[i], bool)
+                    and math.isfinite(hourly_gusts[i])
+                ]
+
+                valid_dirs = [
+                    float(hourly_dirs[i]) for i in valid_indices
+                    if i < len(hourly_dirs)
+                    and isinstance(hourly_dirs[i], (int, float))
+                    and not isinstance(hourly_dirs[i], bool)
+                    and math.isfinite(hourly_dirs[i])
+                ]
+
                 wind = sum(valid_winds) / len(valid_winds) if valid_winds else None
+                max_wind = max(valid_gusts) if valid_gusts else (max(valid_winds) if valid_winds else None)
+                wind_dir = sum(valid_dirs) / len(valid_dirs) if valid_dirs else None
+
                 precip_7d = (
                     sum(precips)
                     if len(precips) == 7 and all(value is not None for value in precips)
                     else None
                 )
+
+                # Cálculo de FWI proxy alineado con Euskalmet
+                fwi = None
+                if (
+                    temp is not None
+                    and hum is not None
+                    and hum > 0
+                    and wind is not None
+                    and precip_7d is not None
+                    and precip_7d >= 0
+                ):
+                    fwi = round((temp * wind) / (hum * (1 + math.log1p(precip_7d))), 4)
 
                 results.append({
                     "date": day.isoformat(),
@@ -219,8 +267,10 @@ def fetch_open_meteo_fallback(
                     "temperature": round(temp, 2) if temp is not None else None,
                     "humidity": round(hum, 2) if hum is not None else None,
                     "wind_speed": round(wind, 2) if wind is not None else None,
+                    "max_wind_speed": round(max_wind, 2) if max_wind is not None else None,
+                    "wind_direction": round(wind_dir, 2) if wind_dir is not None else None,
                     "precip_7d": round(precip_7d, 2) if precip_7d is not None else None,
-                    "fwi_proxy": None,
+                    "fwi_proxy": fwi,
                 })
 
             if results:

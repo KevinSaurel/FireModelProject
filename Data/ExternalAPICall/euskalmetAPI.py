@@ -1,8 +1,8 @@
 """
-Euskalmet Open Data API Client.
-Exposes:
-  - get_live_weather_data(): Fetches live/yesterday weather without direct DB saving.
-  - get_daily_since_2026(): Fills missing daily registers since 2026-01-01 into DB.
+Euskalmet Open Data API Client (OpenAPI 3.0 High-Feature Extraction).
+Fully decoupled from local database/SQLite persistence.
+Extracts raw observations, multi-scale accumulated precipitation, wind vectors,
+Vapor Pressure Deficit (VPD), FWI proxies, and temporal embeddings.
 """
 
 import argparse
@@ -18,6 +18,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import jwt
+import numpy as np
 import pandas as pd
 import requests
 from requests.adapters import HTTPAdapter
@@ -33,17 +34,11 @@ from Data.Constants.constants import (
     PRIVATE_KEY_PATH,
     USER_EMAIL,
 )
-from Database.persistenceManager import (
-    get_cached_daily_precipitation,
-    get_existing_weather_dates,
-    save_cached_daily_precipitation,
-    save_weather_observations,
-)
 
 BASE_URL = "https://api.euskadi.eus/euskalmet"
 STATIONS_CATALOG_PATH = BASE_DIR / "Data" / "GeoJSON" / "euskalmet_stations.json"
 
-PRECIP_DAYS = 7
+PRECIP_DAYS = 30
 REQUEST_TIMEOUT = 30
 REQUEST_PAUSE = 0.1
 TOKEN_MAX_AGE = 50 * 60
@@ -53,13 +48,17 @@ MEASURES = {
     ("measuresForAir", "temperature"): "temperature",
     ("measuresForAir", "humidity"): "humidity",
     ("measuresForWind", "mean_speed"): "mean_speed",
+    ("measuresForWind", "max_speed"): "max_speed",
+    ("measuresForWind", "mean_direction"): "mean_direction",
     ("measuresForWater", "precipitation"): "precipitation",
 }
 
 VALID_RANGE = {
     "temperature": (-30.0, 50.0),
     "humidity": (0.0, 100.0),
-    "mean_speed": (0.0, 80.0),
+    "mean_speed": (0.0, 150.0),
+    "max_speed": (0.0, 200.0),
+    "mean_direction": (0.0, 360.0),
     "precipitation": (0.0, 500.0),
 }
 
@@ -67,6 +66,8 @@ MIN_COVERAGE = {
     "temperature": 0.5,
     "humidity": 0.5,
     "mean_speed": 0.5,
+    "max_speed": 0.3,
+    "mean_direction": 0.3,
     "precipitation": 0.8,
 }
 
@@ -146,7 +147,7 @@ class EuskalmetClient:
     def _refresh_token(self) -> None:
         self.session.headers["Authorization"] = f"Bearer {generate_jwt()}"
         self._token_ts = time.time()
-        log.info("JWT generated for %s", USER_EMAIL)
+        log.info("JWT token generated for %s", USER_EMAIL)
 
     def get_json(self, path: str) -> tuple[int | None, object | None]:
         with self._auth_lock:
@@ -158,7 +159,7 @@ class EuskalmetClient:
         for attempt in (1, 2):
             try:
                 resp = session.get(url, timeout=REQUEST_TIMEOUT)
-            except requests.RequestException as exc:
+            except requests.RequestException:
                 with self._stats_lock:
                     self.counters["network error"] += 1
                 return None, None
@@ -187,7 +188,7 @@ def load_station_catalog(client: EuskalmetClient, refresh: bool = False) -> list
     if STATIONS_CATALOG_PATH.exists() and not refresh:
         catalog = json.loads(STATIONS_CATALOG_PATH.read_text(encoding="utf-8"))
     else:
-        log.info("Fetching station catalog from Euskalmet API...")
+        log.info("Downloading station catalog from Euskalmet API...")
         status, data = client.get_json("/stations")
         ids = sorted({s["stationId"] for s in data if isinstance(s, dict) and "stationId" in s})
         catalog = []
@@ -201,6 +202,7 @@ def load_station_catalog(client: EuskalmetClient, refresh: bool = False) -> list
                 "type": d.get("stationType"),
                 "name": (d.get("name") or {}).get("SPANISH"),
                 "municipality": (d.get("municipality") or {}).get("SPANISH"),
+                "province": (d.get("province") or {}).get("SPANISH"),
                 "lat": pos.get("y"),
                 "lon": pos.get("x"),
             })
@@ -218,8 +220,10 @@ def parse_day(station_id: str, day: datetime.date, data: dict, wanted: frozenset
             continue
         raw_total, good = 0, []
         lo, hi = VALID_RANGE[name]
-        for reading in item.get("readings", []) or []:
-            for v in reading.get("values", []) or []:
+        readings = item.get("readings", []) or []
+        for reading in readings:
+            values = reading.get("values", []) or []
+            for v in values:
                 raw_total += 1
                 if isinstance(v, (int, float)) and not isinstance(v, bool) and lo <= v <= hi:
                     good.append(float(v))
@@ -228,7 +232,8 @@ def parse_day(station_id: str, day: datetime.date, data: dict, wanted: frozenset
     out = {}
     for name, options in candidates.items():
         sensor, raw_total, good = max(options, key=lambda o: len(o[2]))
-        if (len(good) / SLOTS_PER_DAY) < MIN_COVERAGE[name]:
+        coverage = MIN_COVERAGE.get(name, 0.5)
+        if (len(good) / SLOTS_PER_DAY) < coverage:
             continue
         out[name] = {"sensor": sensor, "values": good}
     return out
@@ -242,39 +247,48 @@ def get_station_day(client: EuskalmetClient, station_id: str, day: datetime.date
     return parse_day(station_id, day, data, wanted), status
 
 
-def accumulate_rain(client: EuskalmetClient, station_id: str, day: datetime.date, first_day: dict, precip_days: int):
+def compute_accumulated_rain(client: EuskalmetClient, station_id: str, day: datetime.date, first_day: dict, window_days: int) -> float | None:
     if "precipitation" not in first_day:
-        save_cached_daily_precipitation(station_id, day.isoformat(), None)
         return None
     total = sum(first_day["precipitation"]["values"])
-    save_cached_daily_precipitation(station_id, day.isoformat(), round(total, 2))
-    for back in range(1, precip_days):
+    for back in range(1, window_days):
         prev_day = day - datetime.timedelta(days=back)
-        cached, precipitation = get_cached_daily_precipitation(
-            station_id,
-            prev_day.isoformat(),
-        )
-        if cached:
-            if precipitation is None:
-                return None
-            total += precipitation
-            continue
-
         prev, status = get_station_day(client, station_id, prev_day, RAIN_ONLY)
-        if prev is None:
-            if status == 404:
-                save_cached_daily_precipitation(station_id, prev_day.isoformat(), None)
+        if prev is None or "precipitation" not in prev:
             return None
-        if "precipitation" not in prev:
-            save_cached_daily_precipitation(station_id, prev_day.isoformat(), None)
-            return None
-        precipitation = round(sum(prev["precipitation"]["values"]), 2)
-        save_cached_daily_precipitation(station_id, prev_day.isoformat(), precipitation)
-        total += precipitation
+        precip = round(sum(prev["precipitation"]["values"]), 2)
+        total += precip
     return round(total, 2)
 
 
-def collect_day(client: EuskalmetClient, stations: list[dict], day: datetime.date, precip_days: int) -> pd.DataFrame:
+def compute_consecutive_dry_days(client: EuskalmetClient, station_id: str, day: datetime.date, first_day: dict) -> int:
+    dry_count = 0
+    p1 = sum(first_day.get("precipitation", {}).get("values", [0.0]))
+    if p1 >= 1.0:
+        return 0
+    dry_count += 1
+    for back in range(1, 30):
+        prev_day = day - datetime.timedelta(days=back)
+        prev, status = get_station_day(client, station_id, prev_day, RAIN_ONLY)
+        if prev and "precipitation" in prev:
+            precip = sum(prev["precipitation"]["values"])
+            if precip < 1.0:
+                dry_count += 1
+            else:
+                break
+        else:
+            break
+    return dry_count
+
+
+def calculate_vpd(temp_c: float, humidity_pct: float) -> float:
+    """Computes Vapor Pressure Deficit (VPD in kPa)."""
+    e_sat = 0.61078 * math.exp((17.27 * temp_c) / (temp_c + 237.3))
+    vpd = e_sat * (1.0 - humidity_pct / 100.0)
+    return round(max(0.0, vpd), 4)
+
+
+def collect_day(client: EuskalmetClient, stations: list[dict], day: datetime.date) -> pd.DataFrame:
     started = time.monotonic()
     rows = []
 
@@ -284,160 +298,131 @@ def collect_day(client: EuskalmetClient, stations: list[dict], day: datetime.dat
         if parsed is None or any(m not in parsed for m in ("temperature", "humidity")):
             return None
 
-        rain = accumulate_rain(client, sid, day, parsed, precip_days)
+        t_vals = parsed["temperature"]["values"]
+        h_vals = parsed["humidity"]["values"]
+        
+        temp_mean = float(np.mean(t_vals))
+        temp_max = float(np.max(t_vals))
+        temp_min = float(np.min(t_vals))
+
+        hum_mean = float(np.mean(h_vals))
+        hum_min = float(np.min(h_vals))
+
         wind = parsed.get("mean_speed")
-        temp = sum(parsed["temperature"]["values"]) / len(parsed["temperature"]["values"])
-        hum = sum(parsed["humidity"]["values"]) / len(parsed["humidity"]["values"])
-        wind_avg = (sum(wind["values"]) / len(wind["values"])) if wind else None
+        wind_max = parsed.get("max_speed")
+        wind_dir = parsed.get("mean_direction")
+
+        wind_avg = float(np.mean(wind["values"])) if wind else 0.0
+        max_wind_val = float(np.max(wind_max["values"])) if wind_max else wind_avg
+        dir_wind_val = float(np.mean(wind_dir["values"])) if wind_dir else 0.0
+
+        wind_rad = math.radians(dir_wind_val)
+        wind_sin = round(math.sin(wind_rad), 4)
+        wind_cos = round(math.cos(wind_rad), 4)
+
+        precip_1d = round(sum(parsed.get("precipitation", {}).get("values", [0.0])), 2)
+        precip_7d = compute_accumulated_rain(client, sid, day, parsed, 7) or precip_1d
+        precip_30d = compute_accumulated_rain(client, sid, day, parsed, 30) or precip_7d
+        dry_days = compute_consecutive_dry_days(client, sid, day, parsed)
+
+        vpd = calculate_vpd(temp_mean, hum_min)
 
         muni = " ".join(str(st.get("municipality") or st.get("name") or "Desconocido").split())
+        prov = str(st.get("province") or "Desconocido").strip()
+
         return {
             "stationId": sid,
             "municipality": muni,
-            "temperature": temp,
-            "humidity": hum,
+            "province": prov,
+            "temperature": temp_mean,
+            "temp_max": temp_max,
+            "temp_min": temp_min,
+            "humidity": hum_mean,
+            "min_humidity": hum_min,
             "wind_speed": wind_avg,
-            "precip_7d": rain,
+            "max_wind_speed": max_wind_val,
+            "wind_direction": dir_wind_val,
+            "wind_dir_sin": wind_sin,
+            "wind_dir_cos": wind_cos,
+            "precip_1d": precip_1d,
+            "precip_7d": precip_7d,
+            "precip_30d": precip_30d,
+            "dry_days": dry_days,
+            "vpd": vpd,
         }
 
     workers = min(8, len(stations))
     if workers:
         with ThreadPoolExecutor(max_workers=workers) as executor:
-            futures = [
-                executor.submit(collect_station, station)
-                for station in stations
-            ]
+            futures = [executor.submit(collect_station, station) for station in stations]
             for index, future in enumerate(as_completed(futures), 1):
                 try:
                     row = future.result()
+                    if row is not None:
+                        rows.append(row)
                 except Exception:
-                    log.exception("⚠️ Error procesando una estación meteorológica.")
-                    continue
-                if row is not None:
-                    rows.append(row)
-                if index % 25 == 0 or index == len(futures):
-                    log.info("📊 Estaciones procesadas: %d/%d", index, len(futures))
+                    log.exception("Error processing weather station.")
 
     if not rows:
         return pd.DataFrame()
 
     df = pd.DataFrame(rows)
-    value_cols = ["temperature", "humidity", "wind_speed", "precip_7d"]
-    for c in value_cols:
+    val_cols = [
+        "temperature", "temp_max", "temp_min", "humidity", "min_humidity",
+        "wind_speed", "max_wind_speed", "wind_direction", "wind_dir_sin", "wind_dir_cos",
+        "precip_1d", "precip_7d", "precip_30d", "dry_days", "vpd"
+    ]
+    for c in val_cols:
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    out = df.groupby("municipality", as_index=False)[value_cols].mean().round(2)
+    agg_rules = {
+        "temperature": "mean",
+        "temp_max": "max",
+        "temp_min": "min",
+        "humidity": "mean",
+        "min_humidity": "min",
+        "wind_speed": "mean",
+        "max_wind_speed": "max",
+        "wind_direction": "mean",
+        "wind_dir_sin": "mean",
+        "wind_dir_cos": "mean",
+        "precip_1d": "mean",
+        "precip_7d": "mean",
+        "precip_30d": "mean",
+        "dry_days": "max",
+        "vpd": "max",
+        "province": "first",
+    }
+    out = df.groupby("municipality", as_index=False).agg(agg_rules).round(4)
     out.insert(0, "date", day.isoformat())
 
+    # Temporal cyclic embeddings & summer indicator
+    month = day.month
+    out["month_sin"] = round(math.sin(2 * math.pi * month / 12.0), 4)
+    out["month_cos"] = round(math.cos(2 * math.pi * month / 12.0), 4)
+    out["is_summer"] = 1 if 6 <= month <= 9 else 0
+
     def fwi_proxy(row):
-        t, w, h, p = row["temperature"], row["wind_speed"], row["humidity"], row["precip_7d"]
-        if pd.isna(t) or pd.isna(w) or pd.isna(h) or pd.isna(p) or h <= 0 or p < 0:
+        t, w, h, p7 = row["temp_max"], row["max_wind_speed"], row["min_humidity"], row["precip_7d"]
+        if pd.isna(t) or pd.isna(w) or pd.isna(h) or pd.isna(p7) or h <= 0:
             return None
-        return (t * w) / (h * (1 + math.log1p(p)))
+        return round((t * w) / (h * (1.0 + math.log1p(max(0.0, p7)))), 4)
 
     out["fwi_proxy"] = out.apply(fwi_proxy, axis=1)
-    log.info(
-        "⏱️ Recopilación de %s completada en %.1f s (%d estaciones válidas).",
-        day,
-        time.monotonic() - started,
-        len(out),
-    )
+    log.info("Finished collecting %s (%d municipalities). Took %.1f s", day, len(out), time.monotonic() - started)
     return out
 
 
-# ---------------------------------------------------------------------------
-# Public Exposed API Methods
-# ---------------------------------------------------------------------------
-def get_live_weather_data(target_day: datetime.date | None = None) -> pd.DataFrame | None:
-    """Method 1: Returns live/yesterday weather DataFrame WITHOUT saving to DB."""
+def GetVariablesForSpecificDay(target_date: str | datetime.date) -> pd.DataFrame | None:
     _ensure_logging()
-    day = target_day or (datetime.date.today() - datetime.timedelta(days=1))
+    if isinstance(target_date, str):
+        day = datetime.date.fromisoformat(target_date)
+    else:
+        day = target_date
     client = EuskalmetClient()
     stations = load_station_catalog(client)
-    df = collect_day(client, stations, day, PRECIP_DAYS)
+    df = collect_day(client, stations, day)
     return df if not df.empty else None
 
 
-def get_daily_since_2026(start_date_str: str = "2026-01-01") -> int:
-    """Fast Backfill: Ingests 1 day at a time (61 requests/day instead of 427).
-    Then computes 7-day rolling precipitation locally in SQLite.
-    """
-    _ensure_logging()
-    client = EuskalmetClient()
-    stations = load_station_catalog(client)
-
-    existing_dates = get_existing_weather_dates()
-    start_date = datetime.date.fromisoformat(start_date_str)
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
-
-    current_date = start_date
-    total_saved = 0
-
-    log.info("🚀 Starting Fast Backfill from %s to %s...", start_date_str, yesterday)
-
-    # Step 1: Ingest 1-day daily weather (precip_days=1)
-    while current_date <= yesterday:
-        date_str = current_date.isoformat()
-        if date_str in existing_dates:
-            log.info("⏩ Date %s already in database. Skipping.", date_str)
-        else:
-            log.info("📥 Ingesting daily weather for %s...", date_str)
-            # precip_days=1 eliminates 6 extra API calls per station
-            df_day = collect_day(client, stations, current_date, precip_days=1)
-            if not df_day.empty:
-                saved = save_weather_observations(df_day)
-                total_saved += saved
-
-        current_date += datetime.timedelta(days=1)
-
-    # Step 2: Calculate precip_7d and fwi_proxy locally across stored records
-    log.info("⚡ Recalculating 7-day rolling precipitation & FWI proxy locally...")
-    _recompute_rolling_fwi_in_db()
-
-    log.info("🎉 Backfill completed! Total records saved: %d", total_saved)
-    return total_saved
-
-
-def _recompute_rolling_fwi_in_db():
-    """Computes precip_7d and fwi_proxy in memory using Pandas rolling windows."""
-    import sqlite3
-    import math
-    from Data.Constants.constants import DB_PATH
-
-    conn = sqlite3.connect(str(DB_PATH))
-    df = pd.read_sql_query(
-        "SELECT id, date, municipality, temperature, humidity, wind_speed, precip_7d FROM weather_observations ORDER BY municipality, date",
-        conn,
-    )
-
-    if df.empty:
-        conn.close()
-        return
-
-    # Tratar la lluvia diaria como base
-    df["precip_1d"] = df["precip_7d"].fillna(0.0)
-
-    # Calcular la suma móvil de 7 días por municipio
-    df["precip_7d"] = (
-        df.groupby("municipality")["precip_1d"]
-        .rolling(window=7, min_periods=1)
-        .sum()
-        .reset_index(level=0, drop=True)
-    )
-
-    def calc_fwi(row):
-        t, w, h, p = row["temperature"], row["wind_speed"], row["humidity"], row["precip_7d"]
-        if pd.isna(t) or pd.isna(w) or pd.isna(h) or h <= 0:
-            return None
-        return round((t * w) / (h * (1 + math.log1p(max(0.0, p)))), 4)
-
-    df["fwi_proxy"] = df.apply(calc_fwi, axis=1)
-
-    # Actualización masiva en SQLite
-    cursor = conn.cursor()
-    cursor.executemany(
-        "UPDATE weather_observations SET precip_7d = ?, fwi_proxy = ? WHERE id = ?",
-        [(row["precip_7d"], row["fwi_proxy"], row["id"]) for _, row in df.iterrows()],
-    )
-    conn.commit()
-    conn.close()
+get_variables_for_specific_day = GetVariablesForSpecificDay
