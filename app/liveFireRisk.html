@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="style.css">
+    <style>
+        .legend .tiers div { margin-top: 7px; letter-spacing: 0.06em; text-transform: none; font-size: 12px; }
+        .legend .sw { display: inline-block; width: 11px; height: 11px; margin-right: 9px; vertical-align: -1px; }
+        .leaflet-container { cursor: pointer; }
+        .leaflet-popup-content { font-family: 'Montserrat', Arial, sans-serif; font-size: 13px; line-height: 1.5; }
+        .popup-tier { display: inline-block; width: 10px; height: 10px; margin-right: 6px; }
+        a.popup-btn {
+            display: inline-block; margin-top: 8px; padding: 8px 14px; background: #08141f; color: #fff !important;
+            font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; text-decoration: none;
+        }
+        a.popup-btn:hover { background: #f0a35e; color: #1a1209 !important; }
+    </style>
 </head>
 <body>
 
@@ -34,18 +46,78 @@
 
 <div class="legend">
     Probabilidad de incendio
-    <div class="bar"></div>
-    <div class="labels"><span>Baja</span><span>Alta</span></div>
+    <div class="tiers">
+        <div><span class="sw" style="background:#38a169"></span>Bajo: menos de 25,7 %</div>
+        <div><span class="sw" style="background:#ecc94b"></span>Medio: 25,7 % a 50,2 %</div>
+        <div><span class="sw" style="background:#dd6b20"></span>Alto: 50,2 % a 75,0 %</div>
+        <div><span class="sw" style="background:#e53e3e"></span>Extremo: 75,0 % o mas</div>
+    </div>
 </div>
 
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
 <script>
     // Mismo origen cuando lo sirve FastAPI; localhost si se abre como archivo.
     const API = location.protocol === 'file:' ? 'http://localhost:8000' : '';
+
+    // Limites de la malla del backend (deben coincidir con EUSKADI_BOUNDS en main.py)
+    const EUSKADI_BOUNDS = { lat_min: 42.47, lat_max: 43.45, lon_min: -3.45, lon_max: -1.73 };
+    const COS_LAT = Math.cos(43.0 * Math.PI / 180);
+
+    // Umbrales de probabilidad del modelo (tier_thresholds.json)
+    const T_MEDIUM = 0.2569;
+    const T_HIGH = 0.5016;
+    const T_EXTREME = 0.7505;
+
+    const TIER_COLORS = {
+        LOW:     [56, 161, 105],    // verde
+        MEDIUM:  [236, 201, 75],    // amarillo
+        HIGH:    [221, 107, 32],    // naranja
+        EXTREME: [229, 62, 62],     // rojo
+    };
+    const TIER_LABELS = { LOW: 'Bajo', MEDIUM: 'Medio', HIGH: 'Alto', EXTREME: 'Extremo' };
+
+    function tierOf(p) {
+        return p >= T_EXTREME ? 'EXTREME' : p >= T_HIGH ? 'HIGH' : p >= T_MEDIUM ? 'MEDIUM' : 'LOW';
+    }
+    function riskColor(p) {
+        return `rgb(${TIER_COLORS[tierOf(p)].join(',')})`;
+    }
+
+    // ---- Calculos locales sobre los datos que ya envia la API ----
+    // Probabilidad de la celda del mapa donde se hace clic (la misma que da el color).
+    function cellProbability(points, n, lat, lon) {
+        const B = EUSKADI_BOUNDS;
+        const r = Math.round((lat - B.lat_min) / (B.lat_max - B.lat_min) * (n - 1));
+        const c = Math.round((lon - B.lon_min) / (B.lon_max - B.lon_min) * (n - 1));
+        const row = Math.max(0, Math.min(n - 1, r));
+        const col = Math.max(0, Math.min(n - 1, c));
+        return points[row * n + col].probability;
+    }
+
+    function haversineKm(lat1, lon1, lat2, lon2) {
+        const rad = Math.PI / 180;
+        const a = Math.sin((lat2 - lat1) * rad / 2) ** 2
+            + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin((lon2 - lon1) * rad / 2) ** 2;
+        return 2 * 6371 * Math.asin(Math.sqrt(a));
+    }
+
+    // Puntos de medicion mas cercanos, con su peso en la interpolacion (1 / distancia^2).
+    function nearbySources(samples, lat, lon, limit) {
+        const list = samples.map(s => {
+            const d = Math.max(Math.hypot(lat - s.lat, (lon - s.lon) * COS_LAT), 1e-6);
+            return { s, w: 1 / (d * d), km: haversineKm(lat, lon, s.lat, s.lon) };
+        });
+        const total = list.reduce((a, x) => a + x.w, 0);
+        list.forEach(x => { x.pct = 100 * x.w / total; });
+        return list.sort((a, b) => b.w - a.w).slice(0, limit);
+    }
+
+    function sourceName(s) {
+        return s.name ? `Estacion ${s.name}` : 'Open-Meteo (punto de malla)';
+    }
 
     const map = L.map('map').setView([43.0, -2.6], 9);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
@@ -53,14 +125,70 @@
         maxZoom: 16
     }).addTo(map);
 
-    let heatLayer = null;
+    // Panel propio para la capa de probabilidad: queda por debajo de las estaciones.
+    map.createPane('probPane');
+    map.getPane('probPane').style.zIndex = 350;
+    map.getPane('probPane').style.pointerEvents = 'none';
+
+    let probLayer = null;
+    let lastData = null;
     const stationLayer = L.layerGroup().addTo(map);
 
-    const TIERS = { EXTREME: 'Extremo', MEDIUM: 'Medio', LOW: 'Bajo' };
+    // Contenido comun de los popups: nivel, probabilidad y boton de detalle.
+    function popupHtml(title, p, lat, lon, extra = '') {
+        return `<strong>${title}</strong><br/>
+            <span class="popup-tier" style="background:${riskColor(p)}"></span>${TIER_LABELS[tierOf(p)]}
+            &middot; ${(p * 100).toFixed(2)}%<br/>
+            ${extra}
+            <a class="popup-btn" href="Detail.html?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}">Ver detalle</a>`;
+    }
 
-    // Umbrales de probabilidad del modelo
-    function riskColor(p) {
-        return p >= 0.332 ? '#e53e3e' : p >= 0.157 ? '#dd6b20' : '#38a169';
+    // Clic en cualquier punto del mapa: popup con el valor, la fuente principal y "Ver detalle".
+    map.on('click', (e) => {
+        const { lat, lng } = e.latlng;
+        if (!lastData) {
+            L.popup().setLatLng(e.latlng).setContent('Cargando datos...').openOn(map);
+            return;
+        }
+        const p = cellProbability(lastData.points, lastData.grid_size, lat, lng);
+        let extra = '';
+        if (lastData.samples && lastData.samples.length) {
+            const main = nearbySources(lastData.samples, lat, lng, 1)[0];
+            extra = `<small>Fuente principal: ${sourceName(main.s)} (${main.km.toFixed(1)} km)</small><br/>`;
+        }
+        L.popup().setLatLng(e.latlng).setContent(popupHtml('Punto seleccionado', p, lat, lng, extra)).openOn(map);
+    });
+
+    // Convierte la malla n x n de la API en una imagen anclada a coordenadas.
+    // El color depende solo de la probabilidad, no del nivel de zoom.
+    function buildProbabilityOverlay(points, n) {
+        const canvas = document.createElement('canvas');
+        canvas.width = n;
+        canvas.height = n;
+        const ctx = canvas.getContext('2d');
+        const img = ctx.createImageData(n, n);
+
+        // Los puntos vienen ordenados por latitud (filas, de sur a norte) y luego por longitud.
+        points.forEach((p, idx) => {
+            const row = Math.floor(idx / n);
+            const col = idx % n;
+            const y = n - 1 - row;                      // el norte va arriba
+            const [r, g, b] = TIER_COLORS[tierOf(p.probability)];
+            const o = (y * n + col) * 4;
+            img.data[o] = r;
+            img.data[o + 1] = g;
+            img.data[o + 2] = b;
+            img.data[o + 3] = 150;                      // opacidad (0 a 255)
+        });
+        ctx.putImageData(img, 0, 0);
+
+        const B = EUSKADI_BOUNDS;
+        const halfLat = (B.lat_max - B.lat_min) / (n - 1) / 2;   // cada celda esta centrada en su punto
+        const halfLon = (B.lon_max - B.lon_min) / (n - 1) / 2;
+        return L.imageOverlay(canvas.toDataURL(), [
+            [B.lat_min - halfLat, B.lon_min - halfLon],
+            [B.lat_max + halfLat, B.lon_max + halfLon],
+        ], { pane: 'probPane', interactive: false });
     }
 
     async function load(refresh = false) {
@@ -70,26 +198,25 @@
             const res = await fetch(`${API}/api/v1/fire-risk/heatmap?resolution=50${refresh ? '&refresh=true' : ''}`);
             const data = await res.json();
             if (data.error) { status.textContent = data.error; return; }
+            lastData = data;
 
-            if (heatLayer) map.removeLayer(heatLayer);
-            heatLayer = L.heatLayer(data.points.map(p => [p.lat, p.lon, p.intensity]), {
-                radius: 25, blur: 15, maxZoom: 12, max: 1.0,
-                gradient: { 0.2: 'green', 0.5: 'yellow', 0.8: 'orange', 1.0: 'red' }
-            }).addTo(map);
+            if (probLayer) map.removeLayer(probLayer);
+            probLayer = buildProbabilityOverlay(data.points, data.grid_size).addTo(map);
 
             stationLayer.clearLayers();
             data.stations.forEach(s => {
                 L.circleMarker([s.lat, s.lon], {
                     radius: 5, color: '#08141f', weight: 1,
-                    fillColor: riskColor(s.probability), fillOpacity: 0.9
+                    fillColor: riskColor(s.probability), fillOpacity: 0.9,
+                    bubblingMouseEvents: false        // el clic en una estacion no abre el popup del mapa
                 }).bindPopup(
-                    `<strong>${s.name}</strong><br/>
-                     <b>Nivel de riesgo:</b> ${TIERS[s.risk_tier] || s.risk_tier}<br/>
-                     <b>Prob. de incendio:</b> ${(s.probability * 100).toFixed(2)}%<br/>
-                     <b>Temp:</b> ${s.temperature} C | <b>Humedad:</b> ${s.humidity}%<br/>
-                     <b>Viento:</b> ${s.wind_speed} km/h | <b>Lluvia 7d:</b> ${s.rain_7d} mm<br/>
-                     <b>Dias secos:</b> ${s.dry_streak}<br/>
-                     <small>Fuente: ${s.source}</small>`
+                    popupHtml(
+                        s.name, s.probability, s.lat, s.lon,
+                        `<b>Temp:</b> ${s.temperature} C | <b>Humedad:</b> ${s.humidity}%<br/>
+                         <b>Viento:</b> ${s.wind_speed} km/h | <b>Lluvia 7d:</b> ${s.rain_7d} mm<br/>
+                         <b>Dias secos:</b> ${s.dry_streak}<br/>
+                         <small>Fuente: ${s.source}</small><br/>`
+                    )
                 ).addTo(stationLayer);
             });
             toggleStations();

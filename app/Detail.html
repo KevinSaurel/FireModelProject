@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detalle del punto - Euskadi Fire Risk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .result { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+        .result .swatch { width: 64px; height: 64px; flex: none; }
+        .result .tier { font-weight: 300; font-size: 34px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.1; }
+        .result .prob { font-weight: 300; font-size: 16px; color: var(--muted); margin-top: 4px; }
+        table.t { width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 300; }
+        table.t th {
+            text-align: left; font-weight: 500; font-size: 11px; letter-spacing: 0.2em;
+            text-transform: uppercase; color: var(--accent); padding: 8px 10px 10px 0;
+        }
+        table.t td { padding: 10px 10px 10px 0; border-top: 1px solid var(--line); vertical-align: middle; }
+        .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; }
+        .bar-wrap { background: rgba(255, 255, 255, 0.1); height: 6px; width: 100%; min-width: 80px; }
+        .bar-fill { background: var(--accent); height: 6px; }
+        .note { font-size: 13px; color: var(--muted); font-weight: 300; margin-top: 12px; line-height: 1.6; }
+        .txt { margin: 0 0 12px 0; font-weight: 300; line-height: 1.75; }
+        .back { display: inline-block; margin-top: 8px; }
+        .scale li.current { font-weight: 500; }
+        @media (max-width: 760px) { table.t { font-size: 12px; } .result .tier { font-size: 26px; } }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a class="brand" href="/">Euskadi Fire Risk</a>
+        <ul>
+            <li><a class="link" href="/">Inicio</a></li>
+            <li><a class="link" href="LiveFireRisk.html">Riesgo en vivo</a></li>
+            <li><a class="link" href="Info.html">Informacion</a></li>
+        </ul>
+    </nav>
+
+    <section class="page-hero" style="height: 34vh; min-height: 240px;">
+        <div class="sky"></div>
+        <div class="sun" style="bottom: 8%;"></div>
+        <svg class="mountains" viewBox="0 0 1440 400" preserveAspectRatio="none" aria-hidden="true">
+            <path fill="#3a5f86" opacity="0.65" d="M0,220 L180,140 L320,200 L520,90 L700,210 L860,130 L1040,220 L1220,120 L1440,200 L1440,400 L0,400 Z"/>
+            <path fill="#1d3a58" d="M0,280 L150,220 L300,270 L480,190 L660,280 L820,230 L1000,290 L1180,210 L1440,280 L1440,400 L0,400 Z"/>
+            <path fill="#08141f" d="M0,330 L200,290 L400,330 L620,280 L840,335 L1060,295 L1260,335 L1440,300 L1440,400 L0,400 Z"/>
+        </svg>
+        <h1>Detalle del punto</h1>
+    </section>
+
+    <main class="page-body">
+        <div class="inner" id="content">
+            <p class="txt">Cargando detalle...</p>
+        </div>
+    </main>
+
+<script>
+    const API = location.protocol === 'file:' ? 'http://localhost:8000' : '';
+
+    // Limites de la malla del backend (deben coincidir con EUSKADI_BOUNDS en main.py)
+    const EUSKADI_BOUNDS = { lat_min: 42.47, lat_max: 43.45, lon_min: -3.45, lon_max: -1.73 };
+    const COS_LAT = Math.cos(43.0 * Math.PI / 180);
+
+    // Umbrales de probabilidad del modelo (tier_thresholds.json)
+    const TIERS = [
+        { key: 'LOW',     label: 'Bajo',    color: '#38a169', lo: 0,      hi: 0.2569 },
+        { key: 'MEDIUM',  label: 'Medio',   color: '#ecc94b', lo: 0.2569, hi: 0.5016 },
+        { key: 'HIGH',    label: 'Alto',    color: '#dd6b20', lo: 0.5016, hi: 0.7505 },
+        { key: 'EXTREME', label: 'Extremo', color: '#e53e3e', lo: 0.7505, hi: 1 },
+    ];
+    const tierOf = p => TIERS.slice().reverse().find(t => p >= t.lo) || TIERS[0];
+
+    const FEATURES = {
+        temperature:    ['Temperatura media', 'C'],
+        humidity:       ['Humedad media', '%'],
+        min_humidity:   ['Humedad minima', '%'],
+        wind_speed:     ['Viento medio', 'km/h'],
+        max_wind_speed: ['Viento maximo', 'km/h'],
+        precip_1d:      ['Lluvia del dia', 'mm'],
+        precip_7d:      ['Lluvia acumulada 7 dias', 'mm'],
+        precip_14d:     ['Lluvia acumulada 14 dias', 'mm'],
+        precip_30d:     ['Lluvia acumulada 30 dias', 'mm'],
+        dry_spell_days: ['Dias secos consecutivos', 'dias'],
+        et0_14d:        ['Evapotranspiracion 14 dias', 'mm'],
+        month:          ['Mes', ''],
+        day_of_year:    ['Dia del anio', ''],
+    };
+
+    const pct = (x, d = 1) => (x * 100).toFixed(d).replace('.', ',') + ' %';
+    const num = (x, d = 1) => Number(x).toFixed(d).replace('.', ',');
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    const params = new URLSearchParams(location.search);
+    const lat = parseFloat(params.get('lat'));
+    const lon = parseFloat(params.get('lon'));
+    const content = document.getElementById('content');
+
+    // ---- Calculos locales sobre los datos que envia la API ----
+    function cellProbability(points, n, la, lo) {
+        const B = EUSKADI_BOUNDS;
+        const r = Math.round((la - B.lat_min) / (B.lat_max - B.lat_min) * (n - 1));
+        const c = Math.round((lo - B.lon_min) / (B.lon_max - B.lon_min) * (n - 1));
+        const row = Math.max(0, Math.min(n - 1, r));
+        const col = Math.max(0, Math.min(n - 1, c));
+        return points[row * n + col].probability;
+    }
+
+    function haversineKm(lat1, lon1, lat2, lon2) {
+        const rad = Math.PI / 180;
+        const a = Math.sin((lat2 - lat1) * rad / 2) ** 2
+            + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin((lon2 - lon1) * rad / 2) ** 2;
+        return 2 * 6371 * Math.asin(Math.sqrt(a));
+    }
+
+    function nearbySources(samples, la, lo, limit) {
+        const list = samples.map(s => {
+            const d = Math.max(Math.hypot(la - s.lat, (lo - s.lon) * COS_LAT), 1e-6);
+            return { s, w: 1 / (d * d), km: haversineKm(la, lo, s.lat, s.lon) };
+        });
+        const total = list.reduce((a, x) => a + x.w, 0);
+        list.forEach(x => { x.pct = 100 * x.w / total; });
+        return list.sort((a, b) => b.w - a.w).slice(0, limit);
+    }
+
+    const isStation = s => !!s.name;
+    const sourceName = s => isStation(s) ? `Estacion ${s.name}` : `Open-Meteo (punto de malla ${num(s.lat, 2)}, ${num(s.lon, 2)})`;
+    const sourceKind = s => isStation(s) ? 'Euskalmet + historico Open-Meteo' : 'Open-Meteo';
+
+    function row(title, html) {
+        return `<div class="row"><h2>${title}</h2><div>${html}</div></div>`;
+    }
+
+    function render(d) {
+        const p = cellProbability(d.points, d.grid_size, lat, lon);
+        const t = tierOf(p);
+        const near = nearbySources(d.samples, lat, lon, 5);
+        const main = near[0];
+
+        const imps = d.importances || [];
+        const impMap = {};
+        let maxImp = 0;
+        imps.forEach(i => { impMap[i.feature] = i.importance; maxImp = Math.max(maxImp, i.importance); });
+
+        // 1. Resultado
+        let html = row('Resultado', `
+            <div class="result">
+                <div class="swatch" style="background:${t.color}"></div>
+                <div>
+                    <div class="tier">${t.label}</div>
+                    <div class="prob">Probabilidad de incendio: ${pct(p, 2)}</div>
+                </div>
+            </div>
+            <p class="note">Coordenadas: ${num(lat, 4)}, ${num(lon, 4)}${d.date ? ' &middot; Datos del ' + esc(d.date) : ''}<br/>
+            Fuente principal: ${esc(sourceName(main.s))} (${num(main.km)} km)</p>
+            <a class="btn small back" href="LiveFireRisk.html">Volver al mapa</a>`);
+
+        // 2. Por que este color
+        html += row('Por que este color', `
+            <p class="txt">El color depende solo de la probabilidad que calcula el modelo. Aqui es
+                <b>${pct(p, 2)}</b>, que cae en el nivel <b>${t.label}</b> (${pct(t.lo)} a ${pct(t.hi)}), y por eso
+                se pinta de ese color.</p>
+            <p class="txt">No hay un sensor en cada punto del mapa. Este valor sale de los puntos de medicion mas
+                cercanos (tabla siguiente), dando mas peso a los mas proximos. El que mas influye es
+                <b>${esc(sourceName(main.s))}</b>, con el ${num(main.pct)} % del peso.</p>`);
+
+        // 3. Fuente de la informacion
+        html += row('Fuente de la informacion', `
+            <table class="t">
+                <tr><th>Punto</th><th>Fuente</th><th>Distancia</th><th>Peso</th><th>Probabilidad</th></tr>
+                ${near.map(x => {
+                    const ct = tierOf(x.s.probability);
+                    return `<tr>
+                        <td>${esc(sourceName(x.s))}</td>
+                        <td>${esc(sourceKind(x.s))}</td>
+                        <td>${num(x.km)} km</td>
+                        <td>${num(x.pct)} %</td>
+                        <td><span class="dot" style="background:${ct.color}"></span>${pct(x.s.probability, 2)}</td>
+                    </tr>`;
+                }).join('')}
+            </table>
+            <p class="note">Las estaciones de Euskalmet aportan las medidas reales del dia (temperatura, humedad, viento y
+            lluvia) y Open-Meteo completa el historico de 30 dias. Los puntos de malla usan solo datos de Open-Meteo y
+            cubren las zonas a mas de 15 km de cualquier estacion.</p>`);
+
+        // 4. Condiciones del punto principal
+        const feats = main.s.features || {};
+        const keys = Object.keys(feats);
+        html += row('Condiciones en la fuente principal', `
+            <table class="t">
+                <tr><th>Variable</th><th>Valor</th><th>Importancia en el modelo</th></tr>
+                ${keys.map(k => {
+                    const [label, unit] = FEATURES[k] || [k, ''];
+                    const imp = impMap[k];
+                    const w = imp && maxImp ? Math.round(100 * imp / maxImp) : 0;
+                    return `<tr>
+                        <td>${esc(label)}</td>
+                        <td>${num(feats[k], 1)} ${unit}</td>
+                        <td>${imp !== undefined ? `<div class="bar-wrap"><div class="bar-fill" style="width:${w}%"></div></div>` : '-'}</td>
+                    </tr>`;
+                }).join('')}
+            </table>
+            <p class="note">Valores de ${esc(sourceName(main.s))}. La importancia es global: indica cuanto usa el modelo
+            cada variable en general, no cuanto pesa en este lugar concreto.</p>`);
+
+        // 5. Escala
+        html += row('Escala de niveles', `
+            <ul class="scale" style="list-style:none; padding:0; margin:0;">
+                ${TIERS.map(x => `<li class="${x.key === t.key ? 'current' : ''}" style="margin-bottom:8px; font-weight:300;">
+                    <span class="dot" style="background:${x.color}"></span>${x.label}: ${pct(x.lo)} a ${pct(x.hi)}${x.key === t.key ? ' (este punto)' : ''}
+                </li>`).join('')}
+            </ul>`);
+
+        content.innerHTML = html;
+    }
+
+    async function init() {
+        if (isNaN(lat) || isNaN(lon)) {
+            content.innerHTML = '<p class="txt">Falta el punto. Vuelve al mapa y pulsa sobre una zona.</p><a class="btn small" href="LiveFireRisk.html">Ir al mapa</a>';
+            return;
+        }
+        try {
+            // Mismos datos (y misma cache del servidor) que usa el mapa
+            const res = await fetch(`${API}/api/v1/fire-risk/heatmap?resolution=50`);
+            const d = await res.json();
+            if (d.error) { content.innerHTML = `<p class="txt">${esc(d.error)}</p>`; return; }
+            if (!d.samples || !d.samples.length) {
+                content.innerHTML = '<p class="txt">El servidor aun no envia el detalle de los puntos. Hay que anadir "samples" e "importances" a la respuesta del heatmap en main.py.</p>';
+                return;
+            }
+            render(d);
+        } catch (e) {
+            content.innerHTML = '<p class="txt">No se pudo conectar con la API. Esta uvicorn en marcha?</p>';
+            console.error(e);
+        }
+    }
+    init();
+</script>
+</body>
+</html>

@@ -31,6 +31,7 @@ import requests
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 APP_DIR = Path(__file__).resolve().parent
 ROOT_DIR = APP_DIR.parent
@@ -47,6 +48,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-7s | 
 
 app = FastAPI(title="Euskadi Fire Risk - Live Heatmap")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.mount("/Static", StaticFiles(directory=APP_DIR / "Static"), name="static")
 
 INDEX_PATH = APP_DIR / "index.html"
 MODEL_PATH = ROOT_DIR / "Model" / "fireTrainModel.pkl"
