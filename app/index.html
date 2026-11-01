@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riesgo de incendios forestales en Euskadi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="nav">
+        <a class="brand" href="/">Euskadi Fire Risk</a>
+        <ul>
+            <li><a class="link active" href="/">Inicio</a></li>
+            <li><a class="link" href="LiveFireRisk.html">Riesgo en vivo</a></li>
+            <li><a class="link" href="Info.html">Informacion</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="sky"></div>
+        <div class="sun"></div>
+
+        <svg class="mountains" viewBox="0 0 1440 400" preserveAspectRatio="none" aria-hidden="true">
+            <path fill="#3a5f86" opacity="0.65" d="M0,220 L180,140 L320,200 L520,90 L700,210 L860,130 L1040,220 L1220,120 L1440,200 L1440,400 L0,400 Z"/>
+            <path fill="#1d3a58" d="M0,280 L150,220 L300,270 L480,190 L660,280 L820,230 L1000,290 L1180,210 L1440,280 L1440,400 L0,400 Z"/>
+            <path fill="#0a1a2a" d="M0,330 L200,290 L400,330 L620,280 L840,335 L1060,295 L1260,335 L1440,300 L1440,400 L0,400 Z"/>
+        </svg>
+
+        <div class="hero-content">
+            <p class="kicker">Modelo predictivo con datos en vivo</p>
+            <h1>Riesgo de incendios forestales en Euskadi</h1>
+            <div class="buttons">
+                <a class="btn solid" href="LiveFireRisk.html">Riesgo en vivo</a>
+                <a class="btn" href="Info.html">Informacion</a>
+            </div>
+        </div>
+
+        <div class="objective-wrap">
+            <div class="objective">
+                <div class="label">Objetivo</div>
+                <p>Estimar en tiempo real la probabilidad de incendio forestal en el Pais Vasco, combinando las estaciones de Euskalmet, los datos de Open-Meteo y un modelo Random Forest, y mostrarla como un mapa de calor continuo sobre el territorio.</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

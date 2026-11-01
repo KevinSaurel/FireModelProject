@@ -1,0 +1,169 @@
+:root {
+    --ink: #08141f;
+    --navy: #0f2a43;
+    --sky-top: #0a2540;
+    --sky-mid: #3e6f9e;
+    --sky-low: #f0b07a;
+    --text: #f4f7fa;
+    --muted: #c3d1de;
+    --accent: #f0a35e;
+    --line: rgba(255, 255, 255, 0.18);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+    font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text);
+    background: var(--ink);
+    -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+
+/* ---------- Navegacion ---------- */
+.nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
+    height: 64px; padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(8, 20, 31, 0.78), rgba(8, 20, 31, 0));
+}
+.nav.solid { background: var(--ink); border-bottom: 1px solid var(--line); }
+.nav .brand {
+    font-weight: 500; font-size: 13px; letter-spacing: 0.28em;
+    text-transform: uppercase; text-decoration: none;
+}
+.nav ul { list-style: none; display: flex; gap: 32px; margin: 0; padding: 0; }
+.nav a.link {
+    font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+    text-decoration: none; color: var(--muted); padding: 6px 0;
+    border-bottom: 1px solid transparent; transition: color 0.2s, border-color 0.2s;
+}
+.nav a.link:hover, .nav a.link.active { color: #fff; border-bottom-color: var(--accent); }
+
+/* ---------- Botones ---------- */
+.btn {
+    display: inline-block; padding: 14px 34px; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.85); background: transparent; color: #fff;
+    font-family: inherit; font-size: 12px; letter-spacing: 0.22em;
+    text-transform: uppercase; text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.btn:hover { background: #fff; color: var(--ink); }
+.btn.solid { background: var(--accent); border-color: var(--accent); color: #1a1209; }
+.btn.solid:hover { background: #fff; border-color: #fff; }
+.btn.small { padding: 9px 18px; font-size: 11px; }
+
+/* ---------- Cielo y montanas ---------- */
+.sky {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-mid) 52%, var(--sky-low) 82%, #f7d3a6 100%);
+}
+.sun {
+    position: absolute; left: 50%; bottom: 24%; width: 620px; height: 620px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(255, 233, 190, 0.85) 0%, rgba(255, 210, 150, 0.35) 35%, rgba(255, 210, 150, 0) 68%);
+}
+.mountains { position: absolute; left: 0; bottom: 0; width: 100%; height: 46%; display: block; }
+
+/* ---------- Portada ---------- */
+.hero { position: relative; min-height: 100vh; overflow: hidden; }
+.hero-content {
+    position: absolute; left: 0; right: 0; top: 24%;
+    text-align: center; padding: 0 24px;
+}
+.hero-content .kicker {
+    font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 22px 0;
+}
+.hero-content h1 {
+    margin: 0 auto 36px auto; max-width: 1000px;
+    font-weight: 300; font-size: clamp(32px, 6vw, 76px);
+    letter-spacing: 0.08em; line-height: 1.12; text-transform: uppercase;
+}
+.hero-content .buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+.objective {
+    position: relative;
+    padding: 80px 40px 40px 40px;
+    display: grid; grid-template-columns: 220px 1fr; gap: 32px; align-items: start;
+    max-width: 1200px; margin: 0 auto;
+}
+.objective-wrap {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, #08141f 62%, rgba(8, 20, 31, 0));
+}
+.objective .label {
+    font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--accent); padding-top: 4px; border-top: 1px solid var(--accent);
+    padding-top: 12px;
+}
+.objective p {
+    margin: 0; font-weight: 300; font-size: 17px; line-height: 1.7; color: var(--text);
+    border-top: 1px solid var(--line); padding-top: 12px;
+}
+
+/* ---------- Pagina interior ---------- */
+.page-hero { position: relative; height: 46vh; min-height: 300px; overflow: hidden; }
+.page-hero .mountains { height: 55%; }
+.page-hero h1 {
+    position: absolute; left: 0; right: 0; top: 36%;
+    margin: 0; text-align: center; padding: 0 24px;
+    font-weight: 300; font-size: clamp(28px, 4.6vw, 54px);
+    letter-spacing: 0.1em; text-transform: uppercase;
+}
+.page-body { background: var(--ink); padding: 40px 24px 80px 24px; }
+.page-body .inner { max-width: 980px; margin: 0 auto; }
+.row {
+    display: grid; grid-template-columns: 240px 1fr; gap: 32px;
+    padding: 34px 0; border-top: 1px solid var(--line);
+}
+.row:first-child { border-top: none; }
+.row h2 {
+    margin: 0; font-weight: 500; font-size: 12px; letter-spacing: 0.32em;
+    text-transform: uppercase; color: var(--accent);
+}
+.row p, .row li { font-weight: 300; font-size: 16px; line-height: 1.75; color: var(--text); }
+.row p { margin: 0; }
+.row ul { margin: 0; padding-left: 18px; }
+.row li { margin-bottom: 8px; }
+.row b { font-weight: 500; }
+.tier { display: inline-block; width: 10px; height: 10px; margin-right: 10px; }
+
+/* ---------- Mapa ---------- */
+#map { position: absolute; top: 64px; left: 0; right: 0; bottom: 0; }
+.panel {
+    position: absolute; top: 84px; left: 70px; z-index: 1000; max-width: 300px;
+    background: rgba(8, 20, 31, 0.9); color: var(--text); padding: 18px 22px;
+    border-left: 2px solid var(--accent);
+}
+.panel h3 {
+    margin: 0 0 10px 0; font-weight: 500; font-size: 12px;
+    letter-spacing: 0.3em; text-transform: uppercase;
+}
+.panel #status { font-size: 12px; font-weight: 300; line-height: 1.5; color: var(--muted); margin-bottom: 14px; }
+.panel .controls { display: flex; align-items: center; gap: 16px; }
+.panel label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+.legend {
+    position: absolute; bottom: 25px; right: 25px; z-index: 1000;
+    background: rgba(8, 20, 31, 0.9); color: var(--text); padding: 14px 18px;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    border-right: 2px solid var(--accent);
+}
+.legend .bar {
+    width: 190px; height: 8px; margin: 8px 0 6px 0;
+    background: linear-gradient(to right, #38a169, #ecc94b, #dd6b20, #e53e3e);
+}
+.legend .labels { display: flex; justify-content: space-between; color: var(--muted); }
+
+/* ---------- Movil ---------- */
+@media (max-width: 760px) {
+    .nav { padding: 0 20px; }
+    .nav ul { gap: 18px; }
+    .nav a.link { font-size: 10px; letter-spacing: 0.12em; }
+    .nav .brand { display: none; }
+    .hero-content { top: 18%; }
+    .objective { grid-template-columns: 1fr; gap: 12px; padding: 60px 24px 28px 24px; }
+    .objective p { font-size: 15px; }
+    .row { grid-template-columns: 1fr; gap: 12px; }
+    .panel { left: 12px; right: 12px; max-width: none; }
+}

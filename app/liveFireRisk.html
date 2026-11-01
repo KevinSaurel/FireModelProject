@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riesgo en vivo - Euskadi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav solid">
+    <a class="brand" href="/">Euskadi Fire Risk</a>
+    <ul>
+        <li><a class="link" href="/">Inicio</a></li>
+        <li><a class="link active" href="LiveFireRisk.html">Riesgo en vivo</a></li>
+        <li><a class="link" href="Info.html">Informacion</a></li>
+    </ul>
+</nav>
+
+<div class="panel">
+    <h3>Riesgo en vivo</h3>
+    <div id="status">Cargando datos en vivo...</div>
+    <div class="controls">
+        <button class="btn small" onclick="load(true)">Actualizar</button>
+        <span>
+            <input type="checkbox" id="chk-stations" checked onchange="toggleStations()">
+            <label for="chk-stations">Estaciones</label>
+        </span>
+    </div>
+</div>
+
+<div class="legend">
+    Probabilidad de incendio
+    <div class="bar"></div>
+    <div class="labels"><span>Baja</span><span>Alta</span></div>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+<script>
+    // Mismo origen cuando lo sirve FastAPI; localhost si se abre como archivo.
+    const API = location.protocol === 'file:' ? 'http://localhost:8000' : '';
+
+    const map = L.map('map').setView([43.0, -2.6], 9);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+        maxZoom: 16
+    }).addTo(map);
+
+    let heatLayer = null;
+    const stationLayer = L.layerGroup().addTo(map);
+
+    const TIERS = { EXTREME: 'Extremo', MEDIUM: 'Medio', LOW: 'Bajo' };
+
+    // Umbrales de probabilidad del modelo
+    function riskColor(p) {
+        return p >= 0.332 ? '#e53e3e' : p >= 0.157 ? '#dd6b20' : '#38a169';
+    }
+
+    async function load(refresh = false) {
+        const status = document.getElementById('status');
+        status.textContent = 'Cargando datos en vivo... (la primera carga puede tardar un minuto)';
+        try {
+            const res = await fetch(`${API}/api/v1/fire-risk/heatmap?resolution=50${refresh ? '&refresh=true' : ''}`);
+            const data = await res.json();
+            if (data.error) { status.textContent = data.error; return; }
+
+            if (heatLayer) map.removeLayer(heatLayer);
+            heatLayer = L.heatLayer(data.points.map(p => [p.lat, p.lon, p.intensity]), {
+                radius: 25, blur: 15, maxZoom: 12, max: 1.0,
+                gradient: { 0.2: 'green', 0.5: 'yellow', 0.8: 'orange', 1.0: 'red' }
+            }).addTo(map);
+
+            stationLayer.clearLayers();
+            data.stations.forEach(s => {
+                L.circleMarker([s.lat, s.lon], {
+                    radius: 5, color: '#08141f', weight: 1,
+                    fillColor: riskColor(s.probability), fillOpacity: 0.9
+                }).bindPopup(
+                    `<strong>${s.name}</strong><br/>
+                     <b>Nivel de riesgo:</b> ${TIERS[s.risk_tier] || s.risk_tier}<br/>
+                     <b>Prob. de incendio:</b> ${(s.probability * 100).toFixed(2)}%<br/>
+                     <b>Temp:</b> ${s.temperature} C | <b>Humedad:</b> ${s.humidity}%<br/>
+                     <b>Viento:</b> ${s.wind_speed} km/h | <b>Lluvia 7d:</b> ${s.rain_7d} mm<br/>
+                     <b>Dias secos:</b> ${s.dry_streak}<br/>
+                     <small>Fuente: ${s.source}</small>`
+                ).addTo(stationLayer);
+            });
+            toggleStations();
+
+            status.textContent =
+                `Datos del ${data.date}. ${data.counts.euskalmet} estaciones Euskalmet y ${data.counts.open_meteo} puntos Open-Meteo.`;
+        } catch (e) {
+            status.textContent = 'No se pudo conectar con la API. Esta uvicorn en marcha?';
+            console.error(e);
+        }
+    }
+
+    function toggleStations() {
+        const on = document.getElementById('chk-stations').checked;
+        if (on) stationLayer.addTo(map); else map.removeLayer(stationLayer);
+    }
+
+    load();
+</script>
+</body>
+</html>

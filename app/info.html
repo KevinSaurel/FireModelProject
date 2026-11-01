@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Info - Euskadi Wildfire Risk Portal</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; color: #2d3748; background: #f7fafc; line-height: 1.6; }
+        header { background: #1a202c; color: #fff; padding: 16px 24px; display: flex; gap: 16px; align-items: center; }
+        header a { color: #fbd38d; text-decoration: none; font-size: 14px; }
+        main { max-width: 760px; margin: 0 auto; padding: 24px; }
+        h1 { margin: 0; font-size: 20px; }
+        h2 { margin-top: 28px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+        code { background: #edf2f7; padding: 1px 5px; border-radius: 3px; }
+        ul { padding-left: 20px; }
+        .tier { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/">← Home</a>
+        <h1>About this portal</h1>
+        <a href="LiveFireRisk.html" style="margin-left:auto;">Live Fire Risk →</a>
+    </header>
+    <main>
+        <h2>What it shows</h2>
+        <p>A live heatmap of wildfire probability over Euskadi. Each point is scored by a Random Forest model, and the area in between is interpolated into a continuous map.</p>
+
+        <h2>Data sources</h2>
+        <ul>
+            <li><b>Euskalmet:</b> real observations from the weather stations for the target day (temperature, humidity, wind, rainfall).</li>
+            <li><b>Open-Meteo:</b> 30-day weather history at each station, plus a coarse grid covering areas more than 15 km from any station.</li>
+        </ul>
+
+        <h2>How the map is built</h2>
+        <ul>
+            <li>Weather features are computed for each station and grid point, including rolling rainfall, dry-spell length, 14-day evapotranspiration and calendar features.</li>
+            <li>The scaler and Random Forest model turn those features into a fire probability.</li>
+            <li>Inverse distance weighting (IDW) interpolates the probabilities between points onto the heatmap.</li>
+        </ul>
+
+        <h2>Risk tiers</h2>
+        <ul>
+            <li><span class="tier" style="background:#38a169"></span><b>Low:</b> probability below 15.7%</li>
+            <li><span class="tier" style="background:#dd6b20"></span><b>Medium:</b> 15.7% to 33.2%</li>
+            <li><span class="tier" style="background:#e53e3e"></span><b>Extreme:</b> 33.2% and above</li>
+        </ul>
+
+        <h2>Limitations</h2>
+        <ul>
+            <li>The data covers the previous day's daily aggregates, not the current hour.</li>
+            <li>Interpolation between points is approximate and ignores terrain.</li>
+            <li>The map extends slightly beyond Euskadi's borders because it uses a bounding box.</li>
+        </ul>
+    </main>
+</body>
+</html>
