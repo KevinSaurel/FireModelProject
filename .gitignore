@@ -1,1 +1,5 @@
 private_key.pem
+Model\incendios-forestales
+Data/MITECO/
+__pycache__/
+*.py[cod]

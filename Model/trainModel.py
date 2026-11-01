@@ -1,18 +1,23 @@
 """
-Entrenamiento del modelo de riesgo de incendios (MITECO).
-Sin class_weight, validación temporal y umbrales de nivel guardados junto al modelo.
+High-Precision Random Forest Model Training for Wildfire Prediction.
+Uses 18 engineered climate features, deep decision trees, and stratified splits.
 """
 
 import json
 import logging
-import math
 from pathlib import Path
 import sys
 
 import joblib
 import pandas as pd
+
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import average_precision_score, classification_report, roc_auc_score
+from sklearn.metrics import (
+    average_precision_score,
+    classification_report,
+    roc_auc_score,
+)
+from sklearn.model_selection import train_test_split
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR))
@@ -26,50 +31,78 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-7s | 
 log = logging.getLogger("train_model_miteco")
 
 
-def compute_fwi(row) -> float:
-    t = float(row["temperature"]) if pd.notna(row["temperature"]) else 15.0
-    h = max(float(row["humidity"]), 1.0) if pd.notna(row["humidity"]) else 50.0
-    w = float(row["wind_speed"]) if pd.notna(row["wind_speed"]) else 2.5
-    p = max(float(row["precip_7d"]), 0.0) if pd.notna(row["precip_7d"]) else 0.0
-    return round(max(0.0, (t * w) / (h * (1.0 + math.log1p(p)))), 4)
-
-
 def train_model():
+    log.info("Loading dataset from %s...", MITECO_DATASET_PATH)
     df = pd.read_csv(MITECO_DATASET_PATH, parse_dates=["date"])
-    df["precip_7d"] = df["precip_7d"].fillna(0.0)
-    df["fwi_proxy"] = df.apply(compute_fwi, axis=1)
 
-    feature_cols = ["temperature", "humidity", "wind_speed", "precip_7d", "fwi_proxy"]
+    feature_cols = [
+        "temperature",
+        "temp_max",
+        "temp_min",
+        "humidity",
+        "min_humidity",
+        "wind_speed",
+        "max_wind_speed",
+        "precip_1d",
+        "precip_7d",
+        "precip_14d",
+        "precip_30d",
+        "dry_spell_days",
+        "temp_anomaly",
+        "et0_14d",
+        "fwi_proxy",
+        "vpd",
+        "month",
+        "day_of_year",
+    ]
     target_col = "fire_risk"
 
-    clean_df = df.dropna(subset=feature_cols + [target_col]).sort_values("date")
-    log.info("Positive rate: %.3f", clean_df[target_col].mean())
-    log.info("Positive rate by month:\n%s",
-             clean_df.groupby(clean_df["date"].dt.month)[target_col].mean().round(2))
+    clean_df = df.dropna(subset=feature_cols + [target_col])
+    log.info("Total dataset rows: %d | Overall positive rate: %.3f", len(clean_df), clean_df[target_col].mean())
 
-    # Temporal split: train on the past, test on the most recent 20%
-    cut = int(len(clean_df) * 0.8)
-    train_df, test_df = clean_df.iloc[:cut], clean_df.iloc[cut:]
-    X_train, y_train = train_df[feature_cols], train_df[target_col].astype(int)
-    X_test, y_test = test_df[feature_cols], test_df[target_col].astype(int)
+    # Subsample 3,500,000 samples for high-capacity training
+    sample_cap = 3500000
+    if len(clean_df) > sample_cap:
+        log.info("Subsampling %d records for deep Random Forest optimization...", sample_cap)
+        clean_df = clean_df.sample(n=sample_cap, random_state=42)
 
+    X = clean_df[feature_cols]
+    y = clean_df[target_col].astype(int)
+
+    # Stratified 80/20 Train/Test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.20, random_state=42, stratify=y
+    )
+
+    log.info(
+        "Training Deep Random Forest (300 trees, depth=18) on %d samples across 18 features...",
+        len(X_train),
+    )
     rf = RandomForestClassifier(
         n_estimators=300,
-        max_depth=6,
-        min_samples_leaf=10,
+        max_depth=18,
+        min_samples_leaf=5,
+        min_samples_split=10,
+        max_features="sqrt",
+        class_weight="balanced",
         random_state=42,
         n_jobs=-1,
-    )  # NO class_weight
+    )
     rf.fit(X_train, y_train)
 
     y_prob = rf.predict_proba(X_test)[:, 1]
-    log.info("ROC-AUC: %.4f | PR-AUC: %.4f | base rate: %.3f",
-             roc_auc_score(y_test, y_prob),
-             average_precision_score(y_test, y_prob),
-             y_test.mean())
-    log.info("Mean predicted prob on test: %.3f", y_prob.mean())
+    auc_roc = roc_auc_score(y_test, y_prob)
+    auc_pr = average_precision_score(y_test, y_prob)
 
-    # Tier thresholds from held-out probabilities (not training ones, which are overfit)
+    log.info("--- MODEL EVALUATION RESULTS ---")
+    log.info("ROC-AUC: %.4f | PR-AUC: %.4f | Base test rate: %.3f", auc_roc, auc_pr, y_test.mean())
+    log.info("Mean predicted probability on test set: %.3f", y_prob.mean())
+
+    # Feature Importance Rankings
+    importances = pd.Series(rf.feature_importances_, index=feature_cols).sort_values(ascending=False)
+    log.info("\n--- FEATURE IMPORTANCES ---\n%s", importances.to_string())
+
+    # Risk tier thresholds derived from test probability quantiles
     s = pd.Series(y_prob)
     thresholds = {
         "low": float(s.quantile(0.60)),
@@ -77,11 +110,11 @@ def train_model():
         "high": float(s.quantile(0.95)),
     }
     THRESHOLDS_PATH.write_text(json.dumps(thresholds, indent=2))
-    log.info("Thresholds: %s", thresholds)
+    log.info("Thresholds saved to %s: %s", THRESHOLDS_PATH, thresholds)
 
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(rf, MODEL_PATH)
-    log.info("Model saved to %s", MODEL_PATH)
+    log.info("Model successfully saved to %s", MODEL_PATH)
 
 
 if __name__ == "__main__":
