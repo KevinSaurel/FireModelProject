@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Detalle del punto - Euskadi Fire Risk</title>
+    <title>Point Details - Euskadi Fire Risk</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
     <link rel="stylesheet" href="style.css">
@@ -32,10 +32,10 @@
     <nav class="nav">
         <a class="brand" href="/">Euskadi Fire Risk</a>
         <ul>
-            <li><a class="link" href="/">Inicio</a></li>
-            <li><a class="link" href="LiveFireRisk.html">Riesgo en vivo</a></li>
-            <li><a class="link" href="LiveFireRisk.html?mode=forecast">Riesgo futuro</a></li>
-            <li><a class="link" href="Info.html">Informacion</a></li>
+            <li><a class="link" href="/">Home</a></li>
+            <li><a class="link" href="LiveFireRisk.html">Live Risk</a></li>
+            <li><a class="link" href="LiveFireRisk.html?mode=forecast">Forecast Risk</a></li>
+            <li><a class="link" href="Info.html">Information</a></li>
         </ul>
     </nav>
 
@@ -47,12 +47,12 @@
             <path fill="#1d3a58" d="M0,280 L150,220 L300,270 L480,190 L660,280 L820,230 L1000,290 L1180,210 L1440,280 L1440,400 L0,400 Z"/>
             <path fill="#08141f" d="M0,330 L200,290 L400,330 L620,280 L840,335 L1060,295 L1260,335 L1440,300 L1440,400 L0,400 Z"/>
         </svg>
-        <h1 id="page-title">Detalle del punto</h1>
+        <h1 id="page-title">Point Details</h1>
     </section>
 
     <main class="page-body">
         <div class="inner" id="content">
-            <p class="txt">Cargando detalle...</p>
+            <p class="txt">Loading details...</p>
         </div>
     </main>
 
@@ -63,7 +63,7 @@
     const MODE = new URLSearchParams(location.search).get('mode') === 'forecast' ? 'forecast' : 'live';
     const FORECAST = MODE === 'forecast';
     const BACK_URL = FORECAST ? 'LiveFireRisk.html?mode=forecast' : 'LiveFireRisk.html';
-    if (FORECAST) document.getElementById('page-title').textContent = 'Detalle de la prevision';
+    if (FORECAST) document.getElementById('page-title').textContent = 'Forecast Details';
 
     // Limites de la malla del backend (deben coincidir con EUSKADI_BOUNDS en main.py)
     const EUSKADI_BOUNDS = { lat_min: 42.47, lat_max: 43.45, lon_min: -3.45, lon_max: -1.73 };
@@ -71,31 +71,31 @@
 
     // Umbrales de probabilidad del modelo (tier_thresholds.json)
     const TIERS = [
-        { key: 'LOW',     label: 'Bajo',    color: '#38a169', lo: 0,      hi: 0.2569 },
-        { key: 'MEDIUM',  label: 'Medio',   color: '#ecc94b', lo: 0.2569, hi: 0.5016 },
-        { key: 'HIGH',    label: 'Alto',    color: '#dd6b20', lo: 0.5016, hi: 0.7505 },
-        { key: 'EXTREME', label: 'Extremo', color: '#e53e3e', lo: 0.7505, hi: 1 },
+        { key: 'LOW',     label: 'Low',      color: '#38a169', lo: 0,      hi: 0.2569 },
+        { key: 'MEDIUM',  label: 'Medium',   color: '#ecc94b', lo: 0.2569, hi: 0.5016 },
+        { key: 'HIGH',    label: 'High',     color: '#dd6b20', lo: 0.5016, hi: 0.7505 },
+        { key: 'EXTREME', label: 'Extreme',  color: '#e53e3e', lo: 0.7505, hi: 1 },
     ];
     const tierOf = p => TIERS.slice().reverse().find(t => p >= t.lo) || TIERS[0];
 
     const FEATURES = {
-        temperature:    ['Temperatura media', 'C'],
-        humidity:       ['Humedad media', '%'],
-        min_humidity:   ['Humedad minima', '%'],
-        wind_speed:     ['Viento medio', 'km/h'],
-        max_wind_speed: ['Viento maximo', 'km/h'],
-        precip_1d:      ['Lluvia del dia', 'mm'],
-        precip_7d:      ['Lluvia acumulada 7 dias', 'mm'],
-        precip_14d:     ['Lluvia acumulada 14 dias', 'mm'],
-        precip_30d:     ['Lluvia acumulada 30 dias', 'mm'],
-        dry_spell_days: ['Dias secos consecutivos', 'dias'],
-        et0_14d:        ['Evapotranspiracion 14 dias', 'mm'],
-        month:          ['Mes', ''],
-        day_of_year:    ['Dia del anio', ''],
+        temperature:    ['Mean temperature', '°C'],
+        humidity:       ['Mean humidity', '%'],
+        min_humidity:   ['Minimum humidity', '%'],
+        wind_speed:     ['Mean wind speed', 'km/h'],
+        max_wind_speed: ['Maximum wind speed', 'km/h'],
+        precip_1d:      ['Daily rainfall', 'mm'],
+        precip_7d:      ['Rainfall over 7 days', 'mm'],
+        precip_14d:     ['Rainfall over 14 days', 'mm'],
+        precip_30d:     ['Rainfall over 30 days', 'mm'],
+        dry_spell_days: ['Consecutive dry days', 'days'],
+        et0_14d:        ['Evapotranspiration over 14 days', 'mm'],
+        month:          ['Month', ''],
+        day_of_year:    ['Day of year', ''],
     };
 
-    const pct = (x, d = 1) => (x * 100).toFixed(d).replace('.', ',') + ' %';
-    const num = (x, d = 1) => Number(x).toFixed(d).replace('.', ',');
+    const pct = (x, d = 1) => (x * 100).toFixed(d) + '%';
+    const num = (x, d = 1) => Number(x).toFixed(d);
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     const params = new URLSearchParams(location.search);
@@ -132,11 +132,11 @@
 
     const isStation = s => !!s.name;
     const sourceName = s => isStation(s)
-        ? (FORECAST ? `Prevision en ${s.name}` : `Estacion ${s.name}`)
-        : `Open-Meteo (punto de malla ${num(s.lat, 2)}, ${num(s.lon, 2)})`;
+        ? (FORECAST ? `Forecast for ${s.name}` : `Station ${s.name}`)
+        : `Open-Meteo (grid point ${num(s.lat, 2)}, ${num(s.lon, 2)})`;
     const sourceKind = s => FORECAST
-        ? 'Open-Meteo (prevision)'
-        : (isStation(s) ? 'Euskalmet + historico Open-Meteo' : 'Open-Meteo');
+        ? 'Open-Meteo (forecast)'
+        : (isStation(s) ? 'Euskalmet + Open-Meteo history' : 'Open-Meteo');
 
     function row(title, html) {
         return `<div class="row"><h2>${title}</h2><div>${html}</div></div>`;
@@ -154,31 +154,31 @@
         imps.forEach(i => { impMap[i.feature] = i.importance; maxImp = Math.max(maxImp, i.importance); });
 
         // 1. Resultado
-        let html = row('Resultado', `
+        let html = row('Result', `
             <div class="result">
                 <div class="swatch" style="background:${t.color}"></div>
                 <div>
                     <div class="tier">${t.label}</div>
-                    <div class="prob">Probabilidad de incendio: ${pct(p, 2)}</div>
+                    <div class="prob">Wildfire probability: ${pct(p, 2)}</div>
                 </div>
             </div>
-            <p class="note">Coordenadas: ${num(lat, 4)}, ${num(lon, 4)}${d.date ? (FORECAST ? ' &middot; Prevision para el ' : ' &middot; Datos del ') + esc(d.date) : ''}<br/>
-            Fuente principal: ${esc(sourceName(main.s))} (${num(main.km)} km)</p>
-            <a class="btn small back" href="${BACK_URL}">Volver al mapa</a>`);
+            <p class="note">Coordinates: ${num(lat, 4)}, ${num(lon, 4)}${d.date ? (FORECAST ? ' &middot; Forecast for ' : ' &middot; Data for ') + esc(d.date) : ''}<br/>
+            Main source: ${esc(sourceName(main.s))} (${num(main.km)} km)</p>
+            <a class="btn small back" href="${BACK_URL}">Back to map</a>`);
 
         // 2. Por que este color
-        html += row('Por que este color', `
-            <p class="txt">El color depende solo de la probabilidad que calcula el modelo. Aqui es
-                <b>${pct(p, 2)}</b>, que cae en el nivel <b>${t.label}</b> (${pct(t.lo)} a ${pct(t.hi)}), y por eso
-                se pinta de ese color.</p>
-            <p class="txt">No hay un sensor en cada punto del mapa. Este valor sale de los puntos de medicion mas
-                cercanos (tabla siguiente), dando mas peso a los mas proximos. El que mas influye es
-                <b>${esc(sourceName(main.s))}</b>, con el ${num(main.pct)} % del peso.</p>`);
+        html += row('Why this color?', `
+            <p class="txt">The color depends only on the probability calculated by the model. Here, it is
+                <b>${pct(p, 2)}</b>, which falls in the <b>${t.label}</b> tier (${pct(t.lo)} to ${pct(t.hi)}), so
+                the map uses that color.</p>
+            <p class="txt">There is no sensor at every point on the map. This value is estimated from the nearest
+                measurement points (shown below), with closer points given more weight. The largest influence comes from
+                <b>${esc(sourceName(main.s))}</b>, with ${num(main.pct)}% of the weight.</p>`);
 
         // 3. Fuente de la informacion
-        html += row('Fuente de la informacion', `
+        html += row('Data sources', `
             <table class="t">
-                <tr><th>Punto</th><th>Fuente</th><th>Distancia</th><th>Peso</th><th>Probabilidad</th></tr>
+                <tr><th>Point</th><th>Source</th><th>Distance</th><th>Weight</th><th>Probability</th></tr>
                 ${near.map(x => {
                     const ct = tierOf(x.s.probability);
                     return `<tr>
@@ -191,20 +191,19 @@
                 }).join('')}
             </table>
             <p class="note">${FORECAST
-                ? `Nadie ha medido todavia el dia de manana, asi que todos los puntos usan la prevision de Open-Meteo para
-                   el ${esc(d.date)} junto con los 29 dias anteriores. Los puntos con nombre son las ubicaciones de las
-                   estaciones de Euskalmet, pero sus valores son prevision, no medidas. Una prevision puede cambiar, asi
-                   que el resultado es una estimacion.`
-                : `Las estaciones de Euskalmet aportan las medidas reales del dia (temperatura, humedad, viento y
-                   lluvia) y Open-Meteo completa el historico de 30 dias. Los puntos de malla usan solo datos de
-                   Open-Meteo y cubren las zonas a mas de 12 km de cualquier estacion.`}</p>`);
+                ? `Tomorrow's conditions have not yet been measured, so all points use the Open-Meteo forecast for
+                   ${esc(d.date)} along with the previous 29 days. Named points show Euskalmet station locations, but
+                   their values are forecasts, not observations. Forecasts can change, so this result is an estimate.`
+                : `Euskalmet stations provide actual daily measurements (temperature, humidity, wind, and rainfall),
+                   while Open-Meteo supplies the rest of the 30-day history. Grid points use Open-Meteo data only and
+                   cover areas more than 12 km from any station.`}</p>`);
 
         // 4. Condiciones del punto principal
         const feats = main.s.features || {};
         const keys = Object.keys(feats);
-        html += row('Condiciones en la fuente principal', `
+        html += row('Conditions at the main source', `
             <table class="t">
-                <tr><th>Variable</th><th>Valor</th><th>Importancia en el modelo</th></tr>
+                <tr><th>Variable</th><th>Value</th><th>Model importance</th></tr>
                 ${keys.map(k => {
                     const [label, unit] = FEATURES[k] || [k, ''];
                     const imp = impMap[k];
@@ -216,14 +215,14 @@
                     </tr>`;
                 }).join('')}
             </table>
-            <p class="note">Valores ${FORECAST ? 'previstos' : ''} de ${esc(sourceName(main.s))}. La importancia es global: indica cuanto usa el modelo
-            cada variable en general, no cuanto pesa en este lugar concreto.</p>`);
+            <p class="note">${FORECAST ? 'Forecast values' : 'Values'} from ${esc(sourceName(main.s))}. Importance is global: it indicates how much the model
+            uses each variable overall, not how much it contributes at this specific location.</p>`);
 
         // 5. Escala
-        html += row('Escala de niveles', `
+        html += row('Risk scale', `
             <ul class="scale" style="list-style:none; padding:0; margin:0;">
                 ${TIERS.map(x => `<li class="${x.key === t.key ? 'current' : ''}" style="margin-bottom:8px; font-weight:300;">
-                    <span class="dot" style="background:${x.color}"></span>${x.label}: ${pct(x.lo)} a ${pct(x.hi)}${x.key === t.key ? ' (este punto)' : ''}
+                    <span class="dot" style="background:${x.color}"></span>${x.label}: ${pct(x.lo)} to ${pct(x.hi)}${x.key === t.key ? ' (this point)' : ''}
                 </li>`).join('')}
             </ul>`);
 
@@ -232,7 +231,7 @@
 
     async function init() {
         if (isNaN(lat) || isNaN(lon)) {
-            content.innerHTML = `<p class="txt">Falta el punto. Vuelve al mapa y pulsa sobre una zona.</p><a class="btn small" href="${BACK_URL}">Ir al mapa</a>`;
+            content.innerHTML = `<p class="txt">No location was provided. Go back to the map and click an area.</p><a class="btn small" href="${BACK_URL}">Go to map</a>`;
             return;
         }
         try {
@@ -241,12 +240,12 @@
             const d = await res.json();
             if (d.error) { content.innerHTML = `<p class="txt">${esc(d.error)}</p>`; return; }
             if (!d.samples || !d.samples.length) {
-                content.innerHTML = '<p class="txt">El servidor aun no envia el detalle de los puntos. Hay que anadir "samples" e "importances" a la respuesta del heatmap en main.py.</p>';
+                content.innerHTML = '<p class="txt">The server is not providing point details yet. Add "samples" and "importances" to the heatmap response in main.py.</p>';
                 return;
             }
             render(d);
         } catch (e) {
-            content.innerHTML = '<p class="txt">No se pudo conectar con la API. Esta uvicorn en marcha?</p>';
+            content.innerHTML = '<p class="txt">Could not connect to the API. Is Uvicorn running?</p>';
             console.error(e);
         }
     }
