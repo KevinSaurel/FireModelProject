@@ -34,6 +34,7 @@
         <ul>
             <li><a class="link" href="/">Inicio</a></li>
             <li><a class="link" href="LiveFireRisk.html">Riesgo en vivo</a></li>
+            <li><a class="link" href="LiveFireRisk.html?mode=forecast">Riesgo futuro</a></li>
             <li><a class="link" href="Info.html">Informacion</a></li>
         </ul>
     </nav>
@@ -46,7 +47,7 @@
             <path fill="#1d3a58" d="M0,280 L150,220 L300,270 L480,190 L660,280 L820,230 L1000,290 L1180,210 L1440,280 L1440,400 L0,400 Z"/>
             <path fill="#08141f" d="M0,330 L200,290 L400,330 L620,280 L840,335 L1060,295 L1260,335 L1440,300 L1440,400 L0,400 Z"/>
         </svg>
-        <h1>Detalle del punto</h1>
+        <h1 id="page-title">Detalle del punto</h1>
     </section>
 
     <main class="page-body">
@@ -57,6 +58,12 @@
 
 <script>
     const API = location.protocol === 'file:' ? 'http://localhost:8000' : '';
+
+    // Misma pagina para los dos modos: ?mode=forecast muestra el detalle de la prevision de manana.
+    const MODE = new URLSearchParams(location.search).get('mode') === 'forecast' ? 'forecast' : 'live';
+    const FORECAST = MODE === 'forecast';
+    const BACK_URL = FORECAST ? 'LiveFireRisk.html?mode=forecast' : 'LiveFireRisk.html';
+    if (FORECAST) document.getElementById('page-title').textContent = 'Detalle de la prevision';
 
     // Limites de la malla del backend (deben coincidir con EUSKADI_BOUNDS en main.py)
     const EUSKADI_BOUNDS = { lat_min: 42.47, lat_max: 43.45, lon_min: -3.45, lon_max: -1.73 };
@@ -124,8 +131,12 @@
     }
 
     const isStation = s => !!s.name;
-    const sourceName = s => isStation(s) ? `Estacion ${s.name}` : `Open-Meteo (punto de malla ${num(s.lat, 2)}, ${num(s.lon, 2)})`;
-    const sourceKind = s => isStation(s) ? 'Euskalmet + historico Open-Meteo' : 'Open-Meteo';
+    const sourceName = s => isStation(s)
+        ? (FORECAST ? `Prevision en ${s.name}` : `Estacion ${s.name}`)
+        : `Open-Meteo (punto de malla ${num(s.lat, 2)}, ${num(s.lon, 2)})`;
+    const sourceKind = s => FORECAST
+        ? 'Open-Meteo (prevision)'
+        : (isStation(s) ? 'Euskalmet + historico Open-Meteo' : 'Open-Meteo');
 
     function row(title, html) {
         return `<div class="row"><h2>${title}</h2><div>${html}</div></div>`;
@@ -151,9 +162,9 @@
                     <div class="prob">Probabilidad de incendio: ${pct(p, 2)}</div>
                 </div>
             </div>
-            <p class="note">Coordenadas: ${num(lat, 4)}, ${num(lon, 4)}${d.date ? ' &middot; Datos del ' + esc(d.date) : ''}<br/>
+            <p class="note">Coordenadas: ${num(lat, 4)}, ${num(lon, 4)}${d.date ? (FORECAST ? ' &middot; Prevision para el ' : ' &middot; Datos del ') + esc(d.date) : ''}<br/>
             Fuente principal: ${esc(sourceName(main.s))} (${num(main.km)} km)</p>
-            <a class="btn small back" href="LiveFireRisk.html">Volver al mapa</a>`);
+            <a class="btn small back" href="${BACK_URL}">Volver al mapa</a>`);
 
         // 2. Por que este color
         html += row('Por que este color', `
@@ -179,9 +190,14 @@
                     </tr>`;
                 }).join('')}
             </table>
-            <p class="note">Las estaciones de Euskalmet aportan las medidas reales del dia (temperatura, humedad, viento y
-            lluvia) y Open-Meteo completa el historico de 30 dias. Los puntos de malla usan solo datos de Open-Meteo y
-            cubren las zonas a mas de 15 km de cualquier estacion.</p>`);
+            <p class="note">${FORECAST
+                ? `Nadie ha medido todavia el dia de manana, asi que todos los puntos usan la prevision de Open-Meteo para
+                   el ${esc(d.date)} junto con los 29 dias anteriores. Los puntos con nombre son las ubicaciones de las
+                   estaciones de Euskalmet, pero sus valores son prevision, no medidas. Una prevision puede cambiar, asi
+                   que el resultado es una estimacion.`
+                : `Las estaciones de Euskalmet aportan las medidas reales del dia (temperatura, humedad, viento y
+                   lluvia) y Open-Meteo completa el historico de 30 dias. Los puntos de malla usan solo datos de
+                   Open-Meteo y cubren las zonas a mas de 12 km de cualquier estacion.`}</p>`);
 
         // 4. Condiciones del punto principal
         const feats = main.s.features || {};
@@ -200,7 +216,7 @@
                     </tr>`;
                 }).join('')}
             </table>
-            <p class="note">Valores de ${esc(sourceName(main.s))}. La importancia es global: indica cuanto usa el modelo
+            <p class="note">Valores ${FORECAST ? 'previstos' : ''} de ${esc(sourceName(main.s))}. La importancia es global: indica cuanto usa el modelo
             cada variable en general, no cuanto pesa en este lugar concreto.</p>`);
 
         // 5. Escala
@@ -216,12 +232,12 @@
 
     async function init() {
         if (isNaN(lat) || isNaN(lon)) {
-            content.innerHTML = '<p class="txt">Falta el punto. Vuelve al mapa y pulsa sobre una zona.</p><a class="btn small" href="LiveFireRisk.html">Ir al mapa</a>';
+            content.innerHTML = `<p class="txt">Falta el punto. Vuelve al mapa y pulsa sobre una zona.</p><a class="btn small" href="${BACK_URL}">Ir al mapa</a>`;
             return;
         }
         try {
             // Mismos datos (y misma cache del servidor) que usa el mapa
-            const res = await fetch(`${API}/api/v1/fire-risk/heatmap?resolution=50`);
+            const res = await fetch(`${API}/api/v1/fire-risk/heatmap?resolution=50&mode=${MODE}`);
             const d = await res.json();
             if (d.error) { content.innerHTML = `<p class="txt">${esc(d.error)}</p>`; return; }
             if (!d.samples || !d.samples.length) {

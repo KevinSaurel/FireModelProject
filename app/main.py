@@ -32,6 +32,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi import HTTPException
 
 APP_DIR = Path(__file__).resolve().parent
 ROOT_DIR = APP_DIR.parent
@@ -58,6 +59,7 @@ OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 EUSKADI_BOUNDS = {"lat_min": 42.47, "lat_max": 43.45, "lon_min": -3.45, "lon_max": -1.73}
 
 CACHE_TTL = 3600           # seconds
+FORECAST_DAYS_AHEAD = 1    # "forecast" mode predicts this many days after today (1 = tomorrow)
 HISTORY_DAYS = 30          # window ending on the target day
 GRID_LAT_POINTS = 9        # Open-Meteo base grid: 9 x 12 = 108 points
 GRID_LON_POINTS = 12
@@ -65,22 +67,23 @@ STATION_RADIUS_KM = 12.0   # grid points closer than this to a station are dropp
 DRY_THRESHOLD_MM = 0.1     # a day counts as "dry" below this rainfall
 IDW_POWER = 2.0
 PROB_CAP = 0.4             # probability mapped to heat intensity 1.0
-TIER_EXTREME = 0.332
-TIER_MEDIUM = 0.157
+# Probability thresholds (Model/tier_thresholds.json)
+TIER_MEDIUM = 0.2569
+TIER_HIGH = 0.5016
+TIER_EXTREME = 0.7505
 
 @app.get("/style.css")
 def style():
     return FileResponse(APP_DIR / "style.css", media_type="text/css")
 
 
-@app.get("/Info.html")
-def info():
-    return FileResponse(APP_DIR / "info.html")
-
-
-@app.get("/LiveFireRisk.html")
-def live_fire_risk():
-    return FileResponse(APP_DIR / "liveFireRisk.html")
+# Serves Info.html, LiveFireRisk.html, Detail.html... whatever the capitalisation
+@app.get("/{page}.html")
+def html_page(page: str):
+    for f in APP_DIR.glob("*.html"):
+        if f.stem.lower() == page.lower():
+            return FileResponse(f)
+    raise HTTPException(status_code=404, detail="Page not found")
 
 
 # Fallback column order, only used if the pickles carry no feature_names_in_.
@@ -104,8 +107,10 @@ OM_MAP = {
 }
 OM_DAILY = list(OM_MAP.values()) + ["precipitation_sum", "et0_fao_evapotranspiration"]
 
-_cache: dict = {"ts": 0.0, "payload": None}
+# One cache entry per mode: {"live": {"ts": ..., "payload": ...}, "forecast": {...}}
+_cache: dict = {}
 _lock = threading.Lock()
+_station_points_cache: list = []
 
 
 # ---------------------------------------------------------------------------
@@ -154,7 +159,13 @@ def predict_probabilities(feature_rows: list[dict]) -> np.ndarray:
 
 
 def risk_tier(p: float) -> str:
-    return "EXTREME" if p >= TIER_EXTREME else "MEDIUM" if p >= TIER_MEDIUM else "LOW"
+    if p >= TIER_EXTREME:
+        return "EXTREME"
+    if p >= TIER_HIGH:
+        return "HIGH"
+    if p >= TIER_MEDIUM:
+        return "MEDIUM"
+    return "LOW"
 
 
 # ---------------------------------------------------------------------------
@@ -426,13 +437,50 @@ def idw_grid(samples: list[dict], resolution: int) -> list[dict]:
     ]
 
 
-def build_payload(resolution: int) -> dict:
-    day = datetime.date.today() - datetime.timedelta(days=1)
-    started = time.perf_counter()
-    log.info("Building fire-risk heatmap: date=%s resolution=%d", day.isoformat(), resolution)
+def fetch_station_points() -> list[dict]:
+    """Station names and coordinates only (no observations). Used by forecast mode,
+    where there are no Euskalmet readings for tomorrow, only the locations."""
+    global _station_points_cache
+    if _station_points_cache:
+        return _station_points_cache
+    try:
+        client = EuskalmetClient()
+        stations = load_station_catalog(client)
+    except Exception:
+        log.exception("Euskalmet station catalog failed")
+        return []
+    out = []
+    for st in stations:
+        if st.get("lat") is None or st.get("lon") is None:
+            continue
+        out.append({
+            "name": " ".join(str(st.get("name") or st.get("municipality") or st["stationId"]).split()),
+            "lat": float(st["lat"]),
+            "lon": float(st["lon"]),
+        })
+    log.info("Station locations loaded for forecast mode: %d", len(out))
+    if out:
+        _station_points_cache = out
+    return out
 
-    observations = fetch_euskalmet_observations(day)
-    log.info("Heatmap input: Euskalmet observations=%d", len(observations))
+
+def build_payload(resolution: int, mode: str = "live") -> dict:
+    """mode="live": yesterday's real observations (Euskalmet) + Open-Meteo.
+    mode="forecast": Open-Meteo forecast for tomorrow at every point, stations included."""
+    today = datetime.date.today()
+    if mode == "forecast":
+        day = today + datetime.timedelta(days=FORECAST_DAYS_AHEAD)
+    else:
+        day = today - datetime.timedelta(days=1)
+    started = time.perf_counter()
+    log.info("Building fire-risk heatmap: mode=%s date=%s resolution=%d", mode, day.isoformat(), resolution)
+
+    if mode == "forecast":
+        observations = fetch_station_points()
+        log.info("Heatmap input: station locations=%d (forecast mode)", len(observations))
+    else:
+        observations = fetch_euskalmet_observations(day)
+        log.info("Heatmap input: Euskalmet observations=%d", len(observations))
 
     grid = build_base_grid()
     initial_grid_size = len(grid)
@@ -464,16 +512,23 @@ def build_payload(resolution: int) -> dict:
             missing_history += 1
             continue
         is_station = k < n_obs
-        obs = observations[k] if is_station else None
+        station = observations[k] if is_station else None
+        # Live: the station's real readings override Open-Meteo for the target day.
+        # Forecast: nobody has measured tomorrow yet, so everything comes from Open-Meteo.
+        obs = station if mode == "live" else None
         feats = make_features(daily, obs, day)
         if feats is None:
             missing_features += 1
             continue
+        if mode == "forecast":
+            source = "Open-Meteo (prevision)"
+        else:
+            source = "Euskalmet + Open-Meteo history" if is_station else "Open-Meteo"
         samples.append({
-            "name": obs["name"] if obs else None,
+            "name": station["name"] if station else None,
             "lat": lat,
             "lon": lon,
-            "source": "Euskalmet + Open-Meteo history" if is_station else "Open-Meteo",
+            "source": source,
             "features": feats,
         })
 
@@ -509,7 +564,19 @@ def build_payload(resolution: int) -> dict:
         for s in samples if s["name"]
     ]
 
+    # Per-point details for the detail page (every point that feeds the map)
+    names = feature_names()
+    fi = getattr(model, "feature_importances_", None)
+    importances = (
+        sorted(
+            ({"feature": n, "importance": round(float(v), 4)} for n, v in zip(names, fi)),
+            key=lambda x: -x["importance"],
+        )
+        if fi is not None and len(fi) == len(names) else []
+    )
+
     payload = {
+        "mode": mode,
         "date": day.isoformat(),
         "generated_at": datetime.datetime.now().isoformat(timespec="seconds"),
         "grid_size": resolution,
@@ -520,6 +587,15 @@ def build_payload(resolution: int) -> dict:
         },
         "points": idw_grid(samples, resolution),
         "stations": stations,
+        "samples": [
+            {
+                "name": s["name"], "lat": s["lat"], "lon": s["lon"],
+                "source": s["source"], "probability": s["probability"],
+                "features": {n: round(float(s["features"][n]), 2) for n in names if n in s["features"]},
+            }
+            for s in samples
+        ],
+        "importances": importances,
     }
     log.info(
         "Heatmap build complete: points=%d stations=%d euskalmet=%d open_meteo=%d elapsed=%.2fs",
@@ -536,27 +612,29 @@ def build_payload(resolution: int) -> dict:
 def get_heatmap(
     resolution: int = Query(45, ge=10, le=120, description="Grid resolution"),
     refresh: bool = Query(False, description="Ignore the cache"),
+    mode: str = Query("live", pattern="^(live|forecast)$", description="live = yesterday's data, forecast = tomorrow"),
 ):
     request_started = time.perf_counter()
-    log.info("API request received: endpoint=/api/v1/fire-risk/heatmap resolution=%d refresh=%s",
-             resolution, refresh)
+    log.info("API request received: endpoint=/api/v1/fire-risk/heatmap mode=%s resolution=%d refresh=%s",
+             mode, resolution, refresh)
     with _lock:
-        cached = _cache["payload"]
-        fresh = (time.time() - _cache["ts"]) < CACHE_TTL
+        entry = _cache.get(mode) or {"ts": 0.0, "payload": None}
+        cached = entry["payload"]
+        fresh = (time.time() - entry["ts"]) < CACHE_TTL
         if not refresh and fresh and cached and cached.get("grid_size") == resolution:
             log.info(
-                "Serving cached heatmap: resolution=%d cache_age=%.2fs",
-                resolution, time.time() - _cache["ts"],
+                "Serving cached heatmap: mode=%s resolution=%d cache_age=%.2fs",
+                mode, resolution, time.time() - entry["ts"],
             )
             return cached
 
         log.info(
-            "Building heatmap: cache_status=%s refresh=%s cached_resolution=%s requested_resolution=%d",
-            "fresh_but_resolution_mismatch" if fresh and cached else "expired_or_missing",
+            "Building heatmap: mode=%s cache_status=%s refresh=%s cached_resolution=%s requested_resolution=%d",
+            mode, "fresh_but_resolution_mismatch" if fresh and cached else "expired_or_missing",
             refresh, cached.get("grid_size") if cached else None, resolution,
         )
         try:
-            payload = build_payload(resolution)
+            payload = build_payload(resolution, mode)
         except Exception as exc:
             log.exception("Heatmap build failed")
             payload = {"error": str(exc)}
@@ -574,12 +652,11 @@ def get_heatmap(
                 time.perf_counter() - request_started, payload["error"],
             )
             return payload
-        _cache["ts"] = time.time()
-        _cache["payload"] = payload
+        _cache[mode] = {"ts": time.time(), "payload": payload}
         log.info(
-            "API request complete: endpoint=/api/v1/fire-risk/heatmap status=success "
+            "API request complete: endpoint=/api/v1/fire-risk/heatmap mode=%s status=success "
             "points=%d stations=%d elapsed=%.2fs",
-            len(payload["points"]), len(payload["stations"]), time.perf_counter() - request_started,
+            mode, len(payload["points"]), len(payload["stations"]), time.perf_counter() - request_started,
         )
         return payload
 

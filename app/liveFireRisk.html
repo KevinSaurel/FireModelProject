@@ -27,13 +27,14 @@
     <a class="brand" href="/">Euskadi Fire Risk</a>
     <ul>
         <li><a class="link" href="/">Inicio</a></li>
-        <li><a class="link active" href="LiveFireRisk.html">Riesgo en vivo</a></li>
+        <li><a class="link active" id="nav-live" href="LiveFireRisk.html">Riesgo en vivo</a></li>
+        <li><a class="link" id="nav-forecast" href="LiveFireRisk.html?mode=forecast">Riesgo futuro</a></li>
         <li><a class="link" href="Info.html">Informacion</a></li>
     </ul>
 </nav>
 
 <div class="panel">
-    <h3>Riesgo en vivo</h3>
+    <h3 id="panel-title">Riesgo en vivo</h3>
     <div id="status">Cargando datos en vivo...</div>
     <div class="controls">
         <button class="btn small" onclick="load(true)">Actualizar</button>
@@ -61,6 +62,15 @@
 <script>
     // Mismo origen cuando lo sirve FastAPI; localhost si se abre como archivo.
     const API = location.protocol === 'file:' ? 'http://localhost:8000' : '';
+
+    // Misma pagina para los dos modos: ?mode=forecast usa la prevision de manana.
+    const MODE = new URLSearchParams(location.search).get('mode') === 'forecast' ? 'forecast' : 'live';
+    if (MODE === 'forecast') {
+        document.title = 'Riesgo futuro - Euskadi';
+        document.getElementById('panel-title').textContent = 'Riesgo futuro';
+        document.getElementById('nav-live').classList.remove('active');
+        document.getElementById('nav-forecast').classList.add('active');
+    }
 
     // Limites de la malla del backend (deben coincidir con EUSKADI_BOUNDS en main.py)
     const EUSKADI_BOUNDS = { lat_min: 42.47, lat_max: 43.45, lon_min: -3.45, lon_max: -1.73 };
@@ -116,7 +126,8 @@
     }
 
     function sourceName(s) {
-        return s.name ? `Estacion ${s.name}` : 'Open-Meteo (punto de malla)';
+        if (s.name) return MODE === 'forecast' ? `Prevision en ${s.name}` : `Estacion ${s.name}`;
+        return 'Open-Meteo (punto de malla)';
     }
 
     const map = L.map('map').setView([43.0, -2.6], 9);
@@ -140,7 +151,7 @@
             <span class="popup-tier" style="background:${riskColor(p)}"></span>${TIER_LABELS[tierOf(p)]}
             &middot; ${(p * 100).toFixed(2)}%<br/>
             ${extra}
-            <a class="popup-btn" href="Detail.html?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}">Ver detalle</a>`;
+            <a class="popup-btn" href="Detail.html?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&mode=${MODE}">Ver detalle</a>`;
     }
 
     // Clic en cualquier punto del mapa: popup con el valor, la fuente principal y "Ver detalle".
@@ -195,7 +206,7 @@
         const status = document.getElementById('status');
         status.textContent = 'Cargando datos en vivo... (la primera carga puede tardar un minuto)';
         try {
-            const res = await fetch(`${API}/api/v1/fire-risk/heatmap?resolution=50${refresh ? '&refresh=true' : ''}`);
+            const res = await fetch(`${API}/api/v1/fire-risk/heatmap?resolution=50&mode=${MODE}${refresh ? '&refresh=true' : ''}`);
             const data = await res.json();
             if (data.error) { status.textContent = data.error; return; }
             lastData = data;
@@ -221,8 +232,9 @@
             });
             toggleStations();
 
-            status.textContent =
-                `Datos del ${data.date}. ${data.counts.euskalmet} estaciones Euskalmet y ${data.counts.open_meteo} puntos Open-Meteo.`;
+            status.textContent = MODE === 'forecast'
+                ? `Prevision para el ${data.date}. ${data.counts.euskalmet} zonas de estaciones y ${data.counts.open_meteo} puntos de malla, todos con prevision de Open-Meteo.`
+                : `Datos del ${data.date}. ${data.counts.euskalmet} estaciones Euskalmet y ${data.counts.open_meteo} puntos Open-Meteo.`;
         } catch (e) {
             status.textContent = 'No se pudo conectar con la API. Esta uvicorn en marcha?';
             console.error(e);
