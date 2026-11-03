@@ -66,6 +66,7 @@ a { color: inherit; }
 .btn:hover { background: #fff; color: var(--ink); }
 .btn.solid { background: var(--accent); border-color: var(--accent); color: #1a1209; }
 .btn.solid:hover { background: #fff; border-color: #fff; }
+.hero-content .btn.solid:hover { background: transparent; border-color: var(--accent); color: #fff; }
 .btn.small { padding: 9px 18px; font-size: 11px; }
 
 /* ---------- Cielo y montanas ---------- */
@@ -294,7 +295,11 @@ progress.bar::-moz-progress-bar { background: var(--accent); }
 }
 .legend .bar {
     width: 190px; height: 8px; margin: 8px 0 6px 0;
-    background: linear-gradient(to right, #38a169, #ecc94b, #dd6b20, #e53e3e);
+    background: linear-gradient(to right,
+        #38a169 0%, #38a169 35%,
+        #ecc94b 35%, #ecc94b 50%,
+        #dd6b20 50%, #dd6b20 70%,
+        #e53e3e 70%, #e53e3e 100%);
 }
 .legend .labels { display: flex; justify-content: space-between; color: var(--muted); }
 .legend .tiers div { margin-top: 7px; letter-spacing: 0.06em; text-transform: none; font-size: 12px; }

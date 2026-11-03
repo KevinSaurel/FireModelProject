@@ -71,10 +71,10 @@
 
     // Umbrales de probabilidad del modelo (tier_thresholds.json)
     const TIERS = [
-        { key: 'LOW',     label: 'Low',      color: '#38a169', lo: 0,      hi: 0.2569 },
-        { key: 'MEDIUM',  label: 'Medium',   color: '#ecc94b', lo: 0.2569, hi: 0.5016 },
-        { key: 'HIGH',    label: 'High',     color: '#dd6b20', lo: 0.5016, hi: 0.7505 },
-        { key: 'EXTREME', label: 'Extreme',  color: '#e53e3e', lo: 0.7505, hi: 1 },
+        { key: 'LOW',     label: 'Low',      color: '#38a169', lo: 0,    hi: 0.35 },
+        { key: 'MEDIUM',  label: 'Medium',   color: '#ecc94b', lo: 0.35, hi: 0.50 },
+        { key: 'HIGH',    label: 'High',     color: '#dd6b20', lo: 0.50, hi: 0.70 },
+        { key: 'EXTREME', label: 'Extreme',  color: '#e53e3e', lo: 0.70, hi: 1 },
     ];
     const tierOf = p => TIERS.slice().reverse().find(t => p >= t.lo) || TIERS[0];
 
