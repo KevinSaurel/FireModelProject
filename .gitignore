@@ -1,5 +1,6 @@
 private_key.pem
 Model\incendios-forestales
 Data/MITECO/
+Database/euskadi_weather.sqlite3
 __pycache__/
 *.py[cod]
