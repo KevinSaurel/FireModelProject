@@ -134,7 +134,12 @@ _station_points_cache: list = []
 # ---------------------------------------------------------------------------
 # Model
 # ---------------------------------------------------------------------------
-model = joblib.load(MODEL_PATH) if MODEL_PATH.exists() else None
+try:
+    model = joblib.load("Model/fireTrainModel.pkl")
+    print("Modelo cargado exitosamente.")
+except Exception as e:
+    print(f"Error crítico al cargar el modelo: {e}")
+    model = None
 scaler = joblib.load(SCALER_PATH) if SCALER_PATH.exists() else None
 
 
