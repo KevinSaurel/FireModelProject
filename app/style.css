@@ -66,7 +66,6 @@ a { color: inherit; }
 .btn:hover { background: #fff; color: var(--ink); }
 .btn.solid { background: var(--accent); border-color: var(--accent); color: #1a1209; }
 .btn.solid:hover { background: #fff; border-color: #fff; }
-.hero-content .btn.solid:hover { background: transparent; border-color: var(--accent); color: #fff; }
 .btn.small { padding: 9px 18px; font-size: 11px; }
 
 /* ---------- Cielo y montanas ---------- */
@@ -295,11 +294,7 @@ progress.bar::-moz-progress-bar { background: var(--accent); }
 }
 .legend .bar {
     width: 190px; height: 8px; margin: 8px 0 6px 0;
-    background: linear-gradient(to right,
-        #38a169 0%, #38a169 35%,
-        #ecc94b 35%, #ecc94b 50%,
-        #dd6b20 50%, #dd6b20 70%,
-        #e53e3e 70%, #e53e3e 100%);
+    background: linear-gradient(to right, #38a169, #ecc94b, #dd6b20, #e53e3e);
 }
 .legend .labels { display: flex; justify-content: space-between; color: var(--muted); }
 .legend .tiers div { margin-top: 7px; letter-spacing: 0.06em; text-transform: none; font-size: 12px; }
@@ -333,3 +328,26 @@ a.popup-btn:hover { background: #f0a35e; color: #1a1209 !important; }
     table.t { font-size: 12px; }
     .result .tier-name { font-size: 26px; }
 }
+
+/* Selector de fecha (modo "Riesgo por dia") */
+.panel .datebox { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.panel .datebox[hidden] { display: none; }
+.panel .datebox label { font-size: 12px; opacity: .8; }
+.panel input[type="date"] { background: rgba(255,255,255,.08); color: var(--text); border: 1px solid var(--line); padding: 7px 8px; font-family: inherit; font-size: 12px; color-scheme: dark; }
+
+/* ---------- Info.html: imagen fija de fondo, el texto se desplaza por encima ---------- */
+body.info-page { background: var(--hero-ground); }
+.fixed-bg { position: fixed; inset: 0; z-index: -1; background: var(--hero-ground); }
+.fixed-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center bottom; display: block; }
+/* Capa oscura para que el texto se lea sobre la imagen */
+.fixed-bg::after { content: ""; position: absolute; inset: 0; background: rgba(18, 21, 15, 0.72); }
+.info-title { padding: 130px 24px 10px 24px; text-align: center; }
+.info-title h1 { margin: 0; font-weight: 300; font-size: 40px; letter-spacing: 0.06em; }
+body.info-page .page-body { background: transparent; padding-top: 20px; }
+body.info-page .page-body .inner { background: rgba(18, 21, 15, 0.55); padding: 10px 36px; }
+@media (max-width: 720px) {
+    .info-title { padding-top: 100px; }
+    .info-title h1 { font-size: 28px; }
+    body.info-page .page-body .inner { padding: 6px 18px; }
+}
+body.info-page .nav { background: rgba(18, 21, 15, 0.88); border-bottom: 1px solid var(--line); backdrop-filter: blur(6px); }
