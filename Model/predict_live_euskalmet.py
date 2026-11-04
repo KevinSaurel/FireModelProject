@@ -315,14 +315,13 @@ def compute_station_features(raw: dict) -> pd.DataFrame:
 
 def get_risk_tier(prob: float, thresholds: dict) -> str:
     """Maps probability output to risk level tier."""
-    if prob >= thresholds["high"]:
-        return "EXTREME RISK 🔴"
-    elif prob >= thresholds["medium"]:
-        return "HIGH RISK 🟠"
-    elif prob >= thresholds["low"]:
-        return "MEDIUM RISK 🟡"
-    else:
+    if prob < thresholds["low"]:
         return "LOW RISK 🟢"
+    if prob < thresholds["medium"]:
+        return "MEDIUM RISK 🟡"
+    if prob < thresholds["high"]:
+        return "HIGH RISK 🟠"
+    return "EXTREME RISK 🔴"
 
 
 def run_pipeline():

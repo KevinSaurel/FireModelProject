@@ -4,54 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Info - Euskadi Wildfire Risk Portal</title>
-    <style>
-        body { margin: 0; font-family: Arial, sans-serif; color: #2d3748; background: #f7fafc; line-height: 1.6; }
-        header { background: #1a202c; color: #fff; padding: 16px 24px; display: flex; gap: 16px; align-items: center; }
-        header a { color: #fbd38d; text-decoration: none; font-size: 14px; }
-        main { max-width: 760px; margin: 0 auto; padding: 24px; }
-        h1 { margin: 0; font-size: 20px; }
-        h2 { margin-top: 28px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
-        code { background: #edf2f7; padding: 1px 5px; border-radius: 3px; }
-        ul { padding-left: 20px; }
-        .tier { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header>
-        <a href="/">← Home</a>
-        <h1>About this portal</h1>
-        <a href="LiveFireRisk.html" style="margin-left:auto;">Live Fire Risk →</a>
-    </header>
-    <main>
-        <h2>What it shows</h2>
-        <p>A live heatmap of wildfire probability over Euskadi. Each point is scored by a Random Forest model, and the area in between is interpolated into a continuous map.</p>
+<body class="info-page">
+    <div class="fixed-bg" aria-hidden="true">
+        <img src="/Static/wildfire-mountain-landscape.jpg" alt="">
+    </div>
 
-        <h2>Data sources</h2>
+    <nav class="nav">
+        <a class="brand" href="/">Euskadi Fire Risk</a>
         <ul>
+            <li><a class="link" href="/">Home</a></li>
+            <li><a class="link" href="LiveFireRisk.html">Live risk</a></li>
+            <li><a class="link" href="LiveFireRisk.html?mode=forecast">Forecast risk</a></li>
+            <li><a class="link active" href="Info.html">Information</a></li>
+        </ul>
+    </nav>
+
+    <header class="info-title">
+        <h1>About this portal</h1>
+    </header>
+
+    <main class="page-body">
+        <div class="inner">
+            <div class="row">
+                <h2>What it shows</h2>
+                <div>
+<p>A live heatmap of wildfire probability over Euskadi. Each point is scored by a Random Forest model, and the area in between is interpolated into a continuous map.</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <h2>Data sources</h2>
+                <div>
+<ul>
             <li><b>Euskalmet:</b> real observations from the weather stations for the target day (temperature, humidity, wind, rainfall).</li>
             <li><b>Open-Meteo:</b> 30-day weather history at each station, plus a coarse grid covering areas more than 15 km from any station.</li>
+            <li><b>Model training data:</b> More than 27,957,637 historical weather records from MITECO and the Euskalmet Climate Atlas, combined with historical fire records from public government sources and filtered for Basque Country locations. The training pipeline uses up to 3.5 million prepared records and reserves 20% (about 700,000 records) for testing.</li>
         </ul>
+                </div>
+            </div>
 
-        <h2>How the map is built</h2>
-        <ul>
+            <div class="row">
+                <h2>How the map is built</h2>
+                <div>
+<ul>
             <li>Weather features are computed for each station and grid point, including rolling rainfall, dry-spell length, 14-day evapotranspiration and calendar features.</li>
             <li>The scaler and Random Forest model turn those features into a fire probability.</li>
             <li>Inverse distance weighting (IDW) interpolates the probabilities between points onto the heatmap.</li>
         </ul>
+                </div>
+            </div>
 
-        <h2>Risk tiers</h2>
+            <div class="row">
+                <h2>How the model works</h2>
+                <div>
+<p>For each day and location, the model uses 18 inputs describing recent weather and the time of year:</p>
         <ul>
-            <li><span class="tier" style="background:#38a169"></span><b>Low:</b> probability below 15.7%</li>
-            <li><span class="tier" style="background:#dd6b20"></span><b>Medium:</b> 15.7% to 33.2%</li>
-            <li><span class="tier" style="background:#e53e3e"></span><b>Extreme:</b> 33.2% and above</li>
+            <li><b>Temperature and humidity:</b> average, maximum and minimum temperatures, plus average and minimum humidity.</li>
+            <li><b>Wind and rain:</b> average and maximum wind speed; rainfall over 1, 7, 14 and 30 days; and the length of the current dry spell.</li>
+            <li><b>Dryness indicators:</b> temperature above or below its recent average, 14-day reference evapotranspiration, a fire-weather indicator, and vapor pressure deficit.</li>
+            <li><b>Calendar:</b> month and day of the year, so the model can account for seasonal patterns.</li>
         </ul>
+        <p>The model is a Random Forest made up of 300 decision trees, each with a maximum depth of 18. Each tree applies a series of learned yes-or-no rules to the weather inputs and estimates fire probability from similar historical cases. The model averages the trees' estimates to produce the final probability shown on the map.</p>
+                </div>
+            </div>
 
-        <h2>Limitations</h2>
+            <div class="row">
+                <h2>Risk tiers</h2>
+                <div>
+<ul class="plain-list">
+            <li><span class="tier c-low"></span><b>Low:</b> P &lt; 0.35 (Safe background weather)</li>
+            <li><span class="tier c-medium"></span><b>Medium:</b> 0.35 &le; P &lt; 0.50 (Moderate fire weather parameters)</li>
+            <li><span class="tier c-high"></span><b>High:</b> 0.50 &le; P &lt; 0.70 (Elevated danger advisory)</li>
+            <li><span class="tier c-extreme"></span><b>Extreme:</b> P &ge; 0.70 (Active Fire Risk Alert)</li>
+        </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <h2>Model performance &amp; metrics</h2>
+                <div>
+<p>Operational test results on 700,000 held-out samples:</p>
         <ul>
+            <li><b>Overall model accuracy:</b> 95.40%. Across the test samples, this is the share of predictions the model got right.</li>
+            <li><b>ROC-AUC:</b> 0.9867. This measures how well the model separates fire cases from non-fire cases; 1.0 is a perfect score.</li>
+            <li><b>PR-AUC:</b> 0.8062. This summarizes how useful the fire alerts are by considering both correct alerts and how many fire cases are detected.</li>
+            <li><b>Optimal decision boundary:</b> 0.7000. The model raises an Extreme alert at a predicted probability of 70% or higher. At this setting, 72.83% of alerts matched fire cases (precision), and 72.84% of fire cases were detected (recall).</li>
+            <li><b>False alarm reduction:</b> 80.5% fewer false alerts at the 0.7000 boundary than at the default 0.50 boundary. A false alert is a high-risk prediction when no fire case occurred.</li>
+        </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <h2>Limitations</h2>
+                <div>
+<ul>
             <li>The data covers the previous day's daily aggregates, not the current hour.</li>
             <li>Interpolation between points is approximate and ignores terrain.</li>
             <li>The map extends slightly beyond Euskadi's borders because it uses a bounding box.</li>
         </ul>
+                </div>
+            </div>
+        </div>
     </main>
 </body>
 </html>

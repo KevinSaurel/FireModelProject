@@ -8,6 +8,15 @@
     --muted: #c3d1de;
     --accent: #f0a35e;
     --line: rgba(255, 255, 255, 0.18);
+
+    /* Color del suelo oscuro de la imagen de portada: el resto del index continua con este tono */
+    --hero-ground: #12150f;
+
+    /* Niveles de riesgo (los mismos que usa el mapa) */
+    --tier-low: #38a169;
+    --tier-medium: #ecc94b;
+    --tier-high: #dd6b20;
+    --tier-extreme: #e53e3e;
 }
 
 * { box-sizing: border-box; }
@@ -19,6 +28,12 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 a { color: inherit; }
+
+/* ---------- Colores de los niveles de riesgo (se combinan con .dot, .tier, .sw...) ---------- */
+.c-low { background: var(--tier-low); }
+.c-medium { background: var(--tier-medium); }
+.c-high { background: var(--tier-high); }
+.c-extreme { background: var(--tier-extreme); }
 
 /* ---------- Navegacion ---------- */
 .nav {
@@ -66,31 +81,50 @@ a { color: inherit; }
 .mountains { position: absolute; left: 0; bottom: 0; z-index: 2; width: 100%; height: 46%; display: block; }
 
 /* ---------- Portada ---------- */
-.hero { position: relative; min-height: 100vh; overflow: hidden; }
+/* La imagen ocupa toda la parte superior; el titulo va encima y el objetivo abajo. */
+.hero {
+    position: relative; min-height: 100vh; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    background: var(--hero-ground);
+}
+.hero-img {
+    position: absolute; inset: 0; z-index: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center bottom;
+}
+/* Capa oscura arriba para que el titulo se lea sobre el cielo y el sol */
+.hero::before {
+    content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(to bottom,
+        rgba(29, 12, 8, 0.85) 0%, rgba(29, 12, 8, 0.6) 24%,
+        rgba(29, 12, 8, 0.2) 42%, rgba(29, 12, 8, 0) 56%);
+}
 .hero-content {
-    position: absolute; left: 0; right: 0; top: 24%; z-index: 10;
-    text-align: center; padding: 0 24px;
+    position: relative; z-index: 10;
+    text-align: center; padding: 92px 24px 0 24px;
 }
 .hero-content .kicker {
     font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase;
-    color: var(--muted); margin: 0 0 22px 0;
+    color: #f3d9c8; margin: 0 0 16px 0;
 }
 .hero-content h1 {
-    margin: 0 auto 36px auto; max-width: 1000px;
-    font-weight: 300; font-size: clamp(32px, 6vw, 76px);
+    margin: 0 auto 28px auto; max-width: 1000px;
+    font-weight: 300; font-size: clamp(26px, min(4.2vw, 7.2vh), 54px);
     letter-spacing: 0.08em; line-height: 1.12; text-transform: uppercase;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
 }
 .hero-content .buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
+/* El objetivo se apoya en el suelo oscuro de la imagen: su fondo acaba en el mismo color */
+.objective-wrap {
+    position: relative; z-index: 10; padding-top: 40px;
+    background: linear-gradient(to top, var(--hero-ground) 55%, rgba(18, 21, 15, 0));
+}
 .objective {
     position: relative;
-    padding: 80px 40px 40px 40px;
+    padding: 56px 40px 36px 40px;
     display: grid; grid-template-columns: 220px 1fr; gap: 32px; align-items: start;
     max-width: 1200px; margin: 0 auto;
-}
-.objective-wrap {
-    position: absolute; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(to top, #08141f 62%, rgba(8, 20, 31, 0));
 }
 .objective .label {
     font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase;
@@ -101,6 +135,9 @@ a { color: inherit; }
     margin: 0; font-weight: 300; font-size: 17px; line-height: 1.7; color: var(--text);
     border-top: 1px solid var(--line); padding-top: 12px;
 }
+
+/* Index: lo que hay debajo de la imagen continua el color del suelo */
+body.home { background: var(--hero-ground); }
 
 /* ---------- Variables ambientales ---------- */
 .nature-grid-section {
@@ -171,8 +208,14 @@ a { color: inherit; }
     line-height: 1.75;
 }
 
+body.home .nature-grid-section { background: var(--hero-ground); }
+body.home .nature-card { background: rgba(255, 255, 255, 0.04); }
+body.home .card-img { background: #1b1f16; }
+
 /* ---------- Pagina interior ---------- */
 .page-hero { position: relative; height: 46vh; min-height: 300px; overflow: hidden; }
+.page-hero.compact { height: 34vh; min-height: 240px; }
+.page-hero .sun { bottom: 8%; }
 .page-hero .mountains { height: 55%; }
 .page-hero h1 {
     position: absolute; left: 0; right: 0; top: 36%;
@@ -194,9 +237,40 @@ a { color: inherit; }
 .row p, .row li { font-weight: 300; font-size: 16px; line-height: 1.75; color: var(--text); }
 .row p { margin: 0; }
 .row ul { margin: 0; padding-left: 18px; }
+.row ul.plain-list { list-style: none; padding-left: 0; }
 .row li { margin-bottom: 8px; }
 .row b { font-weight: 500; }
 .tier { display: inline-block; width: 10px; height: 10px; margin-right: 10px; }
+
+/* ---------- Detalle del punto (Detail.html) ---------- */
+.result { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.result .swatch { width: 64px; height: 64px; flex: none; }
+.result .tier-name {
+    font-weight: 300; font-size: 34px; letter-spacing: 0.08em;
+    text-transform: uppercase; line-height: 1.1;
+}
+.result .prob { font-weight: 300; font-size: 16px; color: var(--muted); margin-top: 4px; }
+table.t { width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 300; }
+table.t th {
+    text-align: left; font-weight: 500; font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--accent); padding: 8px 10px 10px 0;
+}
+table.t td { padding: 10px 10px 10px 0; border-top: 1px solid var(--line); vertical-align: middle; }
+.dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; }
+progress.bar {
+    -webkit-appearance: none; appearance: none;
+    display: block; width: 100%; min-width: 80px; height: 6px;
+    border: 0; background: rgba(255, 255, 255, 0.1);
+}
+progress.bar::-webkit-progress-bar { background: rgba(255, 255, 255, 0.1); }
+progress.bar::-webkit-progress-value { background: var(--accent); }
+progress.bar::-moz-progress-bar { background: var(--accent); }
+.note { font-size: 13px; color: var(--muted); font-weight: 300; margin-top: 12px; line-height: 1.6; }
+.txt { margin: 0 0 12px 0; font-weight: 300; line-height: 1.75; }
+.back { display: inline-block; margin-top: 8px; }
+.row ul.scale { list-style: none; padding-left: 0; margin: 0; }
+.scale li { margin-bottom: 8px; font-weight: 300; }
+.scale li.current { font-weight: 500; }
 
 /* ---------- Mapa ---------- */
 #map { position: absolute; top: 64px; left: 0; right: 0; bottom: 0; }
@@ -223,14 +297,26 @@ a { color: inherit; }
     background: linear-gradient(to right, #38a169, #ecc94b, #dd6b20, #e53e3e);
 }
 .legend .labels { display: flex; justify-content: space-between; color: var(--muted); }
+.legend .tiers div { margin-top: 7px; letter-spacing: 0.06em; text-transform: none; font-size: 12px; }
+.legend .sw { display: inline-block; width: 11px; height: 11px; margin-right: 9px; vertical-align: -1px; }
+
+.leaflet-container { cursor: pointer; }
+.leaflet-popup-content { font-family: 'Montserrat', Arial, sans-serif; font-size: 13px; line-height: 1.5; }
+.popup-tier { display: inline-block; width: 10px; height: 10px; margin-right: 6px; }
+a.popup-btn {
+    display: inline-block; margin-top: 8px; padding: 8px 14px; background: #08141f; color: #fff !important;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; text-decoration: none;
+}
+a.popup-btn:hover { background: #f0a35e; color: #1a1209 !important; }
 
 /* ---------- Movil ---------- */
 @media (max-width: 760px) {
-    .nav { padding: 0 20px; }
-    .nav ul { gap: 18px; }
-    .nav a.link { font-size: 10px; letter-spacing: 0.12em; }
+    /* El menu tiene 4 enlaces: que quepan en una sola linea */
+    .nav { padding: 0 12px; }
+    .nav ul { gap: 10px; width: 100%; justify-content: space-between; }
+    .nav a.link { font-size: 9px; letter-spacing: 0.05em; white-space: nowrap; }
     .nav .brand { display: none; }
-    .hero-content { top: 18%; }
+    .hero-content { padding-top: 84px; }
     .objective { grid-template-columns: 1fr; gap: 12px; padding: 60px 24px 28px 24px; }
     .objective p { font-size: 15px; }
     .nature-grid-section { padding: 72px 24px 80px; }
@@ -239,4 +325,29 @@ a { color: inherit; }
     .card-content { padding: 22px 22px 26px; }
     .row { grid-template-columns: 1fr; gap: 12px; }
     .panel { left: 12px; right: 12px; max-width: none; }
+    table.t { font-size: 12px; }
+    .result .tier-name { font-size: 26px; }
 }
+
+/* Selector de fecha (modo "Riesgo por dia") */
+.panel .datebox { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.panel .datebox[hidden] { display: none; }
+.panel .datebox label { font-size: 12px; opacity: .8; }
+.panel input[type="date"] { background: rgba(255,255,255,.08); color: var(--text); border: 1px solid var(--line); padding: 7px 8px; font-family: inherit; font-size: 12px; color-scheme: dark; }
+
+/* ---------- Info.html: imagen fija de fondo, el texto se desplaza por encima ---------- */
+body.info-page { background: var(--hero-ground); }
+.fixed-bg { position: fixed; inset: 0; z-index: -1; background: var(--hero-ground); }
+.fixed-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center bottom; display: block; }
+/* Capa oscura para que el texto se lea sobre la imagen */
+.fixed-bg::after { content: ""; position: absolute; inset: 0; background: rgba(18, 21, 15, 0.72); }
+.info-title { padding: 130px 24px 10px 24px; text-align: center; }
+.info-title h1 { margin: 0; font-weight: 300; font-size: 40px; letter-spacing: 0.06em; }
+body.info-page .page-body { background: transparent; padding-top: 20px; }
+body.info-page .page-body .inner { background: rgba(18, 21, 15, 0.55); padding: 10px 36px; }
+@media (max-width: 720px) {
+    .info-title { padding-top: 100px; }
+    .info-title h1 { font-size: 28px; }
+    body.info-page .page-body .inner { padding: 6px 18px; }
+}
+body.info-page .nav { background: rgba(18, 21, 15, 0.88); border-bottom: 1px solid var(--line); backdrop-filter: blur(6px); }

@@ -16,6 +16,7 @@ Data flow (live only, no municipality layer):
 """
 
 import datetime
+import json
 import logging
 import math
 import sys
@@ -54,6 +55,7 @@ app.mount("/Static", StaticFiles(directory=APP_DIR / "Static"), name="static")
 INDEX_PATH = APP_DIR / "index.html"
 MODEL_PATH = ROOT_DIR / "Model" / "fireTrainModel.pkl"
 SCALER_PATH = ROOT_DIR / "Model" / "scaler.pkl"
+TIER_THRESHOLDS_PATH = ROOT_DIR / "Model" / "tier_thresholds.json"
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 EUSKADI_BOUNDS = {"lat_min": 42.47, "lat_max": 43.45, "lon_min": -3.45, "lon_max": -1.73}
@@ -66,11 +68,27 @@ GRID_LON_POINTS = 12
 STATION_RADIUS_KM = 12.0   # grid points closer than this to a station are dropped
 DRY_THRESHOLD_MM = 0.1     # a day counts as "dry" below this rainfall
 IDW_POWER = 2.0
-PROB_CAP = 0.4             # probability mapped to heat intensity 1.0
-# Probability thresholds (Model/tier_thresholds.json)
-TIER_MEDIUM = 0.2569
-TIER_HIGH = 0.5016
-TIER_EXTREME = 0.7505
+
+DEFAULT_TIER_THRESHOLDS = {"low": 0.35, "medium": 0.50, "high": 0.70}
+
+
+def load_tier_thresholds() -> dict[str, float]:
+    try:
+        configured = json.loads(TIER_THRESHOLDS_PATH.read_text(encoding="utf-8"))
+        thresholds = {key: float(configured[key]) for key in DEFAULT_TIER_THRESHOLDS}
+        if not 0 <= thresholds["low"] < thresholds["medium"] < thresholds["high"] <= 1:
+            raise ValueError("Tier thresholds must be increasing values between 0 and 1")
+        return thresholds
+    except (OSError, KeyError, TypeError, ValueError) as exc:
+        log.warning("Could not load tier thresholds from %s: %s", TIER_THRESHOLDS_PATH, exc)
+        return DEFAULT_TIER_THRESHOLDS.copy()
+
+
+TIER_THRESHOLDS = load_tier_thresholds()
+TIER_LOW = TIER_THRESHOLDS["low"]
+TIER_MEDIUM = TIER_THRESHOLDS["medium"]
+TIER_HIGH = TIER_THRESHOLDS["high"]
+PROB_CAP = TIER_HIGH
 
 @app.get("/style.css")
 def style():
@@ -159,13 +177,13 @@ def predict_probabilities(feature_rows: list[dict]) -> np.ndarray:
 
 
 def risk_tier(p: float) -> str:
-    if p >= TIER_EXTREME:
-        return "EXTREME"
-    if p >= TIER_HIGH:
-        return "HIGH"
-    if p >= TIER_MEDIUM:
+    if p < TIER_LOW:
+        return "LOW"
+    if p < TIER_MEDIUM:
         return "MEDIUM"
-    return "LOW"
+    if p < TIER_HIGH:
+        return "HIGH"
+    return "EXTREME"
 
 
 # ---------------------------------------------------------------------------

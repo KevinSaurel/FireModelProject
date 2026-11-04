@@ -1,47 +1,42 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Riesgo de incendios forestales en Euskadi</title>
+    <title>Wildfire Risk in Euskadi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="home">
     <nav class="nav">
         <a class="brand" href="/">Euskadi Fire Risk</a>
         <ul>
-            <li><a class="link active" href="/">Inicio</a></li>
-            <li><a class="link" href="LiveFireRisk.html">Riesgo en vivo</a></li>
-            <li><a class="link" href="Info.html">Informacion</a></li>
+            <li><a class="link active" href="/">Home</a></li>
+            <li><a class="link" href="LiveFireRisk.html">Live Risk</a></li>
+            <li><a class="link" href="LiveFireRisk.html?mode=forecast">Forecast Risk</a></li>
+            <li><a class="link" href="Info.html">Information</a></li>
         </ul>
     </nav>
 
     <section class="hero">
-        <div class="sky"></div>
-        <div class="sun"></div>
-
-        <svg class="mountains" viewBox="0 0 1440 400" preserveAspectRatio="none" aria-hidden="true">
-            <path fill="#3a5f86" opacity="0.65" d="M0,220 L180,140 L320,200 L520,90 L700,210 L860,130 L1040,220 L1220,120 L1440,200 L1440,400 L0,400 Z"/>
-            <path fill="#1d3a58" d="M0,280 L150,220 L300,270 L480,190 L660,280 L820,230 L1000,290 L1180,210 L1440,280 L1440,400 L0,400 Z"/>
-            <path fill="#0a1a2a" d="M0,330 L200,290 L400,330 L620,280 L840,335 L1060,295 L1260,335 L1440,300 L1440,400 L0,400 Z"/>
-        </svg>
+        <img class="hero-img" src="/Static/wildfire-mountain-landscape.jpg"
+             alt="Illustration of a deer facing a wildfire in the mountains">
 
         <div class="hero-content">
-            <p class="kicker">Modelo predictivo con datos en vivo</p>
-            <h1>Riesgo de incendios forestales en Euskadi</h1>
+            <p class="kicker">Predictive model using live data</p>
+            <h1>Wildfire Risk in Euskadi</h1>
             <div class="buttons">
-                <a class="btn solid" href="LiveFireRisk.html">Riesgo en vivo</a>
-                <a class="btn" href="Info.html">Informacion</a>
-                <a class="btn" href="LiveFireRisk.html?mode=forecast">Riesgo futuro</a>
+                <a class="btn solid" href="LiveFireRisk.html">Live Risk</a>
+                <a class="btn solid" href="Info.html">Information</a>
+                <a class="btn solid" href="LiveFireRisk.html?mode=forecast">Forecast Risk</a>
             </div>
         </div>
 
         <div class="objective-wrap">
             <div class="objective">
-                <div class="label">Objetivo</div>
-                <p>Estimar en tiempo real la probabilidad de incendio forestal en el Pais Vasco, combinando las estaciones de Euskalmet, los datos de Open-Meteo y un modelo Random Forest, y mostrarla como un mapa de calor continuo sobre el territorio.</p>
+                <div class="label">Objective</div>
+                <p>Estimate wildfire probability in the Basque Country in real time by combining Euskalmet weather stations, Open-Meteo data, and a Random Forest model, then display it as a continuous heatmap across the region.</p>
             </div>
         </div>
     </section>
@@ -49,8 +44,8 @@
     <section class="nature-grid-section" aria-labelledby="nature-grid-title">
         <div class="nature-grid-inner">
             <header class="nature-grid-heading">
-                <p class="kicker">Cobertura y Monitoreo</p>
-                <h2 id="nature-grid-title">Variables Ambientales en Tiempo Real</h2>
+                <p class="kicker">Coverage and Monitoring</p>
+                <h2 id="nature-grid-title">Real-Time Environmental Conditions</h2>
             </header>
 
             <div class="cards-grid">
@@ -58,12 +53,12 @@
                     <div class="card-img">
                         <img
                             src="/Static/wildfirefoto.jpg"
-                            alt="Incendio forestal entre masas de arbolado"
+                            alt="Wildfire among forested areas"
                             loading="lazy"
                         >
                     </div>
                     <div class="card-content">
-                        <h3>Masas Forestales</h3>
+                        <h3>Forest Areas</h3>
                         <p>As wildfires become increasingly common across the country, proactive anticipation is vital. Euskadi Fire Risk leverages a machine learning model trained specifically on local Basque data to predict hazards early and prevent catastrophic forest fires from spreading here like in other regions.</p>
                     </div>
                 </article>
@@ -72,12 +67,12 @@
                     <div class="card-img">
                         <img
                             src="/Static/ESTACION-METEOROLOGICA.jpeg"
-                            alt="Instrumentos de una estación meteorológica"
+                            alt="Weather station instruments"
                             loading="lazy"
                         >
                     </div>
                     <div class="card-content">
-                        <h3>Estaciones Euskalmet</h3>
+                        <h3>Euskalmet Weather Stations</h3>
                         <p>Powered by high-precision telemetry, our platform aggregates real-time weather data from local stations provided by the Basque Government, the Provincial Councils (Diputaciones Forales), and MITECO.</p>
                     </div>
                 </article>
@@ -86,12 +81,12 @@
                     <div class="card-img">
                         <img
                             src="/Static/mapaIncendiosEspana.jfif"
-                            alt="Mapa de incendios forestales en España"
+                            alt="Wildfire map of Spain"
                             loading="lazy"
                         >
                     </div>
                     <div class="card-content">
-                        <h3>Mapa de Calor Continuo</h3>
+                        <h3>Continuous Heatmap</h3>
                         <p>In response to rising global temperatures and climate change, our continuous spatial heat map uses a Random Forest model to analyze current weather conditions, helping the region adapt to and prepare for future fire risks.</p>
                     </div>
                 </article>

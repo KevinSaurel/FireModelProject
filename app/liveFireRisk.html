@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Riesgo en vivo - Euskadi</title>
+    <title>Live Wildfire Risk - Euskadi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -26,32 +26,32 @@
 <nav class="nav solid">
     <a class="brand" href="/">Euskadi Fire Risk</a>
     <ul>
-        <li><a class="link" href="/">Inicio</a></li>
-        <li><a class="link active" id="nav-live" href="LiveFireRisk.html">Riesgo en vivo</a></li>
-        <li><a class="link" id="nav-forecast" href="LiveFireRisk.html?mode=forecast">Riesgo futuro</a></li>
-        <li><a class="link" href="Info.html">Informacion</a></li>
+        <li><a class="link" href="/">Home</a></li>
+        <li><a class="link active" id="nav-live" href="LiveFireRisk.html">Live Risk</a></li>
+        <li><a class="link" id="nav-forecast" href="LiveFireRisk.html?mode=forecast">Forecast Risk</a></li>
+        <li><a class="link" href="Info.html">Information</a></li>
     </ul>
 </nav>
 
 <div class="panel">
-    <h3 id="panel-title">Riesgo en vivo</h3>
-    <div id="status">Cargando datos en vivo...</div>
+    <h3 id="panel-title">Live Risk</h3>
+    <div id="status">Loading live data...</div>
     <div class="controls">
-        <button class="btn small" onclick="load(true)">Actualizar</button>
+        <button class="btn small" onclick="load(true)">Refresh</button>
         <span>
             <input type="checkbox" id="chk-stations" checked onchange="toggleStations()">
-            <label for="chk-stations">Estaciones</label>
+            <label for="chk-stations">Stations</label>
         </span>
     </div>
 </div>
 
 <div class="legend">
-    Probabilidad de incendio
+    Wildfire probability
     <div class="tiers">
-        <div><span class="sw" style="background:#38a169"></span>Bajo: menos de 25,7 %</div>
-        <div><span class="sw" style="background:#ecc94b"></span>Medio: 25,7 % a 50,2 %</div>
-        <div><span class="sw" style="background:#dd6b20"></span>Alto: 50,2 % a 75,0 %</div>
-        <div><span class="sw" style="background:#e53e3e"></span>Extremo: 75,0 % o mas</div>
+        <div><span class="sw" style="background:#38a169"></span>Low: P &lt; 0.35</div>
+        <div><span class="sw" style="background:#ecc94b"></span>Medium: 0.35 &le; P &lt; 0.50</div>
+        <div><span class="sw" style="background:#dd6b20"></span>High: 0.50 &le; P &lt; 0.70</div>
+        <div><span class="sw" style="background:#e53e3e"></span>Extreme: P &ge; 0.70</div>
     </div>
 </div>
 
@@ -66,20 +66,20 @@
     // Misma pagina para los dos modos: ?mode=forecast usa la prevision de manana.
     const MODE = new URLSearchParams(location.search).get('mode') === 'forecast' ? 'forecast' : 'live';
     if (MODE === 'forecast') {
-        document.title = 'Riesgo futuro - Euskadi';
-        document.getElementById('panel-title').textContent = 'Riesgo futuro';
+        document.title = 'Wildfire Risk Forecast - Euskadi';
+        document.getElementById('panel-title').textContent = 'Risk Forecast';
         document.getElementById('nav-live').classList.remove('active');
         document.getElementById('nav-forecast').classList.add('active');
     }
 
-    // Limites de la malla del backend (deben coincidir con EUSKADI_BOUNDS en main.py)
+    // Backend grid bounds (must match EUSKADI_BOUNDS in main.py)
     const EUSKADI_BOUNDS = { lat_min: 42.47, lat_max: 43.45, lon_min: -3.45, lon_max: -1.73 };
     const COS_LAT = Math.cos(43.0 * Math.PI / 180);
 
-    // Umbrales de probabilidad del modelo (tier_thresholds.json)
-    const T_MEDIUM = 0.2569;
-    const T_HIGH = 0.5016;
-    const T_EXTREME = 0.7505;
+    // Model probability thresholds (tier_thresholds.json)
+    const T_MEDIUM = 0.35;
+    const T_HIGH = 0.50;
+    const T_EXTREME = 0.70;
 
     const TIER_COLORS = {
         LOW:     [56, 161, 105],    // verde
@@ -87,7 +87,7 @@
         HIGH:    [221, 107, 32],    // naranja
         EXTREME: [229, 62, 62],     // rojo
     };
-    const TIER_LABELS = { LOW: 'Bajo', MEDIUM: 'Medio', HIGH: 'Alto', EXTREME: 'Extremo' };
+    const TIER_LABELS = { LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High', EXTREME: 'Extreme' };
 
     function tierOf(p) {
         return p >= T_EXTREME ? 'EXTREME' : p >= T_HIGH ? 'HIGH' : p >= T_MEDIUM ? 'MEDIUM' : 'LOW';
@@ -96,8 +96,8 @@
         return `rgb(${TIER_COLORS[tierOf(p)].join(',')})`;
     }
 
-    // ---- Calculos locales sobre los datos que ya envia la API ----
-    // Probabilidad de la celda del mapa donde se hace clic (la misma que da el color).
+    // ---- Local calculations using data already provided by the API ----
+    // Probability for the map cell that was clicked (the value that determines its color).
     function cellProbability(points, n, lat, lon) {
         const B = EUSKADI_BOUNDS;
         const r = Math.round((lat - B.lat_min) / (B.lat_max - B.lat_min) * (n - 1));
@@ -114,7 +114,7 @@
         return 2 * 6371 * Math.asin(Math.sqrt(a));
     }
 
-    // Puntos de medicion mas cercanos, con su peso en la interpolacion (1 / distancia^2).
+    // Nearest measurement points and their interpolation weights (1 / distance^2).
     function nearbySources(samples, lat, lon, limit) {
         const list = samples.map(s => {
             const d = Math.max(Math.hypot(lat - s.lat, (lon - s.lon) * COS_LAT), 1e-6);
@@ -126,8 +126,8 @@
     }
 
     function sourceName(s) {
-        if (s.name) return MODE === 'forecast' ? `Prevision en ${s.name}` : `Estacion ${s.name}`;
-        return 'Open-Meteo (punto de malla)';
+        if (s.name) return MODE === 'forecast' ? `Forecast for ${s.name}` : `Station ${s.name}`;
+        return 'Open-Meteo (grid point)';
     }
 
     const map = L.map('map').setView([43.0, -2.6], 9);
@@ -136,7 +136,7 @@
         maxZoom: 16
     }).addTo(map);
 
-    // Panel propio para la capa de probabilidad: queda por debajo de las estaciones.
+    // Keep the probability layer below the station markers.
     map.createPane('probPane');
     map.getPane('probPane').style.zIndex = 350;
     map.getPane('probPane').style.pointerEvents = 'none';
@@ -145,29 +145,29 @@
     let lastData = null;
     const stationLayer = L.layerGroup().addTo(map);
 
-    // Contenido comun de los popups: nivel, probabilidad y boton de detalle.
+    // Shared popup content: risk tier, probability, and details button.
     function popupHtml(title, p, lat, lon, extra = '') {
         return `<strong>${title}</strong><br/>
             <span class="popup-tier" style="background:${riskColor(p)}"></span>${TIER_LABELS[tierOf(p)]}
             &middot; ${(p * 100).toFixed(2)}%<br/>
             ${extra}
-            <a class="popup-btn" href="Detail.html?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&mode=${MODE}">Ver detalle</a>`;
+            <a class="popup-btn" href="Detail.html?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&mode=${MODE}">View details</a>`;
     }
 
-    // Clic en cualquier punto del mapa: popup con el valor, la fuente principal y "Ver detalle".
+    // Clicking the map shows a popup with the value, main source, and details link.
     map.on('click', (e) => {
         const { lat, lng } = e.latlng;
         if (!lastData) {
-            L.popup().setLatLng(e.latlng).setContent('Cargando datos...').openOn(map);
+            L.popup().setLatLng(e.latlng).setContent('Loading data...').openOn(map);
             return;
         }
         const p = cellProbability(lastData.points, lastData.grid_size, lat, lng);
         let extra = '';
         if (lastData.samples && lastData.samples.length) {
             const main = nearbySources(lastData.samples, lat, lng, 1)[0];
-            extra = `<small>Fuente principal: ${sourceName(main.s)} (${main.km.toFixed(1)} km)</small><br/>`;
+            extra = `<small>Main source: ${sourceName(main.s)} (${main.km.toFixed(1)} km)</small><br/>`;
         }
-        L.popup().setLatLng(e.latlng).setContent(popupHtml('Punto seleccionado', p, lat, lng, extra)).openOn(map);
+        L.popup().setLatLng(e.latlng).setContent(popupHtml('Selected point', p, lat, lng, extra)).openOn(map);
     });
 
     // Convierte la malla n x n de la API en una imagen anclada a coordenadas.
@@ -189,7 +189,7 @@
             img.data[o] = r;
             img.data[o + 1] = g;
             img.data[o + 2] = b;
-            img.data[o + 3] = 150;                      // opacidad (0 a 255)
+            img.data[o + 3] = Math.round(255 * Math.max(0, Math.min(1, p.intensity)));
         });
         ctx.putImageData(img, 0, 0);
 
@@ -204,7 +204,7 @@
 
     async function load(refresh = false) {
         const status = document.getElementById('status');
-        status.textContent = 'Cargando datos en vivo... (la primera carga puede tardar un minuto)';
+        status.textContent = 'Loading live data... (the first load may take up to a minute)';
         try {
             const res = await fetch(`${API}/api/v1/fire-risk/heatmap?resolution=50&mode=${MODE}${refresh ? '&refresh=true' : ''}`);
             const data = await res.json();
@@ -223,20 +223,20 @@
                 }).bindPopup(
                     popupHtml(
                         s.name, s.probability, s.lat, s.lon,
-                        `<b>Temp:</b> ${s.temperature} C | <b>Humedad:</b> ${s.humidity}%<br/>
-                         <b>Viento:</b> ${s.wind_speed} km/h | <b>Lluvia 7d:</b> ${s.rain_7d} mm<br/>
-                         <b>Dias secos:</b> ${s.dry_streak}<br/>
-                         <small>Fuente: ${s.source}</small><br/>`
+                        `<b>Temperature:</b> ${s.temperature} °C | <b>Humidity:</b> ${s.humidity}%<br/>
+                         <b>Wind:</b> ${s.wind_speed} km/h | <b>Rainfall (7 days):</b> ${s.rain_7d} mm<br/>
+                         <b>Consecutive dry days:</b> ${s.dry_streak}<br/>
+                         <small>Source: ${s.source}</small><br/>`
                     )
                 ).addTo(stationLayer);
             });
             toggleStations();
 
             status.textContent = MODE === 'forecast'
-                ? `Prevision para el ${data.date}. ${data.counts.euskalmet} zonas de estaciones y ${data.counts.open_meteo} puntos de malla, todos con prevision de Open-Meteo.`
-                : `Datos del ${data.date}. ${data.counts.euskalmet} estaciones Euskalmet y ${data.counts.open_meteo} puntos Open-Meteo.`;
+                ? `Forecast for ${data.date}. ${data.counts.euskalmet} station areas and ${data.counts.open_meteo} grid points, all using the Open-Meteo forecast.`
+                : `Data for ${data.date}. ${data.counts.euskalmet} Euskalmet stations and ${data.counts.open_meteo} Open-Meteo grid points.`;
         } catch (e) {
-            status.textContent = 'No se pudo conectar con la API. Esta uvicorn en marcha?';
+            status.textContent = 'Could not connect to the API. Is Uvicorn running?';
             console.error(e);
         }
     }
