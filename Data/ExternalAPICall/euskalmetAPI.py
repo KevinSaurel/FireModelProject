@@ -1,11 +1,9 @@
 """
 Euskalmet Open Data API Client.
 Exposes:
-  - get_live_weather_data(): Fetches live/yesterday weather without direct DB saving.
-  - get_daily_since_2026(): Fills missing daily registers since 2026-01-01 into DB.
+  - get_live_weather_data(): Fetches live/yesterday weather without database access.
 """
 
-import argparse
 from collections import Counter
 import datetime
 import json
@@ -32,12 +30,6 @@ from Data.Constants.constants import (
     JWT_VERSION,
     PRIVATE_KEY_PATH,
     USER_EMAIL,
-)
-from Database.persistenceManager import (
-    get_cached_daily_precipitation,
-    get_existing_weather_dates,
-    save_cached_daily_precipitation,
-    save_weather_observations,
 )
 
 BASE_URL = "https://api.euskadi.eus/euskalmet"
@@ -244,32 +236,16 @@ def get_station_day(client: EuskalmetClient, station_id: str, day: datetime.date
 
 def accumulate_rain(client: EuskalmetClient, station_id: str, day: datetime.date, first_day: dict, precip_days: int):
     if "precipitation" not in first_day:
-        save_cached_daily_precipitation(station_id, day.isoformat(), None)
         return None
     total = sum(first_day["precipitation"]["values"])
-    save_cached_daily_precipitation(station_id, day.isoformat(), round(total, 2))
     for back in range(1, precip_days):
         prev_day = day - datetime.timedelta(days=back)
-        cached, precipitation = get_cached_daily_precipitation(
-            station_id,
-            prev_day.isoformat(),
-        )
-        if cached:
-            if precipitation is None:
-                return None
-            total += precipitation
-            continue
-
-        prev, status = get_station_day(client, station_id, prev_day, RAIN_ONLY)
+        prev, _ = get_station_day(client, station_id, prev_day, RAIN_ONLY)
         if prev is None:
-            if status == 404:
-                save_cached_daily_precipitation(station_id, prev_day.isoformat(), None)
             return None
         if "precipitation" not in prev:
-            save_cached_daily_precipitation(station_id, prev_day.isoformat(), None)
             return None
         precipitation = round(sum(prev["precipitation"]["values"]), 2)
-        save_cached_daily_precipitation(station_id, prev_day.isoformat(), precipitation)
         total += precipitation
     return round(total, 2)
 
@@ -349,95 +325,10 @@ def collect_day(client: EuskalmetClient, stations: list[dict], day: datetime.dat
 # Public Exposed API Methods
 # ---------------------------------------------------------------------------
 def get_live_weather_data(target_day: datetime.date | None = None) -> pd.DataFrame | None:
-    """Method 1: Returns live/yesterday weather DataFrame WITHOUT saving to DB."""
+    """Return a live/yesterday weather DataFrame without database access."""
     _ensure_logging()
     day = target_day or (datetime.date.today() - datetime.timedelta(days=1))
     client = EuskalmetClient()
     stations = load_station_catalog(client)
     df = collect_day(client, stations, day, PRECIP_DAYS)
     return df if not df.empty else None
-
-
-def get_daily_since_2026(start_date_str: str = "2026-01-01") -> int:
-    """Fast Backfill: Ingests 1 day at a time (61 requests/day instead of 427).
-    Then computes 7-day rolling precipitation locally in SQLite.
-    """
-    _ensure_logging()
-    client = EuskalmetClient()
-    stations = load_station_catalog(client)
-
-    existing_dates = get_existing_weather_dates()
-    start_date = datetime.date.fromisoformat(start_date_str)
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
-
-    current_date = start_date
-    total_saved = 0
-
-    log.info("🚀 Starting Fast Backfill from %s to %s...", start_date_str, yesterday)
-
-    # Step 1: Ingest 1-day daily weather (precip_days=1)
-    while current_date <= yesterday:
-        date_str = current_date.isoformat()
-        if date_str in existing_dates:
-            log.info("⏩ Date %s already in database. Skipping.", date_str)
-        else:
-            log.info("📥 Ingesting daily weather for %s...", date_str)
-            # precip_days=1 eliminates 6 extra API calls per station
-            df_day = collect_day(client, stations, current_date, precip_days=1)
-            if not df_day.empty:
-                saved = save_weather_observations(df_day)
-                total_saved += saved
-
-        current_date += datetime.timedelta(days=1)
-
-    # Step 2: Calculate precip_7d and fwi_proxy locally across stored records
-    log.info("⚡ Recalculating 7-day rolling precipitation & FWI proxy locally...")
-    _recompute_rolling_fwi_in_db()
-
-    log.info("🎉 Backfill completed! Total records saved: %d", total_saved)
-    return total_saved
-
-
-def _recompute_rolling_fwi_in_db():
-    """Computes precip_7d and fwi_proxy in memory using Pandas rolling windows."""
-    import sqlite3
-    import math
-    from Data.Constants.constants import DB_PATH
-
-    conn = sqlite3.connect(str(DB_PATH))
-    df = pd.read_sql_query(
-        "SELECT id, date, municipality, temperature, humidity, wind_speed, precip_7d FROM weather_observations ORDER BY municipality, date",
-        conn,
-    )
-
-    if df.empty:
-        conn.close()
-        return
-
-    # Tratar la lluvia diaria como base
-    df["precip_1d"] = df["precip_7d"].fillna(0.0)
-
-    # Calcular la suma móvil de 7 días por municipio
-    df["precip_7d"] = (
-        df.groupby("municipality")["precip_1d"]
-        .rolling(window=7, min_periods=1)
-        .sum()
-        .reset_index(level=0, drop=True)
-    )
-
-    def calc_fwi(row):
-        t, w, h, p = row["temperature"], row["wind_speed"], row["humidity"], row["precip_7d"]
-        if pd.isna(t) or pd.isna(w) or pd.isna(h) or h <= 0:
-            return None
-        return round((t * w) / (h * (1 + math.log1p(max(0.0, p)))), 4)
-
-    df["fwi_proxy"] = df.apply(calc_fwi, axis=1)
-
-    # Actualización masiva en SQLite
-    cursor = conn.cursor()
-    cursor.executemany(
-        "UPDATE weather_observations SET precip_7d = ?, fwi_proxy = ? WHERE id = ?",
-        [(row["precip_7d"], row["fwi_proxy"], row["id"]) for _, row in df.iterrows()],
-    )
-    conn.commit()
-    conn.close()
