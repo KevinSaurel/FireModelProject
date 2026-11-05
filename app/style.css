@@ -176,6 +176,14 @@ a { color: inherit; }
 
 /* Index: lo que hay debajo de la imagen continua el color del suelo */
 body.home { background: var(--hero-ground); }
+@media (min-width: 761px) {
+    body.home {
+        width: calc(100% / 0.9);
+        max-width: calc(100% / 0.9);
+        zoom: 90%;
+        overflow-x: clip;
+    }
+}
 
 /* ---------- Variables ambientales ---------- */
 .nature-grid-section {
