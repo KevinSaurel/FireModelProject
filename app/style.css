@@ -20,7 +20,7 @@
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; }
+html, body { width: 100%; max-width: 100%; margin: 0; overflow-x: clip; }
 body {
     font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
     color: var(--text);
@@ -357,24 +357,92 @@ a.popup-btn:hover { background: #f0a35e; color: #1a1209 !important; }
 
 /* ---------- Movil ---------- */
 @media (max-width: 760px) {
-    .nav { height: auto; min-height: 64px; padding: 8px 12px; }
-    .nav ul { flex: 1; gap: 6px 12px; width: auto; justify-content: flex-end; flex-wrap: wrap; }
-    .nav a.link { font-size: 9px; letter-spacing: 0.05em; white-space: nowrap; }
-    .nav .brand { display: none; }
-    .nav-brand-group { gap: 0; }
-    .lang-picker-btn { min-height: 30px; padding: 4px 7px; font-size: 9px; }
+    .nav {
+        height: auto; min-height: 0; padding: 8px 12px 6px;
+        flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 6px;
+        background: rgba(8, 20, 31, 0.94); backdrop-filter: blur(8px);
+    }
+    .nav-brand-group { width: 100%; min-width: 0; justify-content: space-between; gap: 8px; }
+    .nav .brand { min-width: 0; gap: 6px; font-size: 10px; letter-spacing: 0.1em; }
+    .nav .brand img { width: 32px; height: 32px; }
+    .nav ul {
+        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%; gap: 2px 8px; padding: 0;
+    }
+    .nav li { min-width: 0; text-align: center; }
+    .nav a.link {
+        display: block; padding: 5px 2px; font-size: clamp(9px, 2.7vw, 11px);
+        line-height: 1.3; letter-spacing: 0.03em; white-space: normal; overflow-wrap: anywhere;
+    }
+    .lang-picker-btn { min-height: 30px; padding: 4px 7px; font-size: 10px; }
     .language-flag { width: 18px; height: 12px; }
-    .hero-content { padding-top: 84px; }
-    .objective { grid-template-columns: 1fr; gap: 12px; padding: 60px 24px 28px 24px; }
-    .objective p { font-size: 15px; }
-    .nature-grid-section { padding: 72px 24px 80px; }
-    .nature-grid-heading { margin-bottom: 32px; }
+    #map { top: 106px; }
+    .panel { top: 148px; left: 10px; right: 10px; max-width: none; padding: 12px 14px; }
+    .panel .controls { flex-wrap: wrap; gap: 8px 14px; }
+    .legend {
+        right: 10px; bottom: max(10px, env(safe-area-inset-bottom));
+        max-width: calc(100vw - 20px); max-height: 34vh; overflow-y: auto;
+        padding: 10px 12px; font-size: 10px; letter-spacing: 0.06em;
+    }
+    .legend .tiers div { font-size: 11px; line-height: 1.35; overflow-wrap: anywhere; }
+    .hero-content { padding: 132px 16px 0; }
+    .hero-content .kicker { font-size: 10px; letter-spacing: 0.2em; line-height: 1.5; }
+    .hero-content h1 { margin-bottom: 22px; font-size: clamp(24px, 8vw, 38px); }
+    .hero-content .buttons { gap: 10px; }
+    .hero-content .buttons .btn { max-width: 100%; padding: 12px 16px; font-size: 10px; letter-spacing: 0.1em; }
+    .objective { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 48px 18px 26px; }
+    .objective .label { letter-spacing: 0.24em; }
+    .objective p { font-size: 15px; overflow-wrap: anywhere; }
+    .nature-grid-section { padding: 64px 16px 72px; }
+    .nature-grid-heading { margin-bottom: 28px; }
+    .nature-grid-heading .kicker { font-size: 10px; letter-spacing: 0.2em; }
+    .nature-grid-heading h2 { font-size: clamp(22px, 7vw, 32px); overflow-wrap: anywhere; }
     .cards-grid { grid-template-columns: 1fr; }
-    .card-content { padding: 22px 22px 26px; }
-    .row { grid-template-columns: 1fr; gap: 12px; }
-    .panel { left: 12px; right: 12px; max-width: none; }
-    table.t { font-size: 12px; }
+    .card-content { min-width: 0; padding: 20px 18px 24px; }
+    .card-content h3 { overflow-wrap: anywhere; }
+    .row { grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
+    .row h2 { letter-spacing: 0.18em; line-height: 1.5; overflow-wrap: anywhere; }
+    .row p, .row li { font-size: 14px; overflow-wrap: anywhere; }
+    .page-body { padding: 28px 16px 56px; }
+    .page-body .inner { width: 100%; min-width: 0; }
+    .info-title { padding: 112px 16px 10px; }
+    .info-title h1 { font-size: clamp(25px, 8vw, 34px); overflow-wrap: anywhere; }
+    table.t { width: 100%; table-layout: fixed; font-size: 10px; }
+    table.t th { padding: 6px 4px; font-size: 9px; letter-spacing: 0.04em; overflow-wrap: anywhere; }
+    table.t td { padding: 7px 4px; overflow-wrap: anywhere; }
     .result .tier-name { font-size: 26px; }
+    .result { gap: 14px; }
+    .result .swatch { width: 48px; height: 48px; }
+    .leaflet-popup-content { max-width: calc(100vw - 60px); overflow-wrap: anywhere; }
+    .leaflet-popup-content-wrapper { max-width: calc(100vw - 40px); }
+    .leaflet-popup-content table { table-layout: fixed; }
+    .leaflet-popup-content td, .leaflet-popup-content th { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 420px) {
+    .nav { padding-right: 10px; padding-left: 10px; }
+    .nav .brand { font-size: 9px; letter-spacing: 0.07em; }
+    .nav .brand img { width: 28px; height: 28px; }
+    .lang-picker-btn { gap: 6px; }
+    .nav ul { column-gap: 4px; }
+    .nav a.link { font-size: 9px; }
+    .panel { top: 142px; }
+    .panel #status { font-size: 11px; }
+    .legend { max-width: calc(100vw - 20px); }
+    .objective { padding-right: 16px; padding-left: 16px; }
+    table.t th, table.t td { padding-right: 3px; padding-left: 3px; }
+}
+
+@media (max-width: 760px) and (orientation: landscape) {
+    #map { top: 84px; }
+    .nav { gap: 2px; padding-top: 4px; padding-bottom: 3px; }
+    .nav-brand-group { min-height: 28px; }
+    .nav .brand img { width: 24px; height: 24px; }
+    .nav ul { display: flex; justify-content: space-between; gap: 4px; }
+    .nav li { flex: 1; }
+    .nav a.link { padding: 3px 1px; font-size: 9px; }
+    .panel { top: 96px; max-height: 35vh; overflow-y: auto; }
+    .legend { max-height: 38vh; }
 }
 
 /* Selector de fecha (modo "Riesgo por dia") */
