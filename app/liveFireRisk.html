@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Live Wildfire Risk - Euskadi</title>
+    <link rel="icon" href="/Static/LogoFire.PNG">
+    <title data-i18n="map.liveTitle">Live Wildfire Risk - Euskadi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -24,40 +25,45 @@
 <body>
 
 <nav class="nav solid">
-    <a class="brand" href="/">Euskadi Fire Risk</a>
+    <div class="nav-brand-group">
+        <a class="brand" href="/"><img src="/Static/LogoFire.PNG" alt=""><span>Euskadi Fire Risk</span></a>
+        <div class="language-picker" id="language-picker"></div>
+    </div>
     <ul>
-        <li><a class="link" href="/">Home</a></li>
-        <li><a class="link active" id="nav-live" href="LiveFireRisk.html">Live Risk</a></li>
-        <li><a class="link" id="nav-forecast" href="LiveFireRisk.html?mode=forecast">Forecast Risk</a></li>
-        <li><a class="link" href="Info.html">Information</a></li>
+        <li><a class="link" href="/" data-i18n="nav.home">Home</a></li>
+        <li><a class="link active" id="nav-live" href="LiveFireRisk.html" data-i18n="nav.live">Live Risk</a></li>
+        <li><a class="link" id="nav-forecast" href="LiveFireRisk.html?mode=forecast" data-i18n="nav.forecast">Forecast Risk</a></li>
+        <li><a class="link" href="Info.html" data-i18n="nav.info">Information</a></li>
     </ul>
 </nav>
 
 <div class="panel">
-    <h3 id="panel-title">Live Risk</h3>
-    <div id="status">Loading live data...</div>
+    <h3 id="panel-title" data-i18n="map.liveTitle">Live Risk</h3>
+    <div id="status" data-i18n="map.loading">Loading live data...</div>
     <div class="controls">
-        <button class="btn small" onclick="load(true)">Refresh</button>
+        <button class="btn small" onclick="load(true)" data-i18n="map.refresh">Refresh</button>
         <span>
             <input type="checkbox" id="chk-stations" checked onchange="toggleStations()">
-            <label for="chk-stations">Stations</label>
+            <label for="chk-stations" data-i18n="map.stations">Stations</label>
         </span>
     </div>
 </div>
 
 <div class="legend">
-    Wildfire probability
+    <span data-i18n="map.probability">Wildfire probability</span>
     <div class="tiers">
-        <div><span class="sw" style="background:#38a169"></span>Low: P &lt; 0.35</div>
-        <div><span class="sw" style="background:#ecc94b"></span>Medium: 0.35 &le; P &lt; 0.50</div>
-        <div><span class="sw" style="background:#dd6b20"></span>High: 0.50 &le; P &lt; 0.70</div>
-        <div><span class="sw" style="background:#e53e3e"></span>Extreme: P &ge; 0.70</div>
+        <div><span class="sw" style="background:#38a169"></span><span data-i18n="legend.low">Low: P &lt; 0.35</span></div>
+        <div><span class="sw" style="background:#ecc94b"></span><span data-i18n="legend.medium">Medium: 0.35 &le; P &lt; 0.50</span></div>
+        <div><span class="sw" style="background:#dd6b20"></span><span data-i18n="legend.high">High: 0.50 &le; P &lt; 0.70</span></div>
+        <div><span class="sw" style="background:#e53e3e"></span><span data-i18n="legend.extreme">Extreme: P &ge; 0.70</span></div>
     </div>
 </div>
 
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/translations/translations.js"></script>
+<script src="/translations/i18n.js"></script>
 
 <script>
     // Mismo origen cuando lo sirve FastAPI; localhost si se abre como archivo.
@@ -66,8 +72,9 @@
     // Misma pagina para los dos modos: ?mode=forecast usa la prevision de manana.
     const MODE = new URLSearchParams(location.search).get('mode') === 'forecast' ? 'forecast' : 'live';
     if (MODE === 'forecast') {
-        document.title = 'Wildfire Risk Forecast - Euskadi';
-        document.getElementById('panel-title').textContent = 'Risk Forecast';
+        document.title = t('map.forecastTitle');
+        document.getElementById('panel-title').dataset.i18n = 'map.forecastTitle';
+        document.getElementById('panel-title').textContent = t('map.forecastTitle');
         document.getElementById('nav-live').classList.remove('active');
         document.getElementById('nav-forecast').classList.add('active');
     }
@@ -87,7 +94,9 @@
         HIGH:    [221, 107, 32],    // naranja
         EXTREME: [229, 62, 62],     // rojo
     };
-    const TIER_LABELS = { LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High', EXTREME: 'Extreme' };
+    function getRiskTierLabel(tierKey) {
+        return t(`tier.${tierKey.toLowerCase()}`);
+    }
 
     function tierOf(p) {
         return p >= T_EXTREME ? 'EXTREME' : p >= T_HIGH ? 'HIGH' : p >= T_MEDIUM ? 'MEDIUM' : 'LOW';
@@ -126,8 +135,17 @@
     }
 
     function sourceName(s) {
-        if (s.name) return MODE === 'forecast' ? `Forecast for ${s.name}` : `Station ${s.name}`;
-        return 'Open-Meteo (grid point)';
+        if (s.name) return MODE === 'forecast'
+            ? t('map.forecastFor', { name: s.name })
+            : t('map.station', { name: s.name });
+        return t('map.openMeteoGrid');
+    }
+
+    function translateSource(source) {
+        if (source === 'Open-Meteo') return t('map.sourceOpenMeteo');
+        if (source === 'Open-Meteo (forecast)') return t('map.sourceOpenMeteo');
+        if (source === 'Euskalmet + Open-Meteo history') return t('map.sourceEuskalmetHistory');
+        return source;
     }
 
     const map = L.map('map').setView([43.0, -2.6], 9);
@@ -143,31 +161,74 @@
 
     let probLayer = null;
     let lastData = null;
+    let statusError = null;
+    let loading = false;
     const stationLayer = L.layerGroup().addTo(map);
+
+    function updateStatus() {
+        const status = document.getElementById('status');
+        if (statusError) {
+            status.textContent = statusError === 'connection' ? t('map.connectionError') : statusError;
+        } else if (loading || !lastData) {
+            status.textContent = t('map.loadingLong');
+        } else if (MODE === 'forecast') {
+            status.textContent = t('map.forecastStatus', {
+                date: lastData.date,
+                stations: lastData.counts.euskalmet,
+                points: lastData.counts.open_meteo
+            });
+        } else {
+            status.textContent = t('map.liveStatus', {
+                date: lastData.date,
+                stations: lastData.counts.euskalmet,
+                points: lastData.counts.open_meteo
+            });
+        }
+    }
+
+    function renderStations(data) {
+        stationLayer.clearLayers();
+        data.stations.forEach(s => {
+            L.circleMarker([s.lat, s.lon], {
+                radius: 5, color: '#08141f', weight: 1,
+                fillColor: riskColor(s.probability), fillOpacity: 0.9,
+                bubblingMouseEvents: false
+            }).bindPopup(
+                popupHtml(
+                    s.name, s.probability, s.lat, s.lon,
+                    `<b>${t('map.temperature')}:</b> ${s.temperature} °C | <b>${t('map.humidity')}:</b> ${s.humidity}%<br/>
+                     <b>${t('map.wind')}:</b> ${s.wind_speed} km/h | <b>${t('map.rainfall7d')}:</b> ${s.rain_7d} mm<br/>
+                     <b>${t('map.dryDays')}:</b> ${s.dry_streak}<br/>
+                     <small>${t('map.source')}: ${translateSource(s.source)}</small><br/>`
+                )
+            ).addTo(stationLayer);
+        });
+        toggleStations();
+    }
 
     // Shared popup content: risk tier, probability, and details button.
     function popupHtml(title, p, lat, lon, extra = '') {
         return `<strong>${title}</strong><br/>
-            <span class="popup-tier" style="background:${riskColor(p)}"></span>${TIER_LABELS[tierOf(p)]}
+            <span class="popup-tier" style="background:${riskColor(p)}"></span>${getRiskTierLabel(tierOf(p))}
             &middot; ${(p * 100).toFixed(2)}%<br/>
             ${extra}
-            <a class="popup-btn" href="Detail.html?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&mode=${MODE}">View details</a>`;
+            <a class="popup-btn" href="Detail.html?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&mode=${MODE}">${t('map.viewDetails')}</a>`;
     }
 
     // Clicking the map shows a popup with the value, main source, and details link.
     map.on('click', (e) => {
         const { lat, lng } = e.latlng;
         if (!lastData) {
-            L.popup().setLatLng(e.latlng).setContent('Loading data...').openOn(map);
+            L.popup().setLatLng(e.latlng).setContent(t('map.loadingPopup')).openOn(map);
             return;
         }
         const p = cellProbability(lastData.points, lastData.grid_size, lat, lng);
         let extra = '';
         if (lastData.samples && lastData.samples.length) {
             const main = nearbySources(lastData.samples, lat, lng, 1)[0];
-            extra = `<small>Main source: ${sourceName(main.s)} (${main.km.toFixed(1)} km)</small><br/>`;
+            extra = `<small>${t('map.mainSource')}: ${sourceName(main.s)} (${main.km.toFixed(1)} km)</small><br/>`;
         }
-        L.popup().setLatLng(e.latlng).setContent(popupHtml('Selected point', p, lat, lng, extra)).openOn(map);
+        L.popup().setLatLng(e.latlng).setContent(popupHtml(t('map.selectedPoint'), p, lat, lng, extra)).openOn(map);
     });
 
     // Convierte la malla n x n de la API en una imagen anclada a coordenadas.
@@ -203,41 +264,27 @@
     }
 
     async function load(refresh = false) {
-        const status = document.getElementById('status');
-        status.textContent = 'Loading live data... (the first load may take up to a minute)';
+        loading = true;
+        statusError = null;
+        updateStatus();
         try {
             const res = await fetch(`${API}/api/v1/fire-risk/heatmap?resolution=50&mode=${MODE}${refresh ? '&refresh=true' : ''}`);
             const data = await res.json();
-            if (data.error) { status.textContent = data.error; return; }
+            if (data.error) {
+                statusError = data.error;
+                return;
+            }
             lastData = data;
 
             if (probLayer) map.removeLayer(probLayer);
             probLayer = buildProbabilityOverlay(data.points, data.grid_size).addTo(map);
-
-            stationLayer.clearLayers();
-            data.stations.forEach(s => {
-                L.circleMarker([s.lat, s.lon], {
-                    radius: 5, color: '#08141f', weight: 1,
-                    fillColor: riskColor(s.probability), fillOpacity: 0.9,
-                    bubblingMouseEvents: false        // el clic en una estacion no abre el popup del mapa
-                }).bindPopup(
-                    popupHtml(
-                        s.name, s.probability, s.lat, s.lon,
-                        `<b>Temperature:</b> ${s.temperature} °C | <b>Humidity:</b> ${s.humidity}%<br/>
-                         <b>Wind:</b> ${s.wind_speed} km/h | <b>Rainfall (7 days):</b> ${s.rain_7d} mm<br/>
-                         <b>Consecutive dry days:</b> ${s.dry_streak}<br/>
-                         <small>Source: ${s.source}</small><br/>`
-                    )
-                ).addTo(stationLayer);
-            });
-            toggleStations();
-
-            status.textContent = MODE === 'forecast'
-                ? `Forecast for ${data.date}. ${data.counts.euskalmet} station areas and ${data.counts.open_meteo} grid points, all using the Open-Meteo forecast.`
-                : `Data for ${data.date}. ${data.counts.euskalmet} Euskalmet stations and ${data.counts.open_meteo} Open-Meteo grid points.`;
+            renderStations(data);
         } catch (e) {
-            status.textContent = 'Could not connect to the API. Is Uvicorn running?';
+            statusError = 'connection';
             console.error(e);
+        } finally {
+            loading = false;
+            updateStatus();
         }
     }
 
@@ -245,6 +292,16 @@
         const on = document.getElementById('chk-stations').checked;
         if (on) stationLayer.addTo(map); else map.removeLayer(stationLayer);
     }
+
+    window.addEventListener('app-language-changed', () => {
+        if (MODE === 'forecast') document.title = t('map.forecastTitle');
+        else document.title = t('map.liveTitle');
+        updateStatus();
+        if (lastData) {
+            map.closePopup();
+            renderStations(lastData);
+        }
+    });
 
     load();
 </script>

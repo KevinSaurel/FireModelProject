@@ -44,9 +44,12 @@ a { color: inherit; }
 }
 .nav.solid { background: var(--ink); border-bottom: 1px solid var(--line); }
 .nav .brand {
+    display: inline-flex; align-items: center; gap: 10px;
     font-weight: 500; font-size: 13px; letter-spacing: 0.28em;
     text-transform: uppercase; text-decoration: none;
 }
+.nav .brand img { width: 50px; height: 50px; object-fit: contain; }
+.nav-brand-group { display: flex; align-items: center; gap: 16px; }
 .nav ul { list-style: none; display: flex; gap: 32px; margin: 0; padding: 0; }
 .nav a.link {
     font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
@@ -54,6 +57,39 @@ a { color: inherit; }
     border-bottom: 1px solid transparent; transition: color 0.2s, border-color 0.2s;
 }
 .nav a.link:hover, .nav a.link.active { color: #fff; border-bottom-color: var(--accent); }
+.language-picker { position: relative; }
+.lang-picker-btn {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 34px;
+    padding: 6px 9px; border: 1px solid var(--line); border-radius: 2px;
+    background: rgba(255, 255, 255, 0.08); color: var(--text);
+    font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px; letter-spacing: 0.04em; cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+.lang-picker-btn:hover, .lang-picker-btn[aria-expanded="true"] {
+    background: rgba(255, 255, 255, 0.18); border-color: rgba(255, 255, 255, 0.4);
+}
+.language-flag { display: block; width: 20px; height: 14px; flex: none; border-radius: 1px; }
+.lang-picker-chevron {
+    width: 6px; height: 6px; margin: -3px 1px 0 3px;
+    border-right: 1px solid currentColor; border-bottom: 1px solid currentColor;
+    transform: rotate(45deg); transition: transform 0.2s;
+}
+.lang-picker-btn[aria-expanded="true"] .lang-picker-chevron { margin-top: 3px; transform: rotate(225deg); }
+.lang-picker-menu {
+    position: absolute; top: calc(100% + 6px); left: 0; z-index: 2100;
+    min-width: 150px; padding: 4px; border: 1px solid var(--line);
+    background: rgba(8, 20, 31, 0.97); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+.lang-picker-menu[hidden] { display: none; }
+.lang-picker-option {
+    display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px;
+    border: 0; background: transparent; color: var(--text); text-align: left;
+    font: inherit; font-size: 12px; cursor: pointer;
+}
+.lang-picker-option:hover, .lang-picker-option:focus-visible, .lang-picker-option.active {
+    background: rgba(255, 255, 255, 0.12); outline: none;
+}
 
 /* ---------- Botones ---------- */
 .btn {
@@ -63,9 +99,11 @@ a { color: inherit; }
     text-transform: uppercase; text-decoration: none;
     transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
-.btn:hover { background: #fff; color: var(--ink); }
+.btn:hover { background: rgba(255, 255, 255, 0.16); color: #fff; backdrop-filter: blur(3px); }
+.btn:active { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.5); color: #fff; }
 .btn.solid { background: var(--accent); border-color: var(--accent); color: #1a1209; }
-.btn.solid:hover { background: #fff; border-color: #fff; }
+.btn.solid:hover { background: rgba(240, 163, 94, 0.25); border-color: var(--accent); color: #fff; }
+.btn.solid:active { background: rgba(240, 163, 94, 0.12); border-color: rgba(240, 163, 94, 0.6); color: #fff; }
 .btn.small { padding: 9px 18px; font-size: 11px; }
 
 /* ---------- Cielo y montanas ---------- */
@@ -311,11 +349,13 @@ a.popup-btn:hover { background: #f0a35e; color: #1a1209 !important; }
 
 /* ---------- Movil ---------- */
 @media (max-width: 760px) {
-    /* El menu tiene 4 enlaces: que quepan en una sola linea */
-    .nav { padding: 0 12px; }
-    .nav ul { gap: 10px; width: 100%; justify-content: space-between; }
+    .nav { height: auto; min-height: 64px; padding: 8px 12px; }
+    .nav ul { flex: 1; gap: 6px 12px; width: auto; justify-content: flex-end; flex-wrap: wrap; }
     .nav a.link { font-size: 9px; letter-spacing: 0.05em; white-space: nowrap; }
     .nav .brand { display: none; }
+    .nav-brand-group { gap: 0; }
+    .lang-picker-btn { min-height: 30px; padding: 4px 7px; font-size: 9px; }
+    .language-flag { width: 18px; height: 12px; }
     .hero-content { padding-top: 84px; }
     .objective { grid-template-columns: 1fr; gap: 12px; padding: 60px 24px 28px 24px; }
     .objective p { font-size: 15px; }
