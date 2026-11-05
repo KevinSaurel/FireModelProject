@@ -39,6 +39,18 @@ APP_DIR = Path(__file__).resolve().parent
 ROOT_DIR = APP_DIR.parent
 sys.path.insert(0, str(ROOT_DIR))
 
+import os
+
+# If running in Cloud Run, recreate PEM keys from environment variables
+if os.getenv("EUSKALMET_PRIVATE_KEY"):
+    (ROOT_DIR / "private_key.pem").write_text(
+        os.getenv("EUSKALMET_PRIVATE_KEY").replace("\\n", "\n")
+    )
+if os.getenv("EUSKALMET_PUBLIC_KEY"):
+    (ROOT_DIR / "public_key.pem").write_text(
+        os.getenv("EUSKALMET_PUBLIC_KEY").replace("\\n", "\n")
+    )
+
 from Data.ExternalAPICall.euskalmetAPI import (  # noqa: E402
     EuskalmetClient,
     get_station_day,
@@ -51,6 +63,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-7s | 
 app = FastAPI(title="Euskadi Fire Risk - Live Heatmap")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 app.mount("/Static", StaticFiles(directory=APP_DIR / "Static"), name="static")
+app.mount("/translations", StaticFiles(directory=APP_DIR / "translations"), name="translations")
 
 INDEX_PATH = APP_DIR / "index.html"
 MODEL_PATH = ROOT_DIR / "Model" / "fireTrainModel.pkl"
