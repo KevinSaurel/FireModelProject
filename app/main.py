@@ -16,6 +16,7 @@ Data flow (live only, no municipality layer):
 """
 
 import datetime
+import csv
 import json
 import logging
 import math
@@ -56,6 +57,12 @@ from Data.ExternalAPICall.euskalmetAPI import (  # noqa: E402
     get_station_day,
     load_station_catalog,
 )
+from Data.ExternalAPICall.openMeteoHistoricalAPI import (  # noqa: E402
+    FEATURE_COLUMNS,
+    fetch_historical_day_data,
+)
+from Data.ExternalAPICall.openMeteoAPI import load_municipalities_centroids  # noqa: E402
+from Model.fireTrainingModel import predict_fire_risk  # noqa: E402
 
 log = logging.getLogger("heatmap")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-7s | %(message)s")
@@ -69,6 +76,8 @@ INDEX_PATH = APP_DIR / "index.html"
 MODEL_PATH = ROOT_DIR / "Model" / "fireTrainModel.pkl"
 SCALER_PATH = ROOT_DIR / "Model" / "scaler.pkl"
 TIER_THRESHOLDS_PATH = ROOT_DIR / "Model" / "tier_thresholds.json"
+TRAINING_DATA_PATH = ROOT_DIR / "Data" / "MITECO" / "real_weather_training.csv"
+MUNICIPALITIES_GEOJSON_PATH = ROOT_DIR / "Data" / "GeoJSON" / "municipios-euskadi.geojson"
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 EUSKADI_BOUNDS = {"lat_min": 42.47, "lat_max": 43.45, "lon_min": -3.45, "lon_max": -1.73}
@@ -115,6 +124,130 @@ def html_page(page: str):
         if f.stem.lower() == page.lower():
             return FileResponse(f)
     raise HTTPException(status_code=404, detail="Page not found")
+
+
+def _line_start_at_or_before(source, offset: int, data_start: int) -> int:
+    cursor = offset
+    while cursor > data_start:
+        block_start = max(data_start, cursor - 4096)
+        source.seek(block_start)
+        block = source.read(cursor - block_start)
+        newline_index = block.rfind(b"\n")
+        if newline_index >= 0:
+            return block_start + newline_index + 1
+        cursor = block_start
+    return data_start
+
+
+def load_training_rows_for_date(target_date: str) -> pd.DataFrame:
+    """Seek to a matching date in the chronologically sorted training CSV."""
+    if not TRAINING_DATA_PATH.exists():
+        return pd.DataFrame()
+
+    with TRAINING_DATA_PATH.open("rb") as source:
+        header_bytes = source.readline()
+        if not header_bytes:
+            return pd.DataFrame()
+        columns = next(csv.reader([header_bytes.decode("utf-8-sig").rstrip("\r\n")]))
+        data_start = source.tell()
+        file_size = TRAINING_DATA_PATH.stat().st_size
+        low, high = data_start, file_size
+        candidate = None
+
+        while low < high:
+            midpoint = (low + high) // 2
+            line_start = _line_start_at_or_before(source, midpoint, data_start)
+            source.seek(line_start)
+            line = source.readline()
+            if not line:
+                high = midpoint
+                continue
+            row_date = line.partition(b",")[0].decode("ascii", errors="ignore")
+            if row_date < target_date:
+                low = source.tell()
+            else:
+                candidate = line_start
+                high = line_start
+
+        if candidate is None:
+            return pd.DataFrame()
+
+        records = []
+        source.seek(candidate)
+        for line in source:
+            row_date = line.partition(b",")[0].decode("ascii", errors="ignore")
+            if row_date > target_date:
+                break
+            if row_date == target_date:
+                values = next(csv.reader([line.decode("utf-8").rstrip("\r\n")]))
+                if len(values) != len(columns):
+                    raise ValueError(f"Malformed training CSV row for {target_date}")
+                records.append(dict(zip(columns, values)))
+
+    if not records:
+        return pd.DataFrame()
+
+    frame = pd.DataFrame.from_records(records)
+    for column in FEATURE_COLUMNS:
+        if column in frame.columns:
+            frame[column] = pd.to_numeric(frame[column], errors="coerce")
+    frame["date"] = target_date
+    return frame
+
+
+@app.get("/api/risk/historical")
+def get_historical_risk(date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$")):
+    try:
+        target_date = datetime.date.fromisoformat(date)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="date must be a valid YYYY-MM-DD date") from exc
+    if target_date.isoformat() != date:
+        raise HTTPException(status_code=422, detail="date must use YYYY-MM-DD format")
+
+    try:
+        weather = load_training_rows_for_date(date)
+        if weather.empty:
+            log.info("No local training rows for %s; fetching Open-Meteo archive data", date)
+            weather = fetch_historical_day_data(load_municipalities_centroids(), date)
+
+        # Puente bidireccional de alias para garantizar que existan ambos nombres de columna
+        aliases = [
+            ("temp_mean", "temperature"),
+            ("humidity_mean", "humidity"),
+            ("humidity_min", "min_humidity"),
+            ("wind_speed_mean", "wind_speed"),
+            ("wind_speed_max", "max_wind_speed"),
+            ("rain_1d", "precip_1d"),
+            ("rain_7d", "precip_7d"),
+            ("rain_14d", "precip_14d"),
+            ("rain_30d", "precip_30d"),
+            ("true_dry_streak", "dry_spell_days"),
+        ]
+        for col_a, col_b in aliases:
+            if col_a in weather.columns and col_b not in weather.columns:
+                weather[col_b] = weather[col_a]
+            elif col_b in weather.columns and col_a not in weather.columns:
+                weather[col_a] = weather[col_b]
+
+        predictions = predict_fire_risk(weather)
+        if predictions.empty:
+            raise HTTPException(status_code=503, detail="Historical risk model returned no predictions")
+        safe_predictions = predictions.astype(object).where(pd.notna(predictions), None)
+        return safe_predictions.to_dict(orient="records")
+    except HTTPException:
+        raise
+    except (OSError, ValueError, RuntimeError, requests.RequestException) as exc:
+        log.exception("Historical risk request failed for %s", date)
+        raise HTTPException(status_code=502, detail=f"Could not calculate historical risk: {exc}") from exc
+    except Exception as exc:
+        log.exception("Historical risk prediction failed for %s", date)
+        raise HTTPException(status_code=503, detail="Historical risk prediction failed") from exc
+
+@app.get("/api/geo/municipalities")
+def get_municipality_geojson():
+    if not MUNICIPALITIES_GEOJSON_PATH.is_file():
+        raise HTTPException(status_code=404, detail="Municipality GeoJSON is not available")
+    return FileResponse(MUNICIPALITIES_GEOJSON_PATH, media_type="application/geo+json")
 
 
 # Fallback column order, only used if the pickles carry no feature_names_in_.
@@ -258,11 +391,11 @@ def make_features(daily: dict, obs: dict | None = None, day: datetime.date | Non
     f["temp_30d_avg"] = sum(temps) / len(temps)
     f["temp_anomaly"] = f["temp_mean"] - f["temp_30d_avg"]
 
-    t, h, w, p = f["temp_mean"], f["humidity_mean"], f["wind_speed_mean"], f["rain_7d"]
-    f["fwi_proxy"] = (t * w) / (h * (1 + math.log1p(max(0.0, p)))) if h > 0 else 0.0
-
-    es = 0.6108 * math.exp(17.27 * t / (t + 237.3))   # saturation vapour pressure (kPa)
-    f["vpd"] = es * (1 - min(max(h, 0.0), 100.0) / 100.0)
+    # These two features use daily extremes to match the training CSV.
+    tx, hm, wx = f["temp_max"], f["humidity_min"], f["wind_speed_max"]
+    f["fwi_proxy"] = (tx * wx) / (max(hm, 1.0) * (1 + math.log1p(max(0.0, f["rain_7d"]))))
+    es = 0.6108 * math.exp(17.27 * tx / (tx + 237.3))   # saturation vapour pressure (kPa)
+    f["vpd"] = es * (1 - min(max(hm, 0.0), 100.0) / 100.0)
 
     # FAO-56 reference evapotranspiration summed over the last 14 days (mm)
     et0 = [float(v) for v in (daily.get("et0_fao_evapotranspiration") or [])[-14:] if v is not None]

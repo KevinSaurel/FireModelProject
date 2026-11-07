@@ -1,6 +1,6 @@
 """
-Inferencia ML, Evaluación y Optimización de Umbrales para Predicción de Incendios.
-Soporta inferencia en tiempo real (predict_fire_risk) y búsqueda grid de umbrales óptimos.
+ML Inference, Evaluation, and Threshold Optimization for Wildfire Risk Prediction.
+Supports live/historical inference (predict_fire_risk) and threshold grid search evaluation.
 """
 
 from datetime import datetime
@@ -14,14 +14,10 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
-    accuracy_score,
-    average_precision_score,
-    classification_report,
     confusion_matrix,
     f1_score,
     precision_score,
     recall_score,
-    roc_auc_score,
 )
 from sklearn.model_selection import train_test_split
 
@@ -38,10 +34,27 @@ THRESHOLDS_PATH = MODEL_PATH.parent / "tier_thresholds.json"
 
 log = logging.getLogger("fire_training_model")
 
+COLUMN_ALIASES = {
+    "temp_mean": "temperature",
+    "humidity_mean": "humidity",
+    "humidity_min": "min_humidity",
+    "wind_speed_mean": "wind_speed",
+    "wind_speed_max": "max_wind_speed",
+    "rain_1d": "precip_1d",
+    "rain_7d": "precip_7d",
+    "rain_14d": "precip_14d",
+    "rain_30d": "precip_30d",
+    "true_dry_streak": "dry_spell_days",
+}
+
 
 def compute_fwi_proxy(row: pd.Series) -> float | None:
-    """Calcula el índice FWI proxy estricto para una fila de datos meteorológicos."""
-    t, h, w, p = row.get("temperature"), row.get("humidity"), row.get("wind_speed"), row.get("precip_7d")
+    """Calculates FWI proxy based on temperature, wind speed, humidity, and 7-day rainfall."""
+    t = row.get("temperature") if "temperature" in row else row.get("temp_mean")
+    h = row.get("humidity") if "humidity" in row else row.get("humidity_mean")
+    w = row.get("max_wind_speed") if "max_wind_speed" in row else row.get("wind_speed")
+    p = row.get("precip_7d") if "precip_7d" in row else row.get("rain_7d")
+
     if any(v is None or pd.isna(v) for v in [t, h, w, p]):
         return None
     try:
@@ -59,107 +72,142 @@ def compute_fwi_proxy(row: pd.Series) -> float | None:
         return None
 
 
+def compute_vpd(row: pd.Series) -> float | None:
+    """Calculates Vapor Pressure Deficit (VPD in kPa) using peak daily drying capacity."""
+    t = row.get("temp_max") if "temp_max" in row else row.get("temperature")
+    h = row.get("min_humidity") if "min_humidity" in row else row.get("humidity")
+
+    if any(v is None or pd.isna(v) for v in [t, h]):
+        return None
+    try:
+        t_val = float(t)
+        h_val = max(0.0, min(100.0, float(h)))
+        sat_vp = 0.61078 * math.exp((17.27 * t_val) / (t_val + 237.3))
+        return round(sat_vp * (1.0 - h_val / 100.0), 4)
+    except (ValueError, TypeError):
+        return None
+
+
 def map_risk_level(
     probability: float | None,
     thresholds: dict[str, float] | None = None,
 ) -> str:
-    """Asigna tiers según los umbrales guardados o límites predeterminados."""
+    """Maps probability scores to Low, Medium, High, and Extreme risk tiers."""
     if probability is None or pd.isna(probability):
         return "Sin datos"
-    if thresholds is not None:
-        if probability < thresholds.get("low", 0.2569):
-            return "Low"
-        if probability < thresholds.get("medium", 0.5016):
-            return "Medium"
-        if probability < thresholds.get("high", 0.7505):
-            return "High"
-        return "Extreme"
-    elif probability < 0.25:
+
+    low_t = thresholds.get("low", 0.35) if thresholds else 0.35
+    med_t = thresholds.get("medium", 0.50) if thresholds else 0.50
+    high_t = thresholds.get("high", 0.70) if thresholds else 0.70
+
+    if probability < low_t:
         return "Low"
-    elif probability < 0.50:
+    if probability < med_t:
         return "Medium"
-    elif probability < 0.75:
+    if probability < high_t:
         return "High"
-    else:
-        return "Extreme"
+    return "Extreme"
 
 
 def prepare_feature_columns(df_in: pd.DataFrame, feature_cols: list[str]) -> pd.DataFrame:
-    """Asegura que todas las características requeridas por el modelo existan."""
+    """Ensures all feature columns exist, maps aliases, and calculates missing metrics."""
     df = df_in.copy()
 
-    if "wind_speed" in df.columns:
-        df["wind_speed"] = pd.to_numeric(df["wind_speed"], errors="coerce")
+    for src, dst in COLUMN_ALIASES.items():
+        if src in df.columns and dst not in df.columns:
+            df[dst] = df[src]
+        elif dst in df.columns and src not in df.columns:
+            df[src] = df[dst]
 
-    if "fwi_proxy" in feature_cols:
-        if "fwi_proxy" not in df.columns or df["fwi_proxy"].isna().all():
-            df["fwi_proxy"] = df.apply(compute_fwi_proxy, axis=1)
+    for col in ["temperature", "temp_max", "temp_min", "humidity", "min_humidity", "wind_speed", "max_wind_speed"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    for p_col in ["precip_1d", "precip_7d", "precip_14d", "precip_30d"]:
+        if p_col in df.columns:
+            df[p_col] = pd.to_numeric(df[p_col], errors="coerce").fillna(0.0)
+
+    if "fwi_proxy" in feature_cols and ("fwi_proxy" not in df.columns or df["fwi_proxy"].isna().all()):
+        df["fwi_proxy"] = df.apply(compute_fwi_proxy, axis=1)
+
+    if "vpd" in feature_cols and ("vpd" not in df.columns or df["vpd"].isna().all()):
+        df["vpd"] = df.apply(compute_vpd, axis=1)
 
     if "date" in df.columns:
         dt_series = pd.to_datetime(df["date"], errors="coerce")
-        if "month" in feature_cols and "month" not in df.columns:
+        if "month" in feature_cols and ("month" not in df.columns or df["month"].isna().all()):
             df["month"] = dt_series.dt.month
-        if "day_of_year" in feature_cols and "day_of_year" not in df.columns:
+        if "day_of_year" in feature_cols and ("day_of_year" not in df.columns or df["day_of_year"].isna().all()):
             df["day_of_year"] = dt_series.dt.dayofyear
 
-    for p_col in ["precip_1d", "precip_7d", "precip_14d", "precip_30d"]:
-        if p_col in feature_cols and p_col in df.columns:
-            df[p_col] = df[p_col].fillna(0.0)
+    if "temp_anomaly" in feature_cols and "temp_anomaly" not in df.columns:
+        df["temp_anomaly"] = 0.0
+    if "et0_14d" in feature_cols and "et0_14d" not in df.columns:
+        df["et0_14d"] = 0.0
+
+    for col in feature_cols:
+        if col not in df.columns:
+            df[col] = 0.0
+        else:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
 
     return df
 
 
 def predict_fire_risk(df_weather: pd.DataFrame) -> pd.DataFrame:
-    """Ejecuta inferencia ML en vivo utilizando el modelo preentrenado."""
+    """Runs machine learning inference using the trained Random Forest model."""
     if df_weather is None or df_weather.empty:
-        log.error("❌ No se recibieron observaciones meteorológicas.")
+        log.error("❌ No weather observations received.")
         return pd.DataFrame()
 
     if not MODEL_PATH.exists():
-        log.error("❌ Modelo no encontrado en: %s", MODEL_PATH)
+        log.error("❌ Model file not found at: %s", MODEL_PATH)
         return pd.DataFrame()
 
-    log.info("🤖 Cargando modelo Random Forest (%s)...", MODEL_PATH.name)
+    log.info("🤖 Loading Random Forest model (%s)...", MODEL_PATH.name)
     model = joblib.load(MODEL_PATH)
 
     if hasattr(model, "feature_names_in_"):
         features = list(model.feature_names_in_)
     else:
-        features = ["temperature", "humidity", "wind_speed", "precip_7d", "fwi_proxy"]
+        features = [
+            "temperature", "temp_max", "temp_min", "humidity", "min_humidity",
+            "wind_speed", "max_wind_speed", "precip_1d", "precip_7d", "precip_14d",
+            "precip_30d", "dry_spell_days", "temp_anomaly", "et0_14d", "fwi_proxy",
+            "vpd", "month", "day_of_year",
+        ]
 
     df = prepare_feature_columns(df_weather, features)
-    valid_mask = df[features].notna().all(axis=1)
 
-    df["risk_probability"] = None
-    df["risk_tier"] = "Sin datos"
+    df["risk_probability"] = 0.0
+    df["risk_tier"] = "Low"
     df["prediction_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    if valid_mask.any():
-        X_valid = df.loc[valid_mask, features]
-        probs = model.predict_proba(X_valid)[:, 1]
-        df.loc[valid_mask, "risk_probability"] = probs
+    X = df[features]
+    probs = model.predict_proba(X)[:, 1]
+    df["risk_probability"] = np.round(probs, 4)
 
-        thresholds = None
-        if THRESHOLDS_PATH.exists():
-            try:
-                thresholds = json.loads(THRESHOLDS_PATH.read_text(encoding="utf-8"))
-            except Exception as e:
-                log.warning("Error leyendo tier_thresholds.json: %s", e)
+    thresholds = None
+    if THRESHOLDS_PATH.exists():
+        try:
+            thresholds = json.loads(THRESHOLDS_PATH.read_text(encoding="utf-8"))
+        except Exception as e:
+            log.warning("Error reading tier_thresholds.json: %s", e)
 
-        df.loc[valid_mask, "risk_tier"] = df.loc[valid_mask, "risk_probability"].apply(
-            lambda p: map_risk_level(p, thresholds)
-        )
+    df["risk_tier"] = df["risk_probability"].apply(
+        lambda p: map_risk_level(p, thresholds)
+    )
 
     log.info(
-        "📊 Inferencia finalizada: %d municipios evaluados correctamente.",
-        valid_mask.sum(),
+        "📊 Inference completed: %d municipalities evaluated successfully.",
+        len(df),
     )
 
     return df
 
 
 def optimize_thresholds(y_test: np.ndarray, y_prob: np.ndarray):
-    """Búsqueda Grid Iterativa para encontrar los umbrales óptimos de decisión."""
+    """Grid Search Optimization for decision thresholds across F1, F2, Precision, and Youden J."""
     print("\n" + "=" * 70)
     print("      🔍 RUNNING AUTOMATED THRESHOLD GRID SEARCH (100 STEPS) 🔍")
     print("=" * 70)
@@ -175,11 +223,7 @@ def optimize_thresholds(y_test: np.ndarray, y_prob: np.ndarray):
         prec = precision_score(y_test, y_pred, zero_division=0)
         rec = recall_score(y_test, y_pred, zero_division=0)
         f1 = f1_score(y_test, y_pred, zero_division=0)
-        
-        # F2 Score (Prioritizes Recall 2x over Precision)
         f2 = (5 * prec * rec) / (4 * prec + rec) if (4 * prec + rec) > 0 else 0.0
-        
-        # Youden's J Statistic = TPR - FPR
         fpr = fp / (fp + tn) if (fp + tn) > 0 else 0.0
         youden = rec - fpr
 
@@ -198,17 +242,10 @@ def optimize_thresholds(y_test: np.ndarray, y_prob: np.ndarray):
 
     df_res = pd.DataFrame(results)
 
-    # 1. Best Balance (Max F1)
     best_f1_row = df_res.loc[df_res["f1"].idxmax()]
-    
-    # 2. Safety First (Max F2 - Catching more fires)
     best_f2_row = df_res.loc[df_res["f2"].idxmax()]
-
-    # 3. High Precision Goal (Precision >= 80%)
     prec_80_df = df_res[df_res["precision"] >= 0.80]
     best_prec_80_row = prec_80_df.iloc[0] if not prec_80_df.empty else best_f1_row
-
-    # 4. Youden's Index Optimal Cutoff
     best_youden_row = df_res.loc[df_res["youden"].idxmax()]
 
     print(f"1️⃣ BEST OVERALL BALANCE (Max F1-Score):")
@@ -240,25 +277,30 @@ def optimize_thresholds(y_test: np.ndarray, y_prob: np.ndarray):
 
 
 def test_model():
-    """Evaluación del modelo y optimización de umbrales sin reentrenar."""
+    """Evaluates the model against holdout data and performs threshold grid search."""
     if not MODEL_PATH.exists():
-        log.error("❌ Modelo no encontrado en: %s", MODEL_PATH)
+        log.error("❌ Model not found at: %s", MODEL_PATH)
         return
 
-    log.info("🤖 Cargando modelo preentrenado desde %s...", MODEL_PATH)
+    log.info("🤖 Loading pretrained model from %s...", MODEL_PATH)
     model = joblib.load(MODEL_PATH)
 
     if hasattr(model, "feature_names_in_"):
         feature_cols = list(model.feature_names_in_)
     else:
-        feature_cols = ["temperature", "humidity", "wind_speed", "precip_7d", "fwi_proxy"]
+        feature_cols = [
+            "temperature", "temp_max", "temp_min", "humidity", "min_humidity",
+            "wind_speed", "max_wind_speed", "precip_1d", "precip_7d", "precip_14d",
+            "precip_30d", "dry_spell_days", "temp_anomaly", "et0_14d", "fwi_proxy",
+            "vpd", "month", "day_of_year",
+        ]
 
     dataset_path = MITECO_DATASET_PATH if MITECO_DATASET_PATH.exists() else Path("real_weather_training.csv")
     if not dataset_path.exists():
-        log.error("❌ Dataset de evaluación no encontrado.")
+        log.error("❌ Evaluation dataset not found.")
         return
 
-    log.info("📥 Cargando dataset de evaluación desde %s...", dataset_path)
+    log.info("📥 Loading evaluation dataset from %s...", dataset_path)
     df = pd.read_csv(dataset_path)
 
     df_prep = prepare_feature_columns(df, feature_cols)
@@ -268,7 +310,7 @@ def test_model():
 
     sample_cap = 3500000
     if len(clean_df) > sample_cap:
-        log.info("Submuestreando %d registros para evaluación...", sample_cap)
+        log.info("Subsampling %d records for evaluation...", sample_cap)
         clean_df = clean_df.sample(n=sample_cap, random_state=42)
 
     X = clean_df[feature_cols]
@@ -278,14 +320,12 @@ def test_model():
         X, y, test_size=0.20, random_state=42, stratify=y
     )
 
-    log.info("⚡ Inferencia en holdout test set (%d muestras)...", len(X_test))
+    log.info("⚡ Inference on holdout test set (%d samples)...", len(X_test))
     y_prob = model.predict_proba(X_test)[:, 1]
 
-    # Ejecutar optimizador automático de umbrales
     optimize_thresholds(y_test.values, y_prob)
 
 
 if __name__ == "__main__":
-    
     logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-7s | %(message)s")
     test_model()

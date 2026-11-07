@@ -1,6 +1,6 @@
 """
-High-Precision Random Forest Model Training for Wildfire Prediction.
-Uses 18 engineered climate features, deep decision trees, and stratified splits.
+High-Precision & Smooth Calibration Random Forest Model Training for Wildfire Risk.
+Uses 18 engineered climate features with tuned depth (max_depth=13) and leaf smoothing.
 """
 
 import json
@@ -10,19 +10,17 @@ import sys
 
 import joblib
 import pandas as pd
-
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import (
-    average_precision_score,
-    classification_report,
-    roc_auc_score,
-)
+from sklearn.metrics import average_precision_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR))
 
-from Data.Constants.constants import MODEL_PATH
+try:
+    from Data.Constants.constants import MODEL_PATH
+except ImportError:
+    MODEL_PATH = BASE_DIR / "Model" / "fireTrainModel.pkl"
 
 MITECO_DATASET_PATH = BASE_DIR / "Data" / "MITECO" / "real_weather_training.csv"
 THRESHOLDS_PATH = MODEL_PATH.parent / "tier_thresholds.json"
@@ -58,31 +56,33 @@ def train_model():
     target_col = "fire_risk"
 
     clean_df = df.dropna(subset=feature_cols + [target_col])
-    log.info("Total dataset rows: %d | Overall positive rate: %.3f", len(clean_df), clean_df[target_col].mean())
+    log.info(
+        "Total dataset rows: %d | Overall positive rate: %.4f",
+        len(clean_df),
+        clean_df[target_col].mean(),
+    )
 
-    # Subsample 3,500,000 samples for high-capacity training
     sample_cap = 3500000
     if len(clean_df) > sample_cap:
-        log.info("Subsampling %d records for deep Random Forest optimization...", sample_cap)
+        log.info("Subsampling %d records for tuned Random Forest training...", sample_cap)
         clean_df = clean_df.sample(n=sample_cap, random_state=42)
 
     X = clean_df[feature_cols]
     y = clean_df[target_col].astype(int)
 
-    # Stratified 80/20 Train/Test split
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, random_state=42, stratify=y
     )
 
     log.info(
-        "Training Deep Random Forest (300 trees, depth=18) on %d samples across 18 features...",
+        "Training Calibrated Random Forest (300 trees, max_depth=13, min_samples_leaf=15) on %d samples...",
         len(X_train),
     )
     rf = RandomForestClassifier(
         n_estimators=300,
-        max_depth=18,
-        min_samples_leaf=5,
-        min_samples_split=10,
+        max_depth=13,
+        min_samples_leaf=15,
+        min_samples_split=20,
         max_features="sqrt",
         class_weight="balanced",
         random_state=42,
@@ -95,14 +95,12 @@ def train_model():
     auc_pr = average_precision_score(y_test, y_prob)
 
     log.info("--- MODEL EVALUATION RESULTS ---")
-    log.info("ROC-AUC: %.4f | PR-AUC: %.4f | Base test rate: %.3f", auc_roc, auc_pr, y_test.mean())
-    log.info("Mean predicted probability on test set: %.3f", y_prob.mean())
+    log.info("ROC-AUC: %.4f | PR-AUC: %.4f | Base test rate: %.4f", auc_roc, auc_pr, y_test.mean())
+    log.info("Mean predicted probability on test set: %.4f", y_prob.mean())
 
-    # Feature Importance Rankings
     importances = pd.Series(rf.feature_importances_, index=feature_cols).sort_values(ascending=False)
     log.info("\n--- FEATURE IMPORTANCES ---\n%s", importances.to_string())
 
-    # Risk tier thresholds derived from test probability quantiles
     s = pd.Series(y_prob)
     thresholds = {
         "low": float(s.quantile(0.60)),

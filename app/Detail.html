@@ -66,10 +66,19 @@
     const API = location.protocol === 'file:' ? 'http://localhost:8000' : '';
 
     // Misma pagina para los dos modos: ?mode=forecast muestra el detalle de la prevision de manana.
-    const MODE = new URLSearchParams(location.search).get('mode') === 'forecast' ? 'forecast' : 'live';
+    const params = new URLSearchParams(location.search);
+    const HISTORICAL = params.get('mode') === 'historical';
+    const HISTORICAL_DATE = params.get('date') || '';
+    const MODE = params.get('mode') === 'forecast' ? 'forecast' : 'live';
     const FORECAST = MODE === 'forecast';
-    const BACK_URL = FORECAST ? 'LiveFireRisk.html?mode=forecast' : 'LiveFireRisk.html';
-    if (FORECAST) {
+    const BACK_URL = HISTORICAL
+        ? `HistoricalRisk.html${HISTORICAL_DATE ? `?date=${encodeURIComponent(HISTORICAL_DATE)}` : ''}`
+        : FORECAST ? 'LiveFireRisk.html?mode=forecast' : 'LiveFireRisk.html';
+    if (HISTORICAL) {
+        document.title = t('detail.historicalTitle');
+        document.getElementById('page-title').dataset.i18n = 'detail.historicalTitle';
+        document.getElementById('page-title').textContent = t('detail.historicalTitle');
+    } else if (FORECAST) {
         document.title = t('detail.forecastTitle');
         document.getElementById('page-title').dataset.i18n = 'detail.forecastTitle';
         document.getElementById('page-title').textContent = t('detail.forecastTitle');
@@ -90,6 +99,8 @@
 
     const FEATURES = {
         temperature:    ['feature.temperature', '°C'],
+        temp_max:       ['feature.tempMax', '°C'],
+        temp_min:       ['feature.tempMin', '°C'],
         humidity:       ['feature.humidity', '%'],
         min_humidity:   ['feature.minHumidity', '%'],
         wind_speed:     ['feature.wind', 'km/h'],
@@ -99,7 +110,10 @@
         precip_14d:     ['feature.rain14', 'mm'],
         precip_30d:     ['feature.rain30', 'mm'],
         dry_spell_days: ['feature.dryDays', 'days'],
+        temp_anomaly:   ['feature.tempAnomaly', '°C'],
         et0_14d:        ['feature.evapotranspiration', 'mm'],
+        fwi_proxy:      ['feature.fwi', ''],
+        vpd:            ['feature.vpd', 'kPa'],
         month:          ['feature.month', ''],
         day_of_year:    ['feature.dayOfYear', ''],
     };
@@ -108,11 +122,11 @@
     const num = (x, d = 1) => Number(x).toFixed(d);
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-    const params = new URLSearchParams(location.search);
     const lat = parseFloat(params.get('lat'));
     const lon = parseFloat(params.get('lon'));
     const content = document.getElementById('content');
     let detailData = null;
+    let historicalRecord = null;
     let detailMessage = null;
 
     // ---- Calculos locales sobre los datos que envia la API ----
@@ -156,6 +170,7 @@
 
     function showMessage(key, withBackLink = false, rawMessage = null) {
         detailData = null;
+        historicalRecord = null;
         detailMessage = { key, withBackLink, rawMessage };
         const message = rawMessage === null ? t(key) : rawMessage;
         const translationAttribute = key ? ` data-i18n="${key}"` : '';
@@ -163,6 +178,7 @@
     }
 
     function render(d) {
+        historicalRecord = null;
         detailData = d;
         detailMessage = null;
         const p = cellProbability(d.points, d.grid_size, lat, lon);
@@ -256,7 +272,77 @@
         content.innerHTML = html;
     }
 
+    function renderHistorical(record) {
+        historicalRecord = record;
+        detailData = null;
+        detailMessage = null;
+        const probability = Number(record.risk_probability);
+        const riskTier = tierOf(probability);
+        const tierLabel = t(`tier.${riskTier.key.toLowerCase()}`);
+        const location = record.municipality || record.name || t('history.location');
+        const featureRows = Object.keys(FEATURES)
+            .filter(key => record[key] !== null && record[key] !== undefined && Number.isFinite(Number(record[key])))
+            .map(key => {
+                const [labelKey, unit] = FEATURES[key];
+                const translatedUnit = unit === 'days' ? t('unit.days') : unit;
+                return `<tr><td>${esc(t(labelKey))}</td><td>${num(record[key], 2)} ${translatedUnit}</td></tr>`;
+            }).join('');
+
+        content.innerHTML = row('detail.result', `
+            <div class="result">
+                <div class="swatch" style="background:${riskTier.color}"></div>
+                <div>
+                    <div class="tier">${esc(tierLabel)}</div>
+                    <div class="prob">${t('detail.probability')}: ${pct(probability, 2)}</div>
+                </div>
+            </div>
+            <p class="note">${t('history.location')}: ${esc(location)} &middot; ${t('detail.dataFor')} ${esc(HISTORICAL_DATE)}</p>
+            <a class="btn small back" href="${esc(BACK_URL)}">${t('detail.backToMap')}</a>`)
+            + row('detail.whyColor', `
+                <p class="txt">${esc(t('detail.historicalExplanation', {
+                    probability: pct(probability, 2),
+                    tier: tierLabel,
+                    low: pct(riskTier.lo),
+                    high: pct(riskTier.hi)
+                }))}</p>`)
+            + row('detail.conditions', `
+                <table class="t">
+                    <tr><th>${t('detail.variable')}</th><th>${t('detail.value')}</th></tr>
+                    ${featureRows}
+                </table>
+                <p class="note">${t('detail.historicalInputsNote')}</p>`)
+            + row('detail.riskScale', `
+                <ul class="scale" style="list-style:none; padding:0; margin:0;">
+                    ${TIERS.map(tier => `<li class="${tier.key === riskTier.key ? 'current' : ''}" style="margin-bottom:8px; font-weight:300;">
+                        <span class="dot" style="background:${tier.color}"></span>${t(`tier.${tier.key.toLowerCase()}`)}: ${pct(tier.lo)} ${t('detail.to')} ${pct(tier.hi)}${tier.key === riskTier.key ? ` ${t('detail.thisPoint')}` : ''}
+                    </li>`).join('')}
+                </ul>`);
+    }
+
     async function init() {
+        if (HISTORICAL) {
+            const index = Number(params.get('index'));
+            if (!HISTORICAL_DATE || !Number.isInteger(index) || index < 0) {
+                showMessage('detail.noHistoricalRecord', true);
+                return;
+            }
+            try {
+                const query = new URLSearchParams({ date: HISTORICAL_DATE });
+                const response = await fetch(`${API}/api/risk/historical?${query}`);
+                const predictions = await response.json();
+                if (!response.ok) throw new Error(predictions.detail || `HTTP ${response.status}`);
+                const record = Array.isArray(predictions) ? predictions[index] : null;
+                if (!record || record.risk_probability == null || !Number.isFinite(Number(record.risk_probability))) {
+                    showMessage('detail.noHistoricalRecord', true);
+                    return;
+                }
+                renderHistorical(record);
+            } catch (error) {
+                showMessage(null, false, error.message || t('detail.connectionError'));
+                console.error('Historical detail failed:', error);
+            }
+            return;
+        }
         if (isNaN(lat) || isNaN(lon)) {
             showMessage('detail.noLocation', true);
             return;
@@ -278,9 +364,11 @@
     }
 
     window.addEventListener('app-language-changed', () => {
-        if (FORECAST) document.title = t('detail.forecastTitle');
+        if (HISTORICAL) document.title = t('detail.historicalTitle');
+        else if (FORECAST) document.title = t('detail.forecastTitle');
         else document.title = t('detail.title');
-        if (detailData) render(detailData);
+        if (historicalRecord) renderHistorical(historicalRecord);
+        else if (detailData) render(detailData);
         else if (detailMessage) showMessage(detailMessage.key, detailMessage.withBackLink, detailMessage.rawMessage);
     });
 

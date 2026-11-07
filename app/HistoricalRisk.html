@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="/Static/LogoFire.PNG">
+    <title data-i18n="history.title">Historical simulation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="nav solid">
+    <div class="nav-brand-group">
+        <a class="brand" href="/"><img src="/Static/LogoFire.PNG" alt=""><span>Euskadi Fire Risk</span></a>
+        <div class="language-picker" id="language-picker"></div>
+    </div>
+    <ul>
+        <li><a class="link" href="/" data-i18n="nav.home">Home</a></li>
+        <li><a class="link" href="LiveFireRisk.html" data-i18n="nav.live">Live Risk</a></li>
+        <li><a class="link" href="LiveFireRisk.html?mode=forecast" data-i18n="nav.forecast">Forecast Risk</a></li>
+        <li><a class="link" href="Info.html" data-i18n="nav.info">Information</a></li>
+    </ul>
+</nav>
+
+<main class="historical-page">
+    <header class="historical-heading">
+        <h1 data-i18n="history.title">Historical simulation</h1>
+        <p data-i18n="history.description">Choose a past date to calculate wildfire risk from historical weather data.</p>
+    </header>
+
+    <section class="historical-controls" data-i18n-attr="aria-label:history.controlsLabel" aria-label="Historical date controls">
+        <label for="history-date" data-i18n="history.date">Select a date</label>
+        <input type="date" id="history-date" min="1940-01-01">
+        <button class="btn solid" id="btn-load-history" type="button" data-i18n="history.analyze">Analyze date</button>
+        <p class="historical-status" id="history-status" role="status" aria-live="polite"></p>
+    </section>
+
+    <div class="history-map-legend" data-i18n-attr="aria-label:history.legendLabel" aria-label="Risk legend">
+        <span><i style="background:#38a169"></i><span data-i18n="legend.low">Low: P &lt; 0.35</span></span>
+        <span><i style="background:#ecc94b"></i><span data-i18n="legend.medium">Medium: 0.35 ≤ P &lt; 0.50</span></span>
+        <span><i style="background:#dd6b20"></i><span data-i18n="legend.high">High: 0.50 ≤ P &lt; 0.70</span></span>
+        <span><i style="background:#e53e3e"></i><span data-i18n="legend.extreme">Extreme: P ≥ 0.70</span></span>
+    </div>
+
+    <div class="historical-layout">
+        <div id="history-map" data-i18n-attr="aria-label:history.mapLabel" aria-label="Historical wildfire risk map"></div>
+        <section class="history-results" aria-labelledby="history-results-title">
+            <header class="history-results-header">
+                <h2 id="history-results-title" data-i18n="history.results">Predictions</h2>
+                <input class="historical-search" id="history-search" type="search"
+                       data-i18n-attr="placeholder:history.search"
+                       placeholder="Search locations">
+            </header>
+            <div class="history-table-wrap">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th data-i18n="history.location">Location</th>
+                            <th data-i18n="history.risk">Risk</th>
+                            <th data-i18n="history.probability">Probability</th>
+                            <th data-i18n="history.details">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-results">
+                        <tr><td colspan="4" data-i18n="history.chooseDate">Choose a date to view predictions.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/translations/translations.js"></script>
+<script src="/translations/i18n.js"></script>
+<script>
+    const API = location.protocol === 'file:' ? 'http://localhost:8000' : '';
+    const params = new URLSearchParams(location.search);
+    const dateInput = document.getElementById('history-date');
+    const statusElement = document.getElementById('history-status');
+    const resultsElement = document.getElementById('history-results');
+    const searchInput = document.getElementById('history-search');
+    const analyzeButton = document.getElementById('btn-load-history');
+    const queryDate = params.get('date');
+
+    // Dynamic max date: Yesterday
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    dateInput.max = yesterday.toISOString().split('T')[0];
+
+    const map = L.map('history-map').setView([43.0, -2.6], 9);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+        maxZoom: 16
+    }).addTo(map);
+
+    const tierColors = { low: '#38a169', medium: '#ecc94b', high: '#dd6b20', extreme: '#e53e3e' };
+    const layers = L.layerGroup().addTo(map);
+    let records = [];
+
+    function tierFor(probability) {
+        return probability >= 0.70 ? 'extreme'
+            : probability >= 0.50 ? 'high'
+            : probability >= 0.35 ? 'medium' : 'low';
+    }
+
+    function getRiskTierLabel(tierKey) {
+        return typeof t === 'function' ? t(`tier.${String(tierKey).toLowerCase()}`) : tierKey.toUpperCase();
+    }
+
+    function safeTranslate(key, fallback) {
+        return typeof t === 'function' ? t(key) : fallback;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[c]);
+    }
+
+    function detailUrl(record) {
+        return `Detail.html?${new URLSearchParams({
+            mode: 'historical',
+            date: dateInput.value,
+            index: String(record.index)
+        })}`;
+    }
+
+    function renderResults() {
+        const search = searchInput.value.trim().toLocaleLowerCase();
+        const visibleRecords = records.filter(record =>
+            record.name.toLocaleLowerCase().includes(search)
+        );
+        if (!visibleRecords.length) {
+            const emptyKey = records.length ? 'history.noMatches' : 'history.noResults';
+            resultsElement.innerHTML = `<tr><td colspan="4">${escapeHtml(safeTranslate(emptyKey, 'No results found'))}</td></tr>`;
+            return;
+        }
+        resultsElement.innerHTML = visibleRecords.map(record => {
+            const tier = tierFor(record.probability);
+            return `<tr>
+                <td>${escapeHtml(record.name)}</td>
+                <td><span class="dot" style="background:${tierColors[tier]}"></span>${escapeHtml(getRiskTierLabel(tier))}</td>
+                <td>${(record.probability * 100).toFixed(2)}%</td>
+                <td><a href="${escapeHtml(detailUrl(record))}">${escapeHtml(safeTranslate('history.details', 'Details'))}</a></td>
+            </tr>`;
+        }).join('');
+    }
+
+    function normalizedName(value) {
+        return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function popupContent(record) {
+        const tier = tierFor(record.probability);
+        return `<strong>${escapeHtml(record.name)}</strong><br>
+            <span class="dot" style="background:${tierColors[tier]}"></span>${escapeHtml(getRiskTierLabel(tier))}
+            · ${(record.probability * 100).toFixed(2)}%<br>
+            <a href="${escapeHtml(detailUrl(record))}">${escapeHtml(safeTranslate('history.details', 'Details'))}</a>`;
+    }
+
+    function renderMap(geojson) {
+        layers.clearLayers();
+        const mapped = records.filter(record =>
+            Number.isFinite(record.latitude) && Number.isFinite(record.longitude)
+        );
+        if (!mapped.length) return;
+
+        const byName = new Map(mapped.map(record => [normalizedName(record.name), record]));
+        if (geojson) {
+            L.geoJSON(geojson, {
+                style: feature => {
+                    const properties = feature.properties || {};
+                    const name = properties.iz_ofizial || properties.iz_euskal
+                        || properties.ud_iz_e || properties.municipality;
+                    const record = byName.get(normalizedName(name));
+                    const tier = record && tierFor(record.probability);
+                    return {
+                        color: '#08141f',
+                        weight: 0.7,
+                        fillColor: record ? tierColors[tier] : '#82909a',
+                        fillOpacity: record ? 0.36 : 0.015,
+                    };
+                },
+                onEachFeature: (feature, layer) => {
+                    const properties = feature.properties || {};
+                    const name = properties.iz_ofizial || properties.iz_euskal
+                        || properties.ud_iz_e || properties.municipality;
+                    const record = byName.get(normalizedName(name));
+                    if (record) layer.bindPopup(popupContent(record));
+                }
+            }).addTo(layers);
+        }
+        mapped.forEach(record => {
+            const tier = tierFor(record.probability);
+            L.circleMarker([record.latitude, record.longitude], {
+                radius: 7,
+                color: '#08141f',
+                weight: 1,
+                fillColor: tierColors[tier],
+                fillOpacity: 0.9,
+            }).bindPopup(popupContent(record)).addTo(layers);
+        });
+        if (mapped.length) {
+            map.fitBounds(L.latLngBounds(mapped.map(record => [record.latitude, record.longitude])), { padding: [24, 24] });
+        }
+    }
+
+    async function loadHistoricalDate() {
+        const date = dateInput.value;
+        if (!date) {
+            statusElement.classList.add('error');
+            statusElement.textContent = safeTranslate('history.selectDateError', 'Please select a date.');
+            return;
+        }
+        analyzeButton.disabled = true;
+        statusElement.classList.remove('error');
+        statusElement.innerHTML = `<span class="history-spinner" aria-hidden="true"></span> ${escapeHtml(safeTranslate('history.loading', 'Loading data...'))}`;
+        resultsElement.innerHTML = '';
+        layers.clearLayers();
+
+        try {
+            const response = await fetch(`${API}/api/risk/historical?${new URLSearchParams({ date })}`);
+            const rawPayload = await response.json();
+            if (!response.ok) throw new Error(rawPayload.detail || rawPayload.error || `HTTP ${response.status}`);
+
+            // Support direct arrays or wrapped object formats ({ records: [...] } / { points: [...] })
+            const dataList = Array.isArray(rawPayload) ? rawPayload : (rawPayload.records || rawPayload.points || []);
+            if (!dataList.length) throw new Error(safeTranslate('history.noResults', 'No data available for this date.'));
+
+            records = dataList.map((record, index) => {
+                const probability = record.risk_probability ?? record.probability;
+                return {
+                    ...record,
+                    index,
+                    name: String(record.municipality || record.name || `#${index + 1}`),
+                    probability: Number(probability),
+                    latitude: Number(record.latitude ?? record.lat),
+                    longitude: Number(record.longitude ?? record.lon),
+                };
+            }).filter(record => Number.isFinite(record.probability));
+
+            if (!records.length) {
+                resultsElement.innerHTML = `<tr><td colspan="4">${escapeHtml(safeTranslate('history.noResults', 'No valid records found.'))}</td></tr>`;
+                statusElement.textContent = safeTranslate('history.noResults', 'No valid records found.');
+                return;
+            }
+
+            let geojson = null;
+            if (records.some(r => Number.isFinite(r.latitude) && Number.isFinite(r.longitude))) {
+                try {
+                    const geoResponse = await fetch(`${API}/api/geo/municipalities`);
+                    if (geoResponse.ok) geojson = await geoResponse.json();
+                } catch (e) {
+                    console.warn('Municipality GeoJSON fetch skipped or failed:', e);
+                }
+            }
+            renderMap(geojson);
+            renderResults();
+
+            const mappedCount = records.filter(r => Number.isFinite(r.latitude) && Number.isFinite(r.longitude)).length;
+            statusElement.textContent = mappedCount
+                ? `Analyzed ${mappedCount} locations for ${date}`
+                : `Loaded ${records.length} records for ${date}`;
+        } catch (error) {
+            records = [];
+            statusElement.classList.add('error');
+            statusElement.textContent = `Error: ${error.message}`;
+            resultsElement.innerHTML = `<tr><td colspan="4">${escapeHtml(safeTranslate('history.noResults', 'No results.'))}</td></tr>`;
+            console.error('Historical simulation failed:', error);
+        } finally {
+            analyzeButton.disabled = false;
+        }
+    }
+
+    analyzeButton.addEventListener('click', loadHistoricalDate);
+    searchInput.addEventListener('input', renderResults);
+    window.addEventListener('app-language-changed', renderResults);
+
+    if (queryDate) dateInput.value = queryDate;
+    if (dateInput.value) loadHistoricalDate();
+</script>
+</body>
+</html>
