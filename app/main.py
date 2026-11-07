@@ -45,7 +45,7 @@ import os
 if os.getenv("EUSKALMET_PRIVATE_KEY"):
     (ROOT_DIR / "private_key.pem").write_text(
         os.getenv("EUSKALMET_PRIVATE_KEY").replace("\\n", "\n")
-    )
+    )   
 if os.getenv("EUSKALMET_PUBLIC_KEY"):
     (ROOT_DIR / "public_key.pem").write_text(
         os.getenv("EUSKALMET_PUBLIC_KEY").replace("\\n", "\n")
