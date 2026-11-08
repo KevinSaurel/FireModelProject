@@ -16,10 +16,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el código del proyecto
 COPY . .
 
-# Descargar el modelo binario real de 289 MB desde GitHub Releases
-# El parámetro -fL asegura que falle si la URL devuelve un error HTTP (ej. 404 o 403)
-# Descargar el modelo binario real de 289 MB desde GitHub Releases con reintentos automáticos
-RUN curl -fL --retry 5 --retry-delay 5 --retry-all-errors -o Model/fireTrainModel.pkl "https://github.com/KevinSaurel/FireModelProject/releases/download/v1.0.0/fireTrainModel.pkl"
+# Descargar el modelo desde Google Cloud Storage (Dominio directo de descarga)
+RUN curl -fL --retry 5 --retry-delay 5 --retry-all-errors -o Model/fireTrainModel.pkl "https://storage.googleapis.com/fire-model-assets-kevin/fireTrainModel.pkl"
+
 # Exponer el puerto
 EXPOSE 8000
 
