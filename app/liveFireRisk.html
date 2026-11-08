@@ -163,6 +163,7 @@
     let lastData = null;
     let statusError = null;
     let loading = false;
+    let euskadiBoundaryPromise = null;
     const stationLayer = L.layerGroup().addTo(map);
 
     function updateStatus() {
@@ -233,12 +234,33 @@
 
     // Convierte la malla n x n de la API en una imagen anclada a coordenadas.
     // El color depende solo de la probabilidad, no del nivel de zoom.
-    function buildProbabilityOverlay(points, n) {
-        const canvas = document.createElement('canvas');
-        canvas.width = n;
-        canvas.height = n;
-        const ctx = canvas.getContext('2d');
-        const img = ctx.createImageData(n, n);
+    async function loadEuskadiBoundary() {
+        if (!euskadiBoundaryPromise) {
+            euskadiBoundaryPromise = fetch(`${API}/api/geo/euskadi`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Euskadi GeoJSON request failed: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.type !== 'FeatureCollection' || !Array.isArray(data.features)) {
+                        throw new Error('Euskadi GeoJSON has an invalid feature collection');
+                    }
+                    return data;
+                })
+                .catch(error => {
+                    euskadiBoundaryPromise = null;
+                    throw error;
+                });
+        }
+        return euskadiBoundaryPromise;
+    }
+
+    function buildProbabilityOverlay(points, n, boundary) {
+        const gridCanvas = document.createElement('canvas');
+        gridCanvas.width = n;
+        gridCanvas.height = n;
+        const gridCtx = gridCanvas.getContext('2d');
+        const img = gridCtx.createImageData(n, n);
 
         // Los puntos vienen ordenados por latitud (filas, de sur a norte) y luego por longitud.
         points.forEach((p, idx) => {
@@ -252,11 +274,59 @@
             img.data[o + 2] = b;
             img.data[o + 3] = Math.round(255 * Math.max(0, Math.min(1, p.intensity)));
         });
-        ctx.putImageData(img, 0, 0);
+        gridCtx.putImageData(img, 0, 0);
 
         const B = EUSKADI_BOUNDS;
         const halfLat = (B.lat_max - B.lat_min) / (n - 1) / 2;   // cada celda esta centrada en su punto
         const halfLon = (B.lon_max - B.lon_min) / (n - 1) / 2;
+        const scale = 4;
+        const canvas = document.createElement('canvas');
+        canvas.width = n * scale;
+        canvas.height = n * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(gridCanvas, 0, 0, canvas.width, canvas.height);
+
+        const mask = document.createElement('canvas');
+        mask.width = canvas.width;
+        mask.height = canvas.height;
+        const maskCtx = mask.getContext('2d');
+        const north = B.lat_max + halfLat;
+        const south = B.lat_min - halfLat;
+        const west = B.lon_min - halfLon;
+        const east = B.lon_max + halfLon;
+        const mercatorY = lat => Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
+        const northY = mercatorY(north);
+        const southY = mercatorY(south);
+        const project = ([lon, lat]) => [
+            (lon - west) / (east - west) * mask.width,
+            (northY - mercatorY(lat)) / (northY - southY) * mask.height
+        ];
+
+        maskCtx.fillStyle = '#fff';
+        boundary.features.forEach(feature => {
+            const geometry = feature.geometry;
+            if (!geometry) return;
+            const polygons = geometry.type === 'Polygon'
+                ? [geometry.coordinates]
+                : geometry.type === 'MultiPolygon' ? geometry.coordinates : [];
+            polygons.forEach(rings => {
+                const path = new Path2D();
+                rings.forEach(ring => {
+                    if (!ring.length) return;
+                    const [firstX, firstY] = project(ring[0]);
+                    path.moveTo(firstX, firstY);
+                    ring.slice(1).forEach(coordinate => {
+                        const [x, y] = project(coordinate);
+                        path.lineTo(x, y);
+                    });
+                    path.closePath();
+                });
+                maskCtx.fill(path, 'evenodd');
+            });
+        });
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.drawImage(mask, 0, 0);
+
         return L.imageOverlay(canvas.toDataURL(), [
             [B.lat_min - halfLat, B.lon_min - halfLon],
             [B.lat_max + halfLat, B.lon_max + halfLon],
@@ -275,9 +345,10 @@
                 return;
             }
             lastData = data;
+            const boundary = await loadEuskadiBoundary();
 
             if (probLayer) map.removeLayer(probLayer);
-            probLayer = buildProbabilityOverlay(data.points, data.grid_size).addTo(map);
+            probLayer = buildProbabilityOverlay(data.points, data.grid_size, boundary).addTo(map);
             renderStations(data);
         } catch (e) {
             statusError = 'connection';
