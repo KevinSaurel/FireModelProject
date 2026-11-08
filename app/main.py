@@ -145,22 +145,38 @@ _station_points_cache: list = []
 
 
 # ---------------------------------------------------------------------------
-# Model
+# Model (Descarga segura mediante GCS SDK con IAM de Cloud Run)
 # ---------------------------------------------------------------------------
+from google.cloud import storage
+
+GCS_BUCKET_NAME = "fire-model-assets-kevin"
+GCS_BLOB_NAME = "fireTrainModel.pkl"
+
+def load_or_download_model():
+    MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+    
+    if not MODEL_PATH.is_file():
+        log.info("Modelo no encontrado en %s. Descargando mediante GCS SDK...", MODEL_PATH)
+        client = storage.Client()
+        bucket = client.bucket(GCS_BUCKET_NAME)
+        blob = bucket.blob(GCS_BLOB_NAME)
+        blob.download_to_filename(str(MODEL_PATH))
+        log.info("Modelo descargado exitosamente desde GCS.")
+        
+    return joblib.load(MODEL_PATH)
+
 try:
-    model = joblib.load("Model/fireTrainModel.pkl")
+    model = load_or_download_model()
     print("Modelo cargado exitosamente.")
 except Exception as e:
     print(f"Error crítico al cargar el modelo: {e}")
     model = None
-
-
-    def feature_names() -> list[str]:
-        names = getattr(model, "feature_names_in_", None)
-        if names is not None:
-            return [str(n) for n in names]
-        return DEFAULT_FEATURES
-
+try:
+    model = load_or_download_model()
+    print("Modelo cargado exitosamente.")
+except Exception as e:
+    print(f"Error crítico al cargar el modelo: {e}")
+    model = None
 
 def predict_probabilities(feature_rows: list[dict]) -> np.ndarray:
     if model is None:

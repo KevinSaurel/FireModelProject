@@ -3,10 +3,9 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
-# Instalar dependencias del sistema (incluyendo curl para descargar el modelo)
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar requirements e instalar librerías de Python
@@ -15,9 +14,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar el código del proyecto
 COPY . .
-
-# Descargar el modelo desde Google Cloud Storage (Dominio directo de descarga)
-RUN curl -fL --retry 5 --retry-delay 5 --retry-all-errors -o Model/fireTrainModel.pkl "https://storage.googleapis.com/fire-model-assets-kevin/fireTrainModel.pkl"
 
 # Exponer el puerto
 EXPOSE 8000
