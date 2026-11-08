@@ -20,6 +20,20 @@
             font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; text-decoration: none;
         }
         a.popup-btn:hover { background: #f0a35e; color: #1a1209 !important; }
+        .map-hint {
+            position: absolute; top: 50%; right: 24px; z-index: 1001; width: 190px;
+            padding: 10px 13px; border-right: 2px solid var(--accent);
+            background: rgba(8, 20, 31, 0.82); color: var(--muted);
+            font-size: 11px; font-weight: 300; line-height: 1.5;
+            opacity: 0; transform: translate(8px, -50%);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+        .map-hint.is-visible { opacity: 1; transform: translate(0, -50%); }
+        @media (max-width: 760px) {
+            .map-hint { top: auto; right: 10px; bottom: 42%; width: 160px; }
+            .map-hint.is-visible { transform: translate(0, 0); }
+        }
     </style>
 </head>
 <body>
@@ -60,6 +74,9 @@
 </div>
 
 <div id="map"></div>
+<div id="map-hint" class="map-hint" data-i18n="map.interactHint" role="status" aria-live="polite" hidden>
+    Interact with the map for more details about an area.
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/translations/translations.js"></script>
@@ -161,9 +178,24 @@
 
     let probLayer = null;
     let lastData = null;
+    let euskadiGeometry = null;
+    let euskadiGeometryRequest = null;
+    let mapHintShown = false;
     let statusError = null;
     let loading = false;
     const stationLayer = L.layerGroup().addTo(map);
+
+    function showMapHint() {
+        if (mapHintShown) return;
+        mapHintShown = true;
+        const hint = document.getElementById('map-hint');
+        hint.hidden = false;
+        requestAnimationFrame(() => hint.classList.add('is-visible'));
+        window.setTimeout(() => {
+            hint.classList.remove('is-visible');
+            window.setTimeout(() => { hint.hidden = true; }, 200);
+        }, 5000);
+    }
 
     function updateStatus() {
         const status = document.getElementById('status');
@@ -233,12 +265,12 @@
 
     // Convierte la malla n x n de la API en una imagen anclada a coordenadas.
     // El color depende solo de la probabilidad, no del nivel de zoom.
-    function buildProbabilityOverlay(points, n) {
-        const canvas = document.createElement('canvas');
-        canvas.width = n;
-        canvas.height = n;
-        const ctx = canvas.getContext('2d');
-        const img = ctx.createImageData(n, n);
+    function buildProbabilityOverlay(points, n, geometry) {
+        const sourceCanvas = document.createElement('canvas');
+        sourceCanvas.width = n;
+        sourceCanvas.height = n;
+        const sourceCtx = sourceCanvas.getContext('2d');
+        const img = sourceCtx.createImageData(n, n);
 
         // Los puntos vienen ordenados por latitud (filas, de sur a norte) y luego por longitud.
         points.forEach((p, idx) => {
@@ -252,15 +284,72 @@
             img.data[o + 2] = b;
             img.data[o + 3] = Math.round(255 * Math.max(0, Math.min(1, p.intensity)));
         });
-        ctx.putImageData(img, 0, 0);
+        sourceCtx.putImageData(img, 0, 0);
 
         const B = EUSKADI_BOUNDS;
         const halfLat = (B.lat_max - B.lat_min) / (n - 1) / 2;   // cada celda esta centrada en su punto
         const halfLon = (B.lon_max - B.lon_min) / (n - 1) / 2;
+        const scale = 8;
+        const canvas = document.createElement('canvas');
+        canvas.width = n * scale;
+        canvas.height = n * scale;
+        const ctx = canvas.getContext('2d');
+        const topLat = B.lat_max + halfLat;
+        const bottomLat = B.lat_min - halfLat;
+        const topY = Math.log(Math.tan(Math.PI / 4 + topLat * Math.PI / 360));
+        const bottomY = Math.log(Math.tan(Math.PI / 4 + bottomLat * Math.PI / 360));
+        const leftLon = B.lon_min - halfLon;
+        const lonSpan = B.lon_max - B.lon_min + 2 * halfLon;
+
+        ctx.beginPath();
+        geometry.features.forEach(feature => {
+            const polygons = feature.geometry.type === 'Polygon'
+                ? [feature.geometry.coordinates]
+                : feature.geometry.coordinates;
+            polygons.forEach(rings => rings.forEach(ring => {
+                ring.forEach(([lon, lat], index) => {
+                    const x = (lon - leftLon) / lonSpan * canvas.width;
+                    const yValue = Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
+                    const y = (topY - yValue) / (topY - bottomY) * canvas.height;
+                    if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                });
+                ctx.closePath();
+            }));
+        });
+        ctx.clip('evenodd');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(sourceCanvas, 0, 0, canvas.width, canvas.height);
+
         return L.imageOverlay(canvas.toDataURL(), [
             [B.lat_min - halfLat, B.lon_min - halfLon],
             [B.lat_max + halfLat, B.lon_max + halfLon],
         ], { pane: 'probPane', interactive: false });
+    }
+
+    function replaceProbabilityOverlay(geometry) {
+        if (probLayer) map.removeLayer(probLayer);
+        probLayer = buildProbabilityOverlay(lastData.points, lastData.grid_size, geometry).addTo(map);
+    }
+
+    async function loadEuskadiGeometry() {
+        if (euskadiGeometry) return euskadiGeometry;
+        if (!euskadiGeometryRequest) {
+            euskadiGeometryRequest = fetch(`${API}/api/v1/geometry/euskadi`).then(async response => {
+                if (!response.ok) throw new Error(`GeoJSON request failed: ${response.status}`);
+                const geometry = await response.json();
+                if (!Array.isArray(geometry.features) || !geometry.features.length) {
+                    throw new Error('Euskadi GeoJSON has no features');
+                }
+                return geometry;
+            });
+        }
+        try {
+            euskadiGeometry = await euskadiGeometryRequest;
+            return euskadiGeometry;
+        } catch (error) {
+            euskadiGeometryRequest = null;
+            throw error;
+        }
     }
 
     async function load(refresh = false) {
@@ -276,8 +365,16 @@
             }
             lastData = data;
 
-            if (probLayer) map.removeLayer(probLayer);
-            probLayer = buildProbabilityOverlay(data.points, data.grid_size).addTo(map);
+            try {
+                const geometry = await loadEuskadiGeometry();
+                replaceProbabilityOverlay(geometry);
+                showMapHint();
+            } catch (error) {
+                if (probLayer) map.removeLayer(probLayer);
+                probLayer = null;
+                statusError = t('map.boundaryError');
+                console.error('Could not load the Euskadi boundary GeoJSON:', error);
+            }
             renderStations(data);
         } catch (e) {
             statusError = 'connection';

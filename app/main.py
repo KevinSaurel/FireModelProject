@@ -697,6 +697,14 @@ def get_heatmap(
         return payload
 
 
+@app.get("/api/v1/geometry/euskadi")
+def get_euskadi_geometry():
+    return FileResponse(
+        ROOT_DIR / "Data" / "GeoJSON" / "municipios-euskadi.geojson",
+        media_type="application/geo+json",
+    )
+
+
 @app.get("/")
 def index():
     log.info("API request received: endpoint=/")
