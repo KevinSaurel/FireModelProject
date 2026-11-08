@@ -171,13 +171,12 @@ try:
 except Exception as e:
     print(f"Error crítico al cargar el modelo: {e}")
     model = None
-try:
-    model = load_or_download_model()
-    print("Modelo cargado exitosamente.")
-except Exception as e:
-    print(f"Error crítico al cargar el modelo: {e}")
-    model = None
 
+def feature_names() -> list[str]:
+    names = getattr(model, "feature_names_in_", None)
+    if names is not None:
+        return [str(n) for n in names]
+    return DEFAULT_FEATURES
 def predict_probabilities(feature_rows: list[dict]) -> np.ndarray:
     if model is None:
         raise RuntimeError(f"Model not found at {MODEL_PATH}")
