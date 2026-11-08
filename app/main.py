@@ -11,7 +11,7 @@ Data flow (live only, no municipality layer):
   2. Open-Meteo: 30-day history at each station location (rain 7/14/30d,
      dry streak, 30d mean temp) + a coarse grid covering the territory,
      kept only where no Euskalmet station is within STATION_RADIUS_KM.
-  3. Features -> Random Forest -> fire probability per point,
+  3. Features -> scaler -> Random Forest -> fire probability per point,
      then IDW interpolation onto a regular grid for the heatmap.
 """
 
@@ -67,8 +67,8 @@ app.mount("/translations", StaticFiles(directory=APP_DIR / "translations"), name
 
 INDEX_PATH = APP_DIR / "index.html"
 MODEL_PATH = ROOT_DIR / "Model" / "fireTrainModel.pkl"
+SCALER_PATH = ROOT_DIR / "Model" / "scaler.pkl"
 TIER_THRESHOLDS_PATH = ROOT_DIR / "Model" / "tier_thresholds.json"
-EUSKADI_GEOJSON_PATH = ROOT_DIR / "Data" / "GeoJSON" / "municipios-euskadi.geojson"
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 EUSKADI_BOUNDS = {"lat_min": 42.47, "lat_max": 43.45, "lon_min": -3.45, "lon_max": -1.73}
@@ -145,38 +145,25 @@ _station_points_cache: list = []
 
 
 # ---------------------------------------------------------------------------
-# Model (Descarga segura mediante GCS SDK con IAM de Cloud Run)
+# Model
 # ---------------------------------------------------------------------------
-from google.cloud import storage
-
-GCS_BUCKET_NAME = "fire-model-assets-kevin"
-GCS_BLOB_NAME = "fireTrainModel.pkl"
-
-def load_or_download_model():
-    MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    
-    if not MODEL_PATH.is_file():
-        log.info("Modelo no encontrado en %s. Descargando mediante GCS SDK...", MODEL_PATH)
-        client = storage.Client()
-        bucket = client.bucket(GCS_BUCKET_NAME)
-        blob = bucket.blob(GCS_BLOB_NAME)
-        blob.download_to_filename(str(MODEL_PATH))
-        log.info("Modelo descargado exitosamente desde GCS.")
-        
-    return joblib.load(MODEL_PATH)
-
 try:
-    model = load_or_download_model()
+    model = joblib.load("Model/fireTrainModel.pkl")
     print("Modelo cargado exitosamente.")
 except Exception as e:
     print(f"Error crítico al cargar el modelo: {e}")
     model = None
+scaler = joblib.load(SCALER_PATH) if SCALER_PATH.exists() else None
+
 
 def feature_names() -> list[str]:
-    names = getattr(model, "feature_names_in_", None)
-    if names is not None:
-        return [str(n) for n in names]
+    for obj in (scaler, model):
+        names = getattr(obj, "feature_names_in_", None)
+        if names is not None:
+            return [str(n) for n in names]
     return DEFAULT_FEATURES
+
+
 def predict_probabilities(feature_rows: list[dict]) -> np.ndarray:
     if model is None:
         raise RuntimeError(f"Model not found at {MODEL_PATH}")
@@ -195,7 +182,10 @@ def predict_probabilities(feature_rows: list[dict]) -> np.ndarray:
         )
 
     X = pd.DataFrame(feature_rows)[names]
-    if not hasattr(model, "feature_names_in_"):
+    if scaler is not None:
+        arr = scaler.transform(X if hasattr(scaler, "feature_names_in_") else X.values)
+        X = pd.DataFrame(arr, columns=names) if hasattr(model, "feature_names_in_") else arr
+    elif not hasattr(model, "feature_names_in_"):
         X = X.values
 
     proba = model.predict_proba(X)
@@ -654,13 +644,6 @@ def build_payload(resolution: int, mode: str = "live") -> dict:
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
-@app.get("/api/geo/euskadi")
-def get_euskadi_geojson():
-    if not EUSKADI_GEOJSON_PATH.is_file():
-        raise HTTPException(status_code=404, detail="Euskadi GeoJSON is not available")
-    return FileResponse(EUSKADI_GEOJSON_PATH, media_type="application/geo+json")
-
-
 @app.get("/api/v1/fire-risk/heatmap")
 def get_heatmap(
     resolution: int = Query(45, ge=10, le=120, description="Grid resolution"),
