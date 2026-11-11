@@ -91,19 +91,27 @@ STATION_RADIUS_KM = 12.0   # grid points closer than this to a station are dropp
 DRY_THRESHOLD_MM = 0.1     # a day counts as "dry" below this rainfall
 IDW_POWER = 2.0
 
-DEFAULT_TIER_THRESHOLDS = {"low": 0.35, "medium": 0.50, "high": 0.70}
-
-
 def load_tier_thresholds() -> dict[str, float]:
     try:
         configured = json.loads(TIER_THRESHOLDS_PATH.read_text(encoding="utf-8"))
-        thresholds = {key: float(configured[key]) for key in DEFAULT_TIER_THRESHOLDS}
-        if not 0 <= thresholds["low"] < thresholds["medium"] < thresholds["high"] <= 1:
-            raise ValueError("Tier thresholds must be increasing values between 0 and 1")
-        return thresholds
-    except (OSError, KeyError, TypeError, ValueError) as exc:
-        log.warning("Could not load tier thresholds from %s: %s", TIER_THRESHOLDS_PATH, exc)
-        return DEFAULT_TIER_THRESHOLDS.copy()
+    except OSError as exc:
+        raise RuntimeError(f"Could not read tier thresholds from {TIER_THRESHOLDS_PATH}") from exc
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Invalid JSON in tier thresholds file {TIER_THRESHOLDS_PATH}") from exc
+
+    if not isinstance(configured, dict):
+        raise ValueError(f"Tier thresholds in {TIER_THRESHOLDS_PATH} must be a JSON object")
+    try:
+        thresholds = {key: float(configured[key]) for key in ("low", "medium", "high")}
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError(
+            f"Tier thresholds in {TIER_THRESHOLDS_PATH} must define numeric low, medium, and high values"
+        ) from exc
+    if not 0 <= thresholds["low"] < thresholds["medium"] < thresholds["high"] <= 1:
+        raise ValueError(
+            f"Tier thresholds in {TIER_THRESHOLDS_PATH} must be increasing values between 0 and 1"
+        )
+    return thresholds
 
 
 TIER_THRESHOLDS = load_tier_thresholds()
