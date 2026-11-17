@@ -339,7 +339,7 @@
             img.data[o + 2] = b;
             img.data[o + 3] = Math.round(255 * Math.sqrt(Math.max(0, Math.min(1, p.intensity))));
         });
-        sourceCtx.putImageData(img, 0, 0);
+        ctx.putImageData(img, 0, 0);
 
         const B = EUSKADI_BOUNDS;
         const halfLat = (B.lat_max - B.lat_min) / (n - 1) / 2;   // cada celda esta centrada en su punto
