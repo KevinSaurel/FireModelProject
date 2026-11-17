@@ -13,6 +13,14 @@
         .legend .tiers div { margin-top: 7px; letter-spacing: 0.06em; text-transform: none; font-size: 12px; }
         .legend .sw { display: inline-block; width: 11px; height: 11px; margin-right: 9px; vertical-align: -1px; }
         .leaflet-container { cursor: pointer; }
+        .open-meteo-marker-icon { background: transparent; border: 0; }
+        .open-meteo-marker {
+            position: absolute; top: 1px; left: 1px; display: block; width: 14px; height: 14px;
+            background: var(--marker-color); clip-path: polygon(50% 0, 0 100%, 100% 100%);
+            filter: drop-shadow(0 1px 1px #08141f) drop-shadow(1px 0 0 #08141f)
+                drop-shadow(-1px 0 0 #08141f) drop-shadow(0 -1px 0 #08141f)
+                drop-shadow(1px 1px 0 #08141f) drop-shadow(-1px 1px 0 #08141f);
+        }
         .leaflet-popup-content { font-family: 'Montserrat', Arial, sans-serif; font-size: 13px; line-height: 1.5; }
         .popup-tier { display: inline-block; width: 10px; height: 10px; margin-right: 6px; }
         a.popup-btn {
@@ -60,16 +68,21 @@
             <input type="checkbox" id="chk-stations" checked onchange="toggleStations()">
             <label for="chk-stations" data-i18n="map.stations">Stations</label>
         </span>
+        <span>
+            <input type="checkbox" id="chk-open-meteo" onchange="toggleOpenMeteo()">
+            <label for="chk-open-meteo" data-i18n="map.openMeteoNodes">Open-Meteo points</label>
+        </span>
     </div>
 </div>
 
 <div class="legend">
     <span data-i18n="map.probability">Wildfire probability</span>
     <div class="tiers">
-        <div><span class="sw" style="background:#38a169"></span><span data-i18n="legend.low">Low: P &lt; 0.35</span></div>
-        <div><span class="sw" style="background:#ecc94b"></span><span data-i18n="legend.medium">Medium: 0.35 &le; P &lt; 0.50</span></div>
-        <div><span class="sw" style="background:#dd6b20"></span><span data-i18n="legend.high">High: 0.50 &le; P &lt; 0.70</span></div>
-        <div><span class="sw" style="background:#e53e3e"></span><span data-i18n="legend.extreme">Extreme: P &ge; 0.70</span></div>
+        <div><span class="sw" style="background:#00a6d6"></span><span id="legend-low"></span></div>
+        <div><span class="sw" style="background:#f2c500"></span><span id="legend-medium"></span></div>
+        <div><span class="sw" style="background:#f57c00"></span><span id="legend-high"></span></div>
+        <div><span class="sw" style="background:#d7191c"></span><span id="legend-very-high"></span></div>
+        <div><span class="sw" style="background:#7b2cbf"></span><span id="legend-extreme"></span></div>
     </div>
 </div>
 
@@ -100,23 +113,47 @@
     const EUSKADI_BOUNDS = { lat_min: 42.47, lat_max: 43.45, lon_min: -3.45, lon_max: -1.73 };
     const COS_LAT = Math.cos(43.0 * Math.PI / 180);
 
-    // Model probability thresholds (tier_thresholds.json)
-    const T_MEDIUM = 0.35;
-    const T_HIGH = 0.50;
-    const T_EXTREME = 0.70;
+    // Tier cut-offs. The backend sends the ones of the model in use (data.thresholds, and the
+    // summer set in Jun-Sep); these defaults are only used until the first response arrives.
+    let T_LOW = 0.35;
+    let T_MEDIUM = 0.50;
+    let T_HIGH = 0.70;
+    let T_VERY_HIGH = 0.85;
+    const fmtP = x => `${(x * 100).toFixed(1)}%`;
+
+    function renderLegend() {
+        const set = (id, text) => { document.getElementById(id).textContent = text; };
+        set('legend-low', `${t('tier.low')}: P < ${fmtP(T_LOW)}`);
+        set('legend-medium', `${t('tier.medium')}: ${fmtP(T_LOW)} \u2264 P < ${fmtP(T_MEDIUM)}`);
+        set('legend-high', `${t('tier.high')}: ${fmtP(T_MEDIUM)} \u2264 P < ${fmtP(T_HIGH)}`);
+        set('legend-very-high', `${t('tier.very_high')}: ${fmtP(T_HIGH)} \u2264 P < ${fmtP(T_VERY_HIGH)}`);
+        set('legend-extreme', `${t('tier.extreme')}: P \u2265 ${fmtP(T_VERY_HIGH)}`);
+    }
+    function setThresholds(thr) {
+        if (!thr) return;
+        T_LOW = thr.low;
+        T_MEDIUM = thr.medium;
+        T_HIGH = thr.high;
+        T_VERY_HIGH = thr.very_high ?? 0.85;
+    }
 
     const TIER_COLORS = {
-        LOW:     [56, 161, 105],    // verde
-        MEDIUM:  [236, 201, 75],    // amarillo
-        HIGH:    [221, 107, 32],    // naranja
-        EXTREME: [229, 62, 62],     // rojo
+        LOW:     [0, 166, 214],
+        MEDIUM:  [242, 197, 0],
+        HIGH:    [245, 124, 0],
+        VERY_HIGH: [215, 25, 28],
+        EXTREME: [123, 44, 191],
     };
     function getRiskTierLabel(tierKey) {
         return t(`tier.${tierKey.toLowerCase()}`);
     }
 
     function tierOf(p) {
-        return p >= T_EXTREME ? 'EXTREME' : p >= T_HIGH ? 'HIGH' : p >= T_MEDIUM ? 'MEDIUM' : 'LOW';
+        return p >= T_VERY_HIGH ? 'EXTREME'
+            : p >= T_HIGH ? 'VERY_HIGH'
+            : p >= T_MEDIUM ? 'HIGH'
+            : p >= T_LOW ? 'MEDIUM'
+            : 'LOW';
     }
     function riskColor(p) {
         return `rgb(${TIER_COLORS[tierOf(p)].join(',')})`;
@@ -183,7 +220,9 @@
     let mapHintShown = false;
     let statusError = null;
     let loading = false;
+    let municipalitiesGeoJSONPromise = null;
     const stationLayer = L.layerGroup().addTo(map);
+    const openMeteoLayer = L.layerGroup();
 
     function showMapHint() {
         if (mapHintShown) return;
@@ -238,6 +277,22 @@
         toggleStations();
     }
 
+    function renderOpenMeteoPoints(data) {
+        openMeteoLayer.clearLayers();
+        data.samples.filter(s => !s.name).forEach(s => {
+            const icon = L.divIcon({
+                className: 'open-meteo-marker-icon',
+                html: `<span class="open-meteo-marker" style="--marker-color:${riskColor(s.probability)}"></span>`,
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+            });
+            L.marker([s.lat, s.lon], { icon }).bindPopup(
+                popupHtml(t('map.openMeteoGrid'), s.probability, s.lat, s.lon)
+            ).addTo(openMeteoLayer);
+        });
+        toggleOpenMeteo();
+    }
+
     // Shared popup content: risk tier, probability, and details button.
     function popupHtml(title, p, lat, lon, extra = '') {
         return `<strong>${title}</strong><br/>
@@ -265,12 +320,12 @@
 
     // Convierte la malla n x n de la API en una imagen anclada a coordenadas.
     // El color depende solo de la probabilidad, no del nivel de zoom.
-    function buildProbabilityOverlay(points, n, geometry) {
-        const sourceCanvas = document.createElement('canvas');
-        sourceCanvas.width = n;
-        sourceCanvas.height = n;
-        const sourceCtx = sourceCanvas.getContext('2d');
-        const img = sourceCtx.createImageData(n, n);
+    function buildProbabilityOverlay(points, n, geojson) {
+        const canvas = document.createElement('canvas');
+        canvas.width = n;
+        canvas.height = n;
+        const ctx = canvas.getContext('2d');
+        const img = ctx.createImageData(n, n);
 
         // Los puntos vienen ordenados por latitud (filas, de sur a norte) y luego por longitud.
         points.forEach((p, idx) => {
@@ -282,74 +337,86 @@
             img.data[o] = r;
             img.data[o + 1] = g;
             img.data[o + 2] = b;
-            img.data[o + 3] = Math.round(255 * Math.max(0, Math.min(1, p.intensity)));
+            img.data[o + 3] = Math.round(255 * Math.sqrt(Math.max(0, Math.min(1, p.intensity))));
         });
         sourceCtx.putImageData(img, 0, 0);
 
         const B = EUSKADI_BOUNDS;
         const halfLat = (B.lat_max - B.lat_min) / (n - 1) / 2;   // cada celda esta centrada en su punto
         const halfLon = (B.lon_max - B.lon_min) / (n - 1) / 2;
-        const scale = 8;
-        const canvas = document.createElement('canvas');
-        canvas.width = n * scale;
-        canvas.height = n * scale;
-        const ctx = canvas.getContext('2d');
-        const topLat = B.lat_max + halfLat;
-        const bottomLat = B.lat_min - halfLat;
-        const topY = Math.log(Math.tan(Math.PI / 4 + topLat * Math.PI / 360));
-        const bottomY = Math.log(Math.tan(Math.PI / 4 + bottomLat * Math.PI / 360));
-        const leftLon = B.lon_min - halfLon;
-        const lonSpan = B.lon_max - B.lon_min + 2 * halfLon;
+        const overlayBounds = {
+            west: B.lon_min - halfLon,
+            east: B.lon_max + halfLon,
+            south: B.lat_min - halfLat,
+            north: B.lat_max + halfLat,
+        };
+        let overlayCanvas = canvas;
 
-        ctx.beginPath();
-        geometry.features.forEach(feature => {
-            const polygons = feature.geometry.type === 'Polygon'
-                ? [feature.geometry.coordinates]
-                : feature.geometry.coordinates;
-            polygons.forEach(rings => rings.forEach(ring => {
-                ring.forEach(([lon, lat], index) => {
-                    const x = (lon - leftLon) / lonSpan * canvas.width;
-                    const yValue = Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
-                    const y = (topY - yValue) / (topY - bottomY) * canvas.height;
-                    if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        if (geojson && Array.isArray(geojson.features)) {
+            const maskScale = 4;
+            const maskSize = n * maskScale;
+            const maskCanvas = document.createElement('canvas');
+            maskCanvas.width = maskSize;
+            maskCanvas.height = maskSize;
+            const maskContext = maskCanvas.getContext('2d');
+            const project = ([longitude, latitude]) => [
+                (longitude - overlayBounds.west) / (overlayBounds.east - overlayBounds.west) * maskSize,
+                (overlayBounds.north - latitude) / (overlayBounds.north - overlayBounds.south) * maskSize,
+            ];
+
+            geojson.features.forEach(feature => {
+                if (String(feature.properties?.fazeria || '0') === '1') return;
+                const geometry = feature.geometry;
+                if (!geometry) return;
+                const polygons = geometry.type === 'Polygon'
+                    ? [geometry.coordinates]
+                    : geometry.type === 'MultiPolygon' ? geometry.coordinates : [];
+
+                polygons.forEach(polygon => {
+                    maskContext.beginPath();
+                    polygon.forEach(ring => {
+                        ring.forEach((coordinate, index) => {
+                            const [x, y] = project(coordinate);
+                            if (index === 0) maskContext.moveTo(x, y);
+                            else maskContext.lineTo(x, y);
+                        });
+                        maskContext.closePath();
+                    });
+                    maskContext.fillStyle = '#fff';
+                    maskContext.fill('evenodd');
                 });
-                ctx.closePath();
-            }));
-        });
-        ctx.clip('evenodd');
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(sourceCanvas, 0, 0, canvas.width, canvas.height);
+            });
 
-        return L.imageOverlay(canvas.toDataURL(), [
+            const clippedCanvas = document.createElement('canvas');
+            clippedCanvas.width = maskSize;
+            clippedCanvas.height = maskSize;
+            const clippedContext = clippedCanvas.getContext('2d');
+            clippedContext.drawImage(canvas, 0, 0, maskSize, maskSize);
+            clippedContext.globalCompositeOperation = 'destination-in';
+            clippedContext.drawImage(maskCanvas, 0, 0);
+            overlayCanvas = clippedCanvas;
+        }
+
+        return L.imageOverlay(overlayCanvas.toDataURL(), [
             [B.lat_min - halfLat, B.lon_min - halfLon],
             [B.lat_max + halfLat, B.lon_max + halfLon],
         ], { pane: 'probPane', interactive: false });
     }
 
-    function replaceProbabilityOverlay(geometry) {
-        if (probLayer) map.removeLayer(probLayer);
-        probLayer = buildProbabilityOverlay(lastData.points, lastData.grid_size, geometry).addTo(map);
-    }
-
-    async function loadEuskadiGeometry() {
-        if (euskadiGeometry) return euskadiGeometry;
-        if (!euskadiGeometryRequest) {
-            euskadiGeometryRequest = fetch(`${API}/api/v1/geometry/euskadi`).then(async response => {
-                if (!response.ok) throw new Error(`GeoJSON request failed: ${response.status}`);
-                const geometry = await response.json();
-                if (!Array.isArray(geometry.features) || !geometry.features.length) {
-                    throw new Error('Euskadi GeoJSON has no features');
-                }
-                return geometry;
-            });
+    function loadMunicipalityGeoJSON() {
+        if (!municipalitiesGeoJSONPromise) {
+            municipalitiesGeoJSONPromise = fetch(`${API}/api/geo/municipalities`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
+                .catch(error => {
+                    municipalitiesGeoJSONPromise = null;
+                    console.warn('Municipality boundary load failed; showing unclipped heatmap:', error);
+                    return null;
+                });
         }
-        try {
-            euskadiGeometry = await euskadiGeometryRequest;
-            return euskadiGeometry;
-        } catch (error) {
-            euskadiGeometryRequest = null;
-            throw error;
-        }
+        return municipalitiesGeoJSONPromise;
     }
 
     async function load(refresh = false) {
@@ -364,18 +431,14 @@
                 return;
             }
             lastData = data;
+            setThresholds(data.thresholds);
+            renderLegend();
+            const geojson = await loadMunicipalityGeoJSON();
 
-            try {
-                const geometry = await loadEuskadiGeometry();
-                replaceProbabilityOverlay(geometry);
-                showMapHint();
-            } catch (error) {
-                if (probLayer) map.removeLayer(probLayer);
-                probLayer = null;
-                statusError = t('map.boundaryError');
-                console.error('Could not load the Euskadi boundary GeoJSON:', error);
-            }
+            if (probLayer) map.removeLayer(probLayer);
+            probLayer = buildProbabilityOverlay(data.points, data.grid_size, geojson).addTo(map);
             renderStations(data);
+            renderOpenMeteoPoints(data);
         } catch (e) {
             statusError = 'connection';
             console.error(e);
@@ -390,16 +453,24 @@
         if (on) stationLayer.addTo(map); else map.removeLayer(stationLayer);
     }
 
+    function toggleOpenMeteo() {
+        const on = document.getElementById('chk-open-meteo').checked;
+        if (on) openMeteoLayer.addTo(map); else map.removeLayer(openMeteoLayer);
+    }
+
     window.addEventListener('app-language-changed', () => {
         if (MODE === 'forecast') document.title = t('map.forecastTitle');
         else document.title = t('map.liveTitle');
         updateStatus();
+        renderLegend();
         if (lastData) {
             map.closePopup();
             renderStations(lastData);
+            renderOpenMeteoPoints(lastData);
         }
     });
 
+    renderLegend();
     load();
 </script>
 </body>
