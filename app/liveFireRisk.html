@@ -28,6 +28,20 @@
             font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; text-decoration: none;
         }
         a.popup-btn:hover { background: #f0a35e; color: #1a1209 !important; }
+        .map-hint {
+            position: absolute; top: 50%; right: 24px; z-index: 1001; width: 190px;
+            padding: 10px 13px; border-right: 2px solid var(--accent);
+            background: rgba(8, 20, 31, 0.82); color: var(--muted);
+            font-size: 11px; font-weight: 300; line-height: 1.5;
+            opacity: 0; transform: translate(8px, -50%);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+        .map-hint.is-visible { opacity: 1; transform: translate(0, -50%); }
+        @media (max-width: 760px) {
+            .map-hint { top: auto; right: 10px; bottom: 42%; width: 160px; }
+            .map-hint.is-visible { transform: translate(0, 0); }
+        }
     </style>
 </head>
 <body>
@@ -73,6 +87,9 @@
 </div>
 
 <div id="map"></div>
+<div id="map-hint" class="map-hint" data-i18n="map.interactHint" role="status" aria-live="polite" hidden>
+    Interact with the map for more details about an area.
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/translations/translations.js"></script>
@@ -198,11 +215,26 @@
 
     let probLayer = null;
     let lastData = null;
+    let euskadiGeometry = null;
+    let euskadiGeometryRequest = null;
+    let mapHintShown = false;
     let statusError = null;
     let loading = false;
     let municipalitiesGeoJSONPromise = null;
     const stationLayer = L.layerGroup().addTo(map);
     const openMeteoLayer = L.layerGroup();
+
+    function showMapHint() {
+        if (mapHintShown) return;
+        mapHintShown = true;
+        const hint = document.getElementById('map-hint');
+        hint.hidden = false;
+        requestAnimationFrame(() => hint.classList.add('is-visible'));
+        window.setTimeout(() => {
+            hint.classList.remove('is-visible');
+            window.setTimeout(() => { hint.hidden = true; }, 200);
+        }, 5000);
+    }
 
     function updateStatus() {
         const status = document.getElementById('status');
@@ -307,7 +339,7 @@
             img.data[o + 2] = b;
             img.data[o + 3] = Math.round(255 * Math.sqrt(Math.max(0, Math.min(1, p.intensity))));
         });
-        ctx.putImageData(img, 0, 0);
+        sourceCtx.putImageData(img, 0, 0);
 
         const B = EUSKADI_BOUNDS;
         const halfLat = (B.lat_max - B.lat_min) / (n - 1) / 2;   // cada celda esta centrada en su punto
