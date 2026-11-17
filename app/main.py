@@ -24,6 +24,7 @@ import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache
 from pathlib import Path
 
 import joblib
@@ -63,6 +64,7 @@ from Data.ExternalAPICall.openMeteoHistoricalAPI import (  # noqa: E402
 )
 from Data.ExternalAPICall.openMeteoAPI import load_municipalities_centroids  # noqa: E402
 from Model.fireTrainingModel import predict_fire_risk  # noqa: E402
+from Model import historicalV3, serveV3  # noqa: E402  (model v3: see Model/serveV3.py)
 
 log = logging.getLogger("heatmap")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-7s | %(message)s")
@@ -85,11 +87,18 @@ EUSKADI_BOUNDS = {"lat_min": 42.47, "lat_max": 43.45, "lon_min": -3.45, "lon_max
 CACHE_TTL = 3600           # seconds
 FORECAST_DAYS_AHEAD = 1    # "forecast" mode predicts this many days after today (1 = tomorrow)
 HISTORY_DAYS = 30          # window ending on the target day
-GRID_LAT_POINTS = 9        # Open-Meteo base grid: 9 x 12 = 108 points
+GRID_LAT_POINTS = 9        # Open-Meteo base candidate grid; outside points are redistributed inside Euskadi
 GRID_LON_POINTS = 12
-STATION_RADIUS_KM = 12.0   # grid points closer than this to a station are dropped
+STATION_RADIUS_KM = 7.0   # grid points closer than this to a station are dropped
 DRY_THRESHOLD_MM = 0.1     # a day counts as "dry" below this rainfall
 IDW_POWER = 2.0
+
+# ---- Model v3 switches ------------------------------------------------------------------
+# Each switch is independent. False = the old model/code path, untouched below, is used instead.
+# If the v3 files are missing the app falls back to the old model by itself.
+USE_V3_LIVE = True          # live + forecast heatmaps
+USE_V3_HISTORICAL = True    # historical simulation (its code lives in Model/historicalV3.py)
+
 
 def load_tier_thresholds() -> dict[str, float]:
     try:
@@ -203,6 +212,18 @@ def load_training_rows_for_date(target_date: str) -> pd.DataFrame:
     return frame
 
 
+# Model v3 historical endpoint. Registered before the old one below, so it takes precedence;
+# set USE_V3_HISTORICAL = False to go back to the old endpoint.
+if USE_V3_HISTORICAL and serveV3.READY:
+    historicalV3.register(
+        app,
+        lambda: fetch_station_points(),
+        lambda stations: build_historical_open_meteo_grid(stations),
+    )
+elif USE_V3_HISTORICAL:
+    log.warning("USE_V3_HISTORICAL is on but model v3 is not loaded (%s); using the old endpoint", serveV3.LOAD_ERROR)
+
+
 @app.get("/api/risk/historical")
 def get_historical_risk(date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$")):
     try:
@@ -241,7 +262,12 @@ def get_historical_risk(date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$")):
         if predictions.empty:
             raise HTTPException(status_code=503, detail="Historical risk model returned no predictions")
         safe_predictions = predictions.astype(object).where(pd.notna(predictions), None)
-        return safe_predictions.to_dict(orient="records")
+        stations, open_meteo_points = build_historical_map_points(target_date)
+        return {
+            "records": safe_predictions.to_dict(orient="records"),
+            "stations": stations,
+            "open_meteo_points": open_meteo_points,
+        }
     except HTTPException:
         raise
     except (OSError, ValueError, RuntimeError, requests.RequestException) as exc:
@@ -580,13 +606,106 @@ def fetch_open_meteo_history(coords: list[tuple[float, float]], day: datetime.da
 # ---------------------------------------------------------------------------
 # Heatmap build
 # ---------------------------------------------------------------------------
-def build_base_grid() -> list[tuple[float, float]]:
+@lru_cache(maxsize=1)
+def _municipality_polygon_parts() -> tuple[tuple[float, float, float, float, list], ...]:
+    data = json.loads(MUNICIPALITIES_GEOJSON_PATH.read_text(encoding="utf-8"))
+    parts = []
+    for feature in data.get("features", []):
+        if str(feature.get("properties", {}).get("fazeria", "0")) == "1":
+            continue
+        geometry = feature.get("geometry") or {}
+        polygons = geometry.get("coordinates", [])
+        if geometry.get("type") == "Polygon":
+            polygons = [polygons]
+        for polygon in polygons:
+            if not polygon or not polygon[0]:
+                continue
+            exterior = polygon[0]
+            longitudes = [point[0] for point in exterior]
+            latitudes = [point[1] for point in exterior]
+            parts.append((
+                min(longitudes), min(latitudes), max(longitudes), max(latitudes), polygon,
+            ))
+    return tuple(parts)
+
+
+def _point_in_ring(lon: float, lat: float, ring: list) -> bool:
+    inside = False
+    previous = ring[-1]
+    for current in ring:
+        x1, y1 = previous[:2]
+        x2, y2 = current[:2]
+        cross = (lon - x1) * (y2 - y1) - (lat - y1) * (x2 - x1)
+        if abs(cross) <= 1e-12 and min(x1, x2) <= lon <= max(x1, x2) and min(y1, y2) <= lat <= max(y1, y2):
+            return True
+        if (y1 > lat) != (y2 > lat) and lon < (x2 - x1) * (lat - y1) / (y2 - y1) + x1:
+            inside = not inside
+        previous = current
+    return inside
+
+
+def _point_in_euskadi(lat: float, lon: float) -> bool:
+    bounds = EUSKADI_BOUNDS
+    if not (bounds["lat_min"] <= lat <= bounds["lat_max"]
+            and bounds["lon_min"] <= lon <= bounds["lon_max"]):
+        return False
+    for min_lon, min_lat, max_lon, max_lat, polygon in _municipality_polygon_parts():
+        if min_lon <= lon <= max_lon and min_lat <= lat <= max_lat:
+            if _point_in_ring(lon, lat, polygon[0]) and not any(
+                _point_in_ring(lon, lat, hole) for hole in polygon[1:]
+            ):
+                return True
+    return False
+
+
+@lru_cache(maxsize=1)
+def _build_base_grid() -> tuple[tuple[float, float], ...]:
     lats = np.linspace(EUSKADI_BOUNDS["lat_min"], EUSKADI_BOUNDS["lat_max"], GRID_LAT_POINTS)
     lons = np.linspace(EUSKADI_BOUNDS["lon_min"], EUSKADI_BOUNDS["lon_max"], GRID_LON_POINTS)
-    return [(float(a), float(o)) for a in lats for o in lons]
+    original_points = [(float(lat), float(lon)) for lat in lats for lon in lons]
+    selected = [point for point in original_points if _point_in_euskadi(*point)]
+    target_count = len(original_points)
+    if len(selected) == target_count:
+        return tuple(selected)
+
+    factor = 4
+    dense_lats = np.linspace(
+        EUSKADI_BOUNDS["lat_min"], EUSKADI_BOUNDS["lat_max"], (GRID_LAT_POINTS - 1) * factor + 1,
+    )
+    dense_lons = np.linspace(
+        EUSKADI_BOUNDS["lon_min"], EUSKADI_BOUNDS["lon_max"], (GRID_LON_POINTS - 1) * factor + 1,
+    )
+    selected_keys = {(round(lat, 6), round(lon, 6)) for lat, lon in selected}
+    candidates = [
+        (float(lat), float(lon))
+        for lat in dense_lats for lon in dense_lons
+        if _point_in_euskadi(float(lat), float(lon))
+        and (round(float(lat), 6), round(float(lon), 6))
+        not in selected_keys
+    ]
+    candidate_xy = np.asarray([(lat, lon * math.cos(math.radians(43.0))) for lat, lon in candidates])
+    selected_xy = np.asarray([(lat, lon * math.cos(math.radians(43.0))) for lat, lon in selected])
+    min_distance_squared = np.min(
+        np.sum((candidate_xy[:, None, :] - selected_xy[None, :, :]) ** 2, axis=2),
+        axis=1,
+    )
+
+    while len(selected) < target_count:
+        index = int(np.argmax(min_distance_squared))
+        selected.append(candidates[index])
+        distances = np.sum((candidate_xy - candidate_xy[index]) ** 2, axis=1)
+        min_distance_squared = np.minimum(min_distance_squared, distances)
+        min_distance_squared[index] = -1
+
+    return tuple(selected)
 
 
-def idw_grid(samples: list[dict], resolution: int) -> list[dict]:
+def build_base_grid() -> list[tuple[float, float]]:
+    return list(_build_base_grid())
+
+
+def idw_grid(samples: list[dict], resolution: int, cap: float | None = None) -> list[dict]:
+    cap = cap or PROB_CAP
     s_lat = np.array([s["lat"] for s in samples])
     s_lon = np.array([s["lon"] for s in samples])
     s_val = np.array([s["probability"] for s in samples])
@@ -608,7 +727,7 @@ def idw_grid(samples: list[dict], resolution: int) -> list[dict]:
             "lat": round(float(a), 4),
             "lon": round(float(o), 4),
             "probability": round(float(p), 4),
-            "intensity": round(float(min(1.0, p / PROB_CAP)), 4),
+            "intensity": round(float(min(1.0, p / cap)), 4),
         }
         for a, o, p in zip(flat_lat, flat_lon, probs)
     ]
@@ -782,6 +901,152 @@ def build_payload(resolution: int, mode: str = "live") -> dict:
     return payload
 
 
+def build_payload_v3(resolution: int, mode: str = "live") -> dict:
+    """Same payload shape as build_payload(), scored with model v3 (see Model/serveV3.py).
+    ~130 days of weather per point (the old model used 30), tier thresholds come from the model
+    (summer set in Jun-Sep) and are sent to the pages in payload["thresholds"]."""
+    today = datetime.date.today()
+    day = today + datetime.timedelta(days=FORECAST_DAYS_AHEAD) if mode == "forecast" else today - datetime.timedelta(days=1)
+    started = time.perf_counter()
+    thr = serveV3.thresholds_for(day)
+    log.info("Building v3 heatmap: mode=%s date=%s season=%s", mode, day.isoformat(), thr["season"])
+
+    observations = fetch_station_points() if mode == "forecast" else fetch_euskalmet_observations(day)
+    grid = build_base_grid()
+    if observations:
+        grid = [
+            (lat, lon) for lat, lon in grid
+            if min(haversine_km(lat, lon, o["lat"], o["lon"]) for o in observations) > STATION_RADIUS_KM
+        ]
+    coords = [(o["lat"], o["lon"]) for o in observations] + grid
+    n_obs = len(observations)
+    log.info("v3 inputs: station_points=%d grid_points=%d (first live load downloads the long weather "
+             "history once; later loads reuse the disk cache)", n_obs, len(grid))
+    history = serveV3.fetch_history(coords, day)
+
+    points = []   # (lat, lon, station or None, source, daily frame)
+    for k, (lat, lon) in enumerate(coords):
+        daily = history[k]
+        if daily is None:
+            continue
+        station = observations[k] if k < n_obs else None
+        if mode == "live" and station:
+            daily = serveV3.apply_observations(daily, station, day)
+        if mode == "forecast":
+            source = "Open-Meteo (prevision)"
+        else:
+            source = "Euskalmet + Open-Meteo history" if station else "Open-Meteo"
+        points.append((lat, lon, station, source, daily))
+
+    results = serveV3.predict_many([(p[4], p[0], p[1]) for p in points])
+    samples: list[dict] = []
+    for (lat, lon, station, source, _), res in zip(points, results):
+        if res is None:
+            continue
+        samples.append({
+            "name": station["name"] if station else None,
+            "lat": lat, "lon": lon, "source": source,
+            "probability": round(res["probability"], 4),
+            "features": res["features"],
+        })
+    if not samples:
+        return {"error": "No usable data from Euskalmet or Open-Meteo"}
+
+    cap = thr["high"]
+    stations = [
+        {
+            "name": s["name"], "lat": s["lat"], "lon": s["lon"], "source": s["source"],
+            "probability": s["probability"],
+            "intensity": round(min(1.0, s["probability"] / cap), 4),
+            "risk_tier": serveV3.tier_of(s["probability"], thr),
+            "temperature": round(s["features"]["temperature"], 1),
+            "humidity": round(s["features"]["humidity"], 1),
+            "wind_speed": round(s["features"]["wind_speed"], 1),
+            "rain_7d": round(s["features"]["precip_7d"], 1),
+            "dry_streak": s["features"]["dry_spell_days"],
+        }
+        for s in samples if s["name"]
+    ]
+    payload = {
+        "mode": mode,
+        "model": "v3",
+        "date": day.isoformat(),
+        "generated_at": datetime.datetime.now().isoformat(timespec="seconds"),
+        "grid_size": resolution,
+        "prob_cap": cap,
+        "thresholds": thr,
+        "history_days": serveV3.HISTORY_DAYS,
+        "counts": {"euskalmet": len(stations), "open_meteo": len(samples) - len(stations)},
+        "points": idw_grid(samples, resolution, cap),
+        "stations": stations,
+        "samples": samples,
+        "importances": [],   # gradient boosting has no built-in feature importances
+    }
+    log.info("v3 heatmap complete: points=%d stations=%d open_meteo=%d elapsed=%.2fs",
+             len(payload["points"]), len(stations), payload["counts"]["open_meteo"], time.perf_counter() - started)
+    return payload
+
+
+def build_historical_map_points(day: datetime.date) -> tuple[list[dict], list[dict]]:
+    station_locations = fetch_station_points()
+    grid = build_base_grid()
+    if station_locations:
+        grid = [
+            (lat, lon) for lat, lon in grid
+            if min(haversine_km(lat, lon, s["lat"], s["lon"]) for s in station_locations)
+            > STATION_RADIUS_KM
+        ]
+
+    named_coords = {
+        f"station_{index}": (station["lat"], station["lon"])
+        for index, station in enumerate(station_locations)
+    }
+    named_coords.update({f"grid_{index}": coord for index, coord in enumerate(grid)})
+    station_probabilities = {}
+    open_meteo_points = []
+    if named_coords:
+        try:
+            map_weather = fetch_historical_day_data(named_coords, day.isoformat())
+            map_predictions = predict_fire_risk(map_weather)
+            for prediction in map_predictions.to_dict(orient="records"):
+                point_name = str(prediction["municipality"])
+                probability = float(prediction["risk_probability"])
+                if point_name.startswith("station_"):
+                    station_index = int(point_name.removeprefix("station_"))
+                    station = station_locations[station_index]
+                    station_probabilities[(station["lat"], station["lon"])] = round(probability, 4)
+                elif point_name.startswith("grid_"):
+                    open_meteo_points.append({
+                        "lat": float(prediction["latitude"]),
+                        "lon": float(prediction["longitude"]),
+                        "probability": round(probability, 4),
+                    })
+        except (OSError, ValueError, RuntimeError, requests.RequestException):
+            log.exception("Historical map weather fetch failed for %s", day.isoformat())
+
+    stations = [
+        {
+            "name": station["name"],
+            "lat": station["lat"],
+            "lon": station["lon"],
+            "probability": station_probabilities.get((station["lat"], station["lon"])),
+        }
+        for station in station_locations
+    ]
+    return stations, open_meteo_points
+
+
+def build_historical_open_meteo_grid(stations: list[dict]) -> list[tuple[float, float]]:
+    grid = build_base_grid()
+    if stations:
+        grid = [
+            (lat, lon) for lat, lon in grid
+            if min(haversine_km(lat, lon, station["lat"], station["lon"]) for station in stations)
+            > STATION_RADIUS_KM
+        ]
+    return grid
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -811,7 +1076,8 @@ def get_heatmap(
             refresh, cached.get("grid_size") if cached else None, resolution,
         )
         try:
-            payload = build_payload(resolution, mode)
+            use_v3 = USE_V3_LIVE and serveV3.READY
+            payload = build_payload_v3(resolution, mode) if use_v3 else build_payload(resolution, mode)
         except Exception as exc:
             log.exception("Heatmap build failed")
             payload = {"error": str(exc)}

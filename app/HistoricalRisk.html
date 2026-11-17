@@ -9,6 +9,16 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .history-open-meteo-icon { background: transparent; border: 0; }
+        .history-open-meteo-triangle {
+            position: absolute; top: 1px; left: 1px; display: block; width: 14px; height: 14px;
+            background: var(--marker-color); clip-path: polygon(50% 0, 0 100%, 100% 100%);
+            filter: drop-shadow(0 1px 1px #08141f) drop-shadow(1px 0 0 #08141f)
+                drop-shadow(-1px 0 0 #08141f) drop-shadow(0 -1px 0 #08141f)
+                drop-shadow(1px 1px 0 #08141f) drop-shadow(-1px 1px 0 #08141f);
+        }
+    </style>
 </head>
 <body>
 <nav class="nav solid">
@@ -32,16 +42,19 @@
 
     <section class="historical-controls" data-i18n-attr="aria-label:history.controlsLabel" aria-label="Historical date controls">
         <label for="history-date" data-i18n="history.date">Select a date</label>
-        <input type="date" id="history-date" min="1940-01-01">
+        <input type="date" id="history-date" min="2010-05-01">
         <button class="btn solid" id="btn-load-history" type="button" data-i18n="history.analyze">Analyze date</button>
         <p class="historical-status" id="history-status" role="status" aria-live="polite"></p>
     </section>
 
     <div class="history-map-legend" data-i18n-attr="aria-label:history.legendLabel" aria-label="Risk legend">
-        <span><i style="background:#38a169"></i><span data-i18n="legend.low">Low: P &lt; 0.35</span></span>
-        <span><i style="background:#ecc94b"></i><span data-i18n="legend.medium">Medium: 0.35 ≤ P &lt; 0.50</span></span>
-        <span><i style="background:#dd6b20"></i><span data-i18n="legend.high">High: 0.50 ≤ P &lt; 0.70</span></span>
-        <span><i style="background:#e53e3e"></i><span data-i18n="legend.extreme">Extreme: P ≥ 0.70</span></span>
+        <span><i style="background:#00a6d6"></i><span id="legend-low"></span></span>
+        <span><i style="background:#f2c500"></i><span id="legend-medium"></span></span>
+        <span><i style="background:#f57c00"></i><span id="legend-high"></span></span>
+        <span><i style="background:#d7191c"></i><span id="legend-very-high"></span></span>
+        <span><i style="background:#7b2cbf"></i><span id="legend-extreme"></span></span>
+        <span><input type="checkbox" id="chk-history-stations" checked><label for="chk-history-stations" data-i18n="map.stations">Stations</label></span>
+        <span><input type="checkbox" id="chk-history-open-meteo" checked><label for="chk-history-open-meteo" data-i18n="map.openMeteoNodes">Open-Meteo points</label></span>
     </div>
 
     <div class="historical-layout">
@@ -96,14 +109,63 @@
         maxZoom: 16
     }).addTo(map);
 
-    const tierColors = { low: '#38a169', medium: '#ecc94b', high: '#dd6b20', extreme: '#e53e3e' };
+    const tierColors = {
+        low: '#00a6d6', medium: '#f2c500', high: '#f57c00',
+        very_high: '#d7191c', extreme: '#7b2cbf'
+    };
+    const HISTORY_BOUNDS = { latMin: 42.47, latMax: 43.45, lonMin: -3.45, lonMax: -1.73 };
+    map.createPane('historyProbPane');
+    map.getPane('historyProbPane').style.zIndex = 350;
+    map.getPane('historyProbPane').style.pointerEvents = 'none';
+
     const layers = L.layerGroup().addTo(map);
+    const stationLayer = L.layerGroup().addTo(map);
+    const openMeteoLayer = L.layerGroup().addTo(map);
+    let probabilityLayer = null;
     let records = [];
+    let stations = [];
+    let openMeteoPoints = [];
+    let historicalMapSamples = [];
+
+    // Tier cut-offs: the backend sends the ones of the model in use (payload.thresholds; summer set
+    // in Jun-Sep). These defaults are what the old model used and apply until a response arrives.
+    let CUT = { low: 0.35, medium: 0.50, high: 0.70, veryHigh: 0.85 };
+    let OVERLAY_CAP = 0.5;          // probability at which the overlay becomes fully opaque
+    let historyDays = 30;
+    let lastThresholds = null;
+    const fmtP = x => `${(x * 100).toFixed(1)}%`;
 
     function tierFor(probability) {
-        return probability >= 0.70 ? 'extreme'
-            : probability >= 0.50 ? 'high'
-            : probability >= 0.35 ? 'medium' : 'low';
+        return probability >= CUT.veryHigh ? 'extreme'
+            : probability >= CUT.high ? 'very_high'
+            : probability >= CUT.medium ? 'high'
+            : probability >= CUT.low ? 'medium' : 'low';
+    }
+
+    function renderLegend() {
+        const set = (id, text) => { document.getElementById(id).textContent = text; };
+        set('legend-low', `${t('tier.low')}: P < ${fmtP(CUT.low)}`);
+        set('legend-medium', `${t('tier.medium')}: ${fmtP(CUT.low)} \u2264 P < ${fmtP(CUT.medium)}`);
+        set('legend-high', `${t('tier.high')}: ${fmtP(CUT.medium)} \u2264 P < ${fmtP(CUT.high)}`);
+        set('legend-very-high', `${t('tier.very_high')}: ${fmtP(CUT.high)} \u2264 P < ${fmtP(CUT.veryHigh)}`);
+        set('legend-extreme', `${t('tier.extreme')}: P \u2265 ${fmtP(CUT.veryHigh)}`);
+    }
+
+    function setThresholds(thr, days) {
+        if (thr) {
+            CUT = {
+                low: thr.low,
+                medium: thr.medium,
+                high: thr.high,
+                veryHigh: thr.very_high ?? 0.85
+            };
+            OVERLAY_CAP = CUT.veryHigh;
+        } else {
+            CUT = { low: 0.35, medium: 0.50, high: 0.70, veryHigh: 0.85 };
+            OVERLAY_CAP = 0.5;
+        }
+        historyDays = days || 30;
+        renderLegend();
     }
 
     function getRiskTierLabel(tierKey) {
@@ -112,6 +174,108 @@
 
     function safeTranslate(key, fallback) {
         return typeof t === 'function' ? t(key) : fallback;
+    }
+
+    function buildProbabilityOverlay(samples, geojson, resolution = 50) {
+        const canvas = document.createElement('canvas');
+        canvas.width = resolution;
+        canvas.height = resolution;
+        const context = canvas.getContext('2d');
+        const image = context.createImageData(resolution, resolution);
+        const cosineLatitude = Math.cos(43.0 * Math.PI / 180);
+
+        for (let row = 0; row < resolution; row++) {
+            const latitude = HISTORY_BOUNDS.latMin
+                + row / (resolution - 1) * (HISTORY_BOUNDS.latMax - HISTORY_BOUNDS.latMin);
+            for (let column = 0; column < resolution; column++) {
+                const longitude = HISTORY_BOUNDS.lonMin
+                    + column / (resolution - 1) * (HISTORY_BOUNDS.lonMax - HISTORY_BOUNDS.lonMin);
+                let weightedProbability = 0;
+                let totalWeight = 0;
+
+                samples.forEach(sample => {
+                    const distance = Math.max(Math.hypot(
+                        latitude - sample.latitude,
+                        (longitude - sample.longitude) * cosineLatitude
+                    ), 1e-6);
+                    const weight = 1 / (distance * distance);
+                    weightedProbability += sample.probability * weight;
+                    totalWeight += weight;
+                });
+
+                const probability = weightedProbability / totalWeight;
+                const [red, green, blue] = tierColors[tierFor(probability)]
+                    .match(/[a-f0-9]{2}/gi).map(value => parseInt(value, 16));
+                const imageRow = resolution - 1 - row;
+                const offset = (imageRow * resolution + column) * 4;
+                image.data[offset] = red;
+                image.data[offset + 1] = green;
+                image.data[offset + 2] = blue;
+                image.data[offset + 3] = Math.round(
+                    255 * Math.sqrt(Math.max(0, Math.min(1, probability / OVERLAY_CAP)))
+                );
+            }
+        }
+
+        context.putImageData(image, 0, 0);
+        const halfLatitude = (HISTORY_BOUNDS.latMax - HISTORY_BOUNDS.latMin) / (resolution - 1) / 2;
+        const halfLongitude = (HISTORY_BOUNDS.lonMax - HISTORY_BOUNDS.lonMin) / (resolution - 1) / 2;
+        const overlayBounds = {
+            west: HISTORY_BOUNDS.lonMin - halfLongitude,
+            east: HISTORY_BOUNDS.lonMax + halfLongitude,
+            south: HISTORY_BOUNDS.latMin - halfLatitude,
+            north: HISTORY_BOUNDS.latMax + halfLatitude,
+        };
+        let overlayCanvas = canvas;
+
+        if (geojson && Array.isArray(geojson.features)) {
+            const maskScale = 4;
+            const maskSize = resolution * maskScale;
+            const maskCanvas = document.createElement('canvas');
+            maskCanvas.width = maskSize;
+            maskCanvas.height = maskSize;
+            const maskContext = maskCanvas.getContext('2d');
+            const project = ([longitude, latitude]) => [
+                (longitude - overlayBounds.west) / (overlayBounds.east - overlayBounds.west) * maskSize,
+                (overlayBounds.north - latitude) / (overlayBounds.north - overlayBounds.south) * maskSize,
+            ];
+
+            geojson.features.forEach(feature => {
+                const geometry = feature.geometry;
+                if (!geometry) return;
+                const polygons = geometry.type === 'Polygon'
+                    ? [geometry.coordinates]
+                    : geometry.type === 'MultiPolygon' ? geometry.coordinates : [];
+
+                polygons.forEach(polygon => {
+                    maskContext.beginPath();
+                    polygon.forEach(ring => {
+                        ring.forEach((coordinate, index) => {
+                            const [x, y] = project(coordinate);
+                            if (index === 0) maskContext.moveTo(x, y);
+                            else maskContext.lineTo(x, y);
+                        });
+                        maskContext.closePath();
+                    });
+                    maskContext.fillStyle = '#fff';
+                    maskContext.fill('evenodd');
+                });
+            });
+
+            const clippedCanvas = document.createElement('canvas');
+            clippedCanvas.width = maskSize;
+            clippedCanvas.height = maskSize;
+            const clippedContext = clippedCanvas.getContext('2d');
+            clippedContext.drawImage(canvas, 0, 0, maskSize, maskSize);
+            clippedContext.globalCompositeOperation = 'destination-in';
+            clippedContext.drawImage(maskCanvas, 0, 0);
+            overlayCanvas = clippedCanvas;
+        }
+
+        return L.imageOverlay(overlayCanvas.toDataURL(), [
+            [HISTORY_BOUNDS.latMin - halfLatitude, HISTORY_BOUNDS.lonMin - halfLongitude],
+            [HISTORY_BOUNDS.latMax + halfLatitude, HISTORY_BOUNDS.lonMax + halfLongitude],
+        ], { pane: 'historyProbPane', interactive: false });
     }
 
     function escapeHtml(value) {
@@ -159,32 +323,69 @@
         return `<strong>${escapeHtml(record.name)}</strong><br>
             <span class="dot" style="background:${tierColors[tier]}"></span>${escapeHtml(getRiskTierLabel(tier))}
             · ${(record.probability * 100).toFixed(2)}%<br>
-            <a href="${escapeHtml(detailUrl(record))}">${escapeHtml(safeTranslate('history.details', 'Details'))}</a>`;
+            <a href="${historicalDetailUrl(record.latitude, record.longitude)}">${escapeHtml(safeTranslate('map.viewDetails', 'View details'))}</a>`;
+    }
+
+    function historicalDetailUrl(latitude, longitude) {
+        return `DetalleHistorico.html?${new URLSearchParams({
+            date: dateInput.value,
+            lat: latitude.toFixed(5),
+            lon: longitude.toFixed(5),
+        })}`;
+    }
+
+    function interpolateProbability(samples, latitude, longitude) {
+        let weightedProbability = 0;
+        let totalWeight = 0;
+        const cosineLatitude = Math.cos(43.0 * Math.PI / 180);
+
+        samples.forEach(sample => {
+            const distance = Math.max(Math.hypot(
+                latitude - sample.latitude,
+                (longitude - sample.longitude) * cosineLatitude
+            ), 1e-6);
+            const weight = 1 / (distance * distance);
+            weightedProbability += sample.probability * weight;
+            totalWeight += weight;
+        });
+        return weightedProbability / totalWeight;
     }
 
     function renderMap(geojson) {
         layers.clearLayers();
+        stationLayer.clearLayers();
+        openMeteoLayer.clearLayers();
+        if (probabilityLayer) map.removeLayer(probabilityLayer);
+        probabilityLayer = null;
         const mapped = records.filter(record =>
             Number.isFinite(record.latitude) && Number.isFinite(record.longitude)
         );
-        if (!mapped.length) return;
+        historicalMapSamples = openMeteoPoints.map(point => ({ ...point, source: 'grid' })).concat(
+            stations.filter(station => Number.isFinite(station.probability))
+                .map(station => ({
+                    latitude: station.lat,
+                    longitude: station.lon,
+                    probability: station.probability,
+                    name: station.name,
+                    source: 'station',
+                }))
+        );
+        try {
+            sessionStorage.setItem(`historical-meta:${dateInput.value}`, JSON.stringify({
+                thresholds: lastThresholds, historyDays,
+            }));
+            sessionStorage.setItem(`historical-map:${dateInput.value}`, JSON.stringify(historicalMapSamples));
+        } catch (error) {
+            console.warn('Historical map detail cache unavailable:', error);
+        }
 
+        if (historicalMapSamples.length) {
+            probabilityLayer = buildProbabilityOverlay(historicalMapSamples, geojson).addTo(map);
+        }
         const byName = new Map(mapped.map(record => [normalizedName(record.name), record]));
         if (geojson) {
             L.geoJSON(geojson, {
-                style: feature => {
-                    const properties = feature.properties || {};
-                    const name = properties.iz_ofizial || properties.iz_euskal
-                        || properties.ud_iz_e || properties.municipality;
-                    const record = byName.get(normalizedName(name));
-                    const tier = record && tierFor(record.probability);
-                    return {
-                        color: '#08141f',
-                        weight: 0.7,
-                        fillColor: record ? tierColors[tier] : '#82909a',
-                        fillOpacity: record ? 0.36 : 0.015,
-                    };
-                },
+                style: () => ({ color: '#08141f', weight: 0.7, fillColor: '#82909a', fillOpacity: 0.015 }),
                 onEachFeature: (feature, layer) => {
                     const properties = feature.properties || {};
                     const name = properties.iz_ofizial || properties.iz_euskal
@@ -194,20 +395,77 @@
                 }
             }).addTo(layers);
         }
-        mapped.forEach(record => {
-            const tier = tierFor(record.probability);
-            L.circleMarker([record.latitude, record.longitude], {
-                radius: 7,
+        openMeteoPoints.forEach(point => {
+            const latitude = point.latitude;
+            const longitude = point.longitude;
+            const tier = tierFor(point.probability);
+            const icon = L.divIcon({
+                className: 'history-open-meteo-icon',
+                html: `<span class="history-open-meteo-triangle" style="--marker-color:${tierColors[tier]}"></span>`,
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+            });
+            L.marker([latitude, longitude], { icon, bubblingMouseEvents: false })
+                .bindPopup(
+                    `<strong>Open-Meteo</strong><br>
+                     <span class="dot" style="background:${tierColors[tier]}"></span>${escapeHtml(getRiskTierLabel(tier))}
+                     · ${(point.probability * 100).toFixed(2)}%<br>
+                     <a href="${historicalDetailUrl(latitude, longitude)}">${escapeHtml(safeTranslate('map.viewDetails', 'View details'))}</a><br>
+                     <small>${latitude.toFixed(4)}, ${longitude.toFixed(4)}</small>`
+                ).addTo(openMeteoLayer);
+        });
+        stations.forEach(station => {
+            const probability = Number.isFinite(station.probability)
+                ? station.probability
+                : historicalMapSamples.length
+                    ? interpolateProbability(historicalMapSamples, station.lat, station.lon)
+                    : null;
+            const tier = probability === null ? null : tierFor(probability);
+            L.circleMarker([station.lat, station.lon], {
+                radius: 5,
                 color: '#08141f',
                 weight: 1,
-                fillColor: tierColors[tier],
-                fillOpacity: 0.9,
-            }).bindPopup(popupContent(record)).addTo(layers);
+                fillColor: tier ? tierColors[tier] : '#ffffff',
+                fillOpacity: 0.95,
+                bubblingMouseEvents: false,
+            }).bindPopup(
+                `<strong>${escapeHtml(station.name)}</strong><br>
+                 ${tier ? `<span class="dot" style="background:${tierColors[tier]}"></span>${escapeHtml(getRiskTierLabel(tier))}
+                 · ${(probability * 100).toFixed(2)}%<br>` : ''}
+                 <a href="${historicalDetailUrl(station.lat, station.lon)}">${escapeHtml(safeTranslate('map.viewDetails', 'View details'))}</a><br>
+                 <small>${station.lat.toFixed(4)}, ${station.lon.toFixed(4)}</small>`
+            ).addTo(stationLayer);
         });
-        if (mapped.length) {
-            map.fitBounds(L.latLngBounds(mapped.map(record => [record.latitude, record.longitude])), { padding: [24, 24] });
-        }
+        toggleMapLayers();
+        map.fitBounds([
+            [HISTORY_BOUNDS.latMin, HISTORY_BOUNDS.lonMin],
+            [HISTORY_BOUNDS.latMax, HISTORY_BOUNDS.lonMax],
+        ], { padding: [24, 24] });
     }
+
+    function toggleMapLayers() {
+        if (document.getElementById('chk-history-stations').checked) stationLayer.addTo(map);
+        else map.removeLayer(stationLayer);
+        if (document.getElementById('chk-history-open-meteo').checked) openMeteoLayer.addTo(map);
+        else map.removeLayer(openMeteoLayer);
+    }
+
+    map.on('click', event => {
+        if (!historicalMapSamples.length) return;
+        const { lat, lng } = event.latlng;
+        const probability = interpolateProbability(historicalMapSamples, lat, lng);
+        const tier = tierFor(probability);
+        L.popup().setLatLng(event.latlng).setContent(
+            `<strong>${escapeHtml(safeTranslate('map.selectedPoint', 'Selected point'))}</strong><br>
+             <span class="dot" style="background:${tierColors[tier]}"></span>${escapeHtml(getRiskTierLabel(tier))}
+             · ${(probability * 100).toFixed(2)}%<br>
+             <a href="${historicalDetailUrl(lat, lng)}">${escapeHtml(safeTranslate('map.viewDetails', 'View details'))}</a><br>
+             <small>${lat.toFixed(4)}, ${lng.toFixed(4)}</small>`
+        ).openOn(map);
+    });
+
+    document.getElementById('chk-history-stations').addEventListener('change', toggleMapLayers);
+    document.getElementById('chk-history-open-meteo').addEventListener('change', toggleMapLayers);
 
     async function loadHistoricalDate() {
         const date = dateInput.value;
@@ -221,6 +479,14 @@
         statusElement.innerHTML = `<span class="history-spinner" aria-hidden="true"></span> ${escapeHtml(safeTranslate('history.loading', 'Loading data...'))}`;
         resultsElement.innerHTML = '';
         layers.clearLayers();
+        stationLayer.clearLayers();
+        openMeteoLayer.clearLayers();
+        records = [];
+        stations = [];
+        openMeteoPoints = [];
+        historicalMapSamples = [];
+        if (probabilityLayer) map.removeLayer(probabilityLayer);
+        probabilityLayer = null;
 
         try {
             const response = await fetch(`${API}/api/risk/historical?${new URLSearchParams({ date })}`);
@@ -229,6 +495,26 @@
 
             // Support direct arrays or wrapped object formats ({ records: [...] } / { points: [...] })
             const dataList = Array.isArray(rawPayload) ? rawPayload : (rawPayload.records || rawPayload.points || []);
+            stations = Array.isArray(rawPayload.stations)
+                ? rawPayload.stations.map(station => ({
+                    ...station,
+                    lat: Number(station.lat),
+                    lon: Number(station.lon),
+                    probability: station.probability == null ? NaN : Number(station.probability),
+                    name: String(station.name || station.stationId || 'Station'),
+                })).filter(station => Number.isFinite(station.lat) && Number.isFinite(station.lon))
+                : [];
+            openMeteoPoints = Array.isArray(rawPayload.open_meteo_points)
+                ? rawPayload.open_meteo_points.map(point => ({
+                    latitude: Number(point.lat),
+                    longitude: Number(point.lon),
+                    probability: Number(point.probability),
+                    modelInputs: point.model_inputs || null,
+                })).filter(point => Number.isFinite(point.latitude)
+                    && Number.isFinite(point.longitude) && Number.isFinite(point.probability))
+                : [];
+            lastThresholds = rawPayload.thresholds || null;
+            setThresholds(lastThresholds, rawPayload.history_days);
             if (!dataList.length) throw new Error(safeTranslate('history.noResults', 'No data available for this date.'));
 
             records = dataList.map((record, index) => {
@@ -238,8 +524,10 @@
                     index,
                     name: String(record.municipality || record.name || `#${index + 1}`),
                     probability: Number(probability),
-                    latitude: Number(record.latitude ?? record.lat),
-                    longitude: Number(record.longitude ?? record.lon),
+                    latitude: record.latitude == null && record.lat == null
+                        ? NaN : Number(record.latitude ?? record.lat),
+                    longitude: record.longitude == null && record.lon == null
+                        ? NaN : Number(record.longitude ?? record.lon),
                 };
             }).filter(record => Number.isFinite(record.probability));
 
@@ -250,7 +538,8 @@
             }
 
             let geojson = null;
-            if (records.some(r => Number.isFinite(r.latitude) && Number.isFinite(r.longitude))) {
+            if (openMeteoPoints.length || stations.length
+                || records.some(r => Number.isFinite(r.latitude) && Number.isFinite(r.longitude))) {
                 try {
                     const geoResponse = await fetch(`${API}/api/geo/municipalities`);
                     if (geoResponse.ok) geojson = await geoResponse.json();
@@ -278,7 +567,8 @@
 
     analyzeButton.addEventListener('click', loadHistoricalDate);
     searchInput.addEventListener('input', renderResults);
-    window.addEventListener('app-language-changed', renderResults);
+    window.addEventListener('app-language-changed', () => { renderLegend(); renderResults(); });
+    renderLegend();
 
     if (queryDate) dateInput.value = queryDate;
     if (dateInput.value) loadHistoricalDate();

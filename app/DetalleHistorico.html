@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="/Static/LogoFire.PNG">
+    <title data-i18n="detail.historicalMapTitle">Historical Map Point Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .result { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+        .result .swatch { width: 64px; height: 64px; flex: none; }
+        .result .tier { font-weight: 300; font-size: 34px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.1; }
+        .result .prob { font-weight: 300; font-size: 16px; color: var(--muted); margin-top: 4px; }
+        table.t { width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 300; }
+        table.t th {
+            text-align: left; font-weight: 500; font-size: 11px; letter-spacing: 0.2em;
+            text-transform: uppercase; color: var(--accent); padding: 8px 10px 10px 0;
+        }
+        table.t td { padding: 10px 10px 10px 0; border-top: 1px solid var(--line); vertical-align: middle; }
+        .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; }
+        .note { font-size: 13px; color: var(--muted); font-weight: 300; margin-top: 12px; line-height: 1.6; }
+        .txt { margin: 0 0 12px; font-weight: 300; line-height: 1.75; }
+        .back { display: inline-block; margin-top: 8px; }
+        .scale li.current { font-weight: 500; }
+        @media (max-width: 760px) { table.t { font-size: 12px; } .result .tier { font-size: 26px; } }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-brand-group">
+            <a class="brand" href="/"><img src="/Static/LogoFire.PNG" alt=""><span>Euskadi Fire Risk</span></a>
+            <div class="language-picker" id="language-picker"></div>
+        </div>
+        <ul>
+            <li><a class="link" href="/" data-i18n="nav.home">Home</a></li>
+            <li><a class="link" href="LiveFireRisk.html" data-i18n="nav.live">Live Risk</a></li>
+            <li><a class="link" href="LiveFireRisk.html?mode=forecast" data-i18n="nav.forecast">Forecast Risk</a></li>
+            <li><a class="link" href="Info.html" data-i18n="nav.info">Information</a></li>
+        </ul>
+    </nav>
+
+    <section class="page-hero" style="height:34vh; min-height:240px">
+        <div class="sky"></div>
+        <div class="sun" style="bottom:8%"></div>
+        <svg class="mountains" viewBox="0 0 1440 400" preserveAspectRatio="none" aria-hidden="true">
+            <path fill="#3a5f86" opacity="0.65" d="M0,220 L180,140 L320,200 L520,90 L700,210 L860,130 L1040,220 L1220,120 L1440,200 L1440,400 L0,400 Z"/>
+            <path fill="#1d3a58" d="M0,280 L150,220 L300,270 L480,190 L660,280 L820,230 L1000,290 L1180,210 L1440,280 L1440,400 L0,400 Z"/>
+            <path fill="#08141f" d="M0,330 L200,290 L400,330 L620,280 L840,335 L1060,295 L1260,335 L1440,300 L1440,400 L0,400 Z"/>
+        </svg>
+        <h1 id="page-title" data-i18n="detail.historicalMapTitle">Historical Map Point Details</h1>
+    </section>
+
+    <main class="page-body">
+        <div class="inner" id="content"><p class="txt" data-i18n="detail.loading">Loading details...</p></div>
+    </main>
+
+    <script src="/translations/translations.js"></script>
+    <script src="/translations/i18n.js"></script>
+    <script>
+        const API = location.protocol === 'file:' ? 'http://localhost:8000' : '';
+        const params = new URLSearchParams(location.search);
+        const date = params.get('date') || '';
+        const latitude = Number(params.get('lat'));
+        const longitude = Number(params.get('lon'));
+        const backUrl = `HistoricalRisk.html${date ? `?date=${encodeURIComponent(date)}` : ''}`;
+        const content = document.getElementById('content');
+        let currentData = null;
+        const FEATURES = {
+            temperature: ['feature.temperature', '°C'], temp_max: ['feature.tempMax', '°C'],
+            temp_min: ['feature.tempMin', '°C'], humidity: ['feature.humidity', '%'],
+            min_humidity: ['feature.minHumidity', '%'], wind_speed: ['feature.wind', 'km/h'],
+            max_wind_speed: ['feature.maxWind', 'km/h'], precip_1d: ['feature.rain1', 'mm'],
+            precip_7d: ['feature.rain7', 'mm'], precip_14d: ['feature.rain14', 'mm'],
+            precip_30d: ['feature.rain30', 'mm'], dry_spell_days: ['feature.dryDays', 'days'],
+            temp_anomaly: ['feature.tempAnomaly', '°C'], et0_14d: ['feature.evapotranspiration', 'mm'],
+            fwi_proxy: ['feature.fwiProxy', ''], vpd: ['feature.vpd', 'kPa'],
+            ffmc: ['feature.ffmc', ''], dmc: ['feature.dmc', ''], dc: ['feature.dc', ''],
+            isi: ['feature.isi', ''], bui: ['feature.bui', ''], fwi: ['feature.fwiCode', ''],
+            tmax_3d: ['feature.tmax3d', '°C'], vpd_3d: ['feature.vpd3d', 'kPa'],
+            vpd_7d: ['feature.vpd7d', 'kPa'], minhum_3d: ['feature.minHumidity3d', '%'],
+            wind_max_3d: ['feature.maxWind3d', 'km/h'], hot_days_7d: ['feature.hotDays7d', 'days'],
+            days_since_rain5: ['feature.daysSinceRain5', 'days'], precip_60d: ['feature.rain60', 'mm'],
+            precip_90d: ['feature.rain90', 'mm'], tmax_anom_30d: ['feature.tempMaxAnomaly30d', '°C'],
+            vpd_anom_30d: ['feature.vpdAnomaly30d', 'kPa'], month: ['feature.month', ''],
+            day_of_year: ['feature.dayOfYear', ''], latitude: ['feature.modelLatitude', '°'],
+            longitude: ['feature.modelLongitude', '°'],
+        };
+
+        // Tier cut-offs come from the backend (payload.thresholds; summer set in Jun-Sep).
+        // The defaults below are what the old model used, for when the payload has none.
+        let tiers = [];
+        let historyDays = 30;
+        function setThresholds(thr, days) {
+            const cut = thr
+                ? [thr.low, thr.medium, thr.high, thr.very_high ?? 0.85]
+                : [0.35, 0.50, 0.70, 0.85];
+            tiers = [
+                { key: 'low', color: '#00a6d6', low: 0, high: cut[0] },
+                { key: 'medium', color: '#f2c500', low: cut[0], high: cut[1] },
+                { key: 'high', color: '#f57c00', low: cut[1], high: cut[2] },
+                { key: 'very_high', color: '#d7191c', low: cut[2], high: cut[3] },
+                { key: 'extreme', color: '#7b2cbf', low: cut[3], high: 1 },
+            ];
+            historyDays = days || 30;
+        }
+        setThresholds(null);
+        const tierFor = probability => tiers.slice().reverse().find(tier => probability >= tier.low) || tiers[0];
+        const percent = value => `${(value * 100).toFixed(2)}%`;
+        const number = (value, digits = 2) => Number(value).toFixed(digits);
+        const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[character]);
+
+        function row(title, html) {
+            return `<div class="row"><h2>${t(title)}</h2><div>${html}</div></div>`;
+        }
+
+        function distances(samples) {
+            const cosineLatitude = Math.cos(43 * Math.PI / 180);
+            const values = samples.map(sample => {
+                const planarDistance = Math.max(Math.hypot(
+                    latitude - sample.latitude,
+                    (longitude - sample.longitude) * cosineLatitude
+                ), 1e-6);
+                const weight = 1 / (planarDistance * planarDistance);
+                const radians = Math.PI / 180;
+                const a = Math.sin((sample.latitude - latitude) * radians / 2) ** 2
+                    + Math.cos(latitude * radians) * Math.cos(sample.latitude * radians)
+                    * Math.sin((sample.longitude - longitude) * radians / 2) ** 2;
+                return { sample, weight, km: 2 * 6371 * Math.asin(Math.sqrt(a)) };
+            });
+            const totalWeight = values.reduce((total, item) => total + item.weight, 0);
+            values.forEach(item => { item.share = item.weight / totalWeight; });
+            return values.sort((a, b) => b.weight - a.weight);
+        }
+
+        function render(samples) {
+            if (!samples.length) {
+                content.innerHTML = `<p class="txt">${t('detail.historicalMapNoSamples')}</p><a class="btn small" href="${backUrl}">${t('detail.backToMap')}</a>`;
+                return;
+            }
+            const nearby = distances(samples);
+            const probability = nearby.reduce((sum, item) => sum + item.sample.probability * item.share, 0);
+            const tier = tierFor(probability);
+            const modelSource = nearby.find(item => item.sample.modelInputs) || nearby[0];
+            const modelInputs = modelSource.sample.modelInputs || {};
+            const startDate = new Date(`${date}T00:00:00Z`);
+            startDate.setUTCDate(startDate.getUTCDate() - (historyDays - 1));
+            const windowStart = Number.isNaN(startDate.getTime()) ? date : startDate.toISOString().slice(0, 10);
+            const shown = nearby.slice(0, 5);
+            const featureRows = Object.entries(FEATURES)
+                .filter(([key]) => modelInputs[key] !== null && modelInputs[key] !== undefined
+                    && Number.isFinite(Number(modelInputs[key])))
+                .map(([key, [labelKey, unit, localLabel]]) => `<tr>
+                    <td>${escapeHtml(labelKey ? t(labelKey) : localLabel)}</td>
+                    <td>${number(modelInputs[key])} ${unit === 'days' ? t('unit.days') : unit}</td>
+                </tr>`).join('');
+            const codeRows = ['ffmc', 'dmc', 'dc', 'isi', 'bui', 'fwi']
+                .filter(key => modelInputs[key] !== null && modelInputs[key] !== undefined
+                    && Number.isFinite(Number(modelInputs[key])))
+                .map(key => `<tr><td>${escapeHtml(t(FEATURES[key][0]))}</td><td>${number(modelInputs[key])}</td></tr>`)
+                .join('');
+            const modelSourceName = modelSource.sample.source === 'station'
+                ? `${t('detail.historicalMapStationSource')}: ${modelSource.sample.name}`
+                : `${t('detail.historicalMapGridSource')} (${number(modelSource.sample.latitude, 3)}, ${number(modelSource.sample.longitude, 3)})`;
+
+            content.innerHTML = row('detail.result', `
+                <div class="result">
+                    <div class="swatch" style="background:${tier.color}"></div>
+                    <div><div class="tier">${t(`tier.${tier.key}`)}</div><div class="prob">${t('detail.probability')}: ${percent(probability)}</div></div>
+                </div>
+                <p class="note">${t('detail.coordinates')}: ${number(latitude, 4)}, ${number(longitude, 4)} · ${t('detail.dataFor')} ${escapeHtml(date)}<br>
+                ${t('detail.historicalMapDateNote', { start: windowStart, date, days: historyDays })}</p>
+                <a class="btn small back" href="${backUrl}">${t('detail.backToMap')}</a>`)
+                + row('detail.whyColor', `
+                    <p class="txt">${t('detail.historicalMapExplanation')}</p>
+                    <p class="note">${escapeHtml(t('detail.historicalMapDominantSource', {
+                        source: modelSourceName, weight: percent(modelSource.share),
+                    }))}</p>
+                    <ul class="scale" style="list-style:none;padding:0;margin:0">
+                        ${tiers.map(item => `<li class="${item.key === tier.key ? 'current' : ''}" style="margin-bottom:8px;font-weight:300">
+                            <span class="dot" style="background:${item.color}"></span>${t(`tier.${item.key}`)}: ${percent(item.low)} ${t('detail.to')} ${percent(item.high)}${item.key === tier.key ? ` ${t('detail.thisPoint')}` : ''}
+                        </li>`).join('')}
+                    </ul>`)
+                + row('detail.historicalMapSources', `
+                    <table class="t">
+                        <tr><th>${t('detail.point')}</th><th>${t('detail.source')}</th><th>${t('detail.distance')}</th><th>${t('detail.weight')}</th><th>${t('detail.probabilityHeader')}</th></tr>
+                        ${shown.map(item => {
+                            const sourceTier = tierFor(item.sample.probability);
+                            const sourceName = item.sample.source === 'station'
+                                ? `${t('detail.historicalMapStationSource')}: ${item.sample.name}`
+                                : t('detail.historicalMapGridSource');
+                            return `<tr>
+                                <td>${escapeHtml(sourceName)}</td>
+                                <td>${item.sample.source === 'station' ? t('map.stations') : t('map.sourceOpenMeteo')}</td>
+                                <td>${number(item.km)} km</td>
+                                <td>${percent(item.share)}</td>
+                                <td><span class="dot" style="background:${sourceTier.color}"></span>${percent(item.sample.probability)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </table>`)
+                + row('detail.fireWeatherCodes', `
+                    <table class="t">
+                        <tr><th>${t('detail.variable')}</th><th>${t('detail.value')}</th></tr>
+                        ${codeRows}
+                    </table>
+                    <p class="note">${t('detail.fireWeatherCodesNote')}</p>`)
+                + row('detail.conditions', `
+                    <p class="note">${escapeHtml(t('detail.historicalModelInputsNote', {
+                        source: modelSourceName,
+                        distance: number(modelSource.km),
+                    }))}</p>
+                    <table class="t">
+                        <tr><th>${t('detail.variable')}</th><th>${t('detail.value')}</th></tr>
+                        ${featureRows}
+                    </table>`);
+        }
+
+        async function init() {
+            if (!date || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+                content.innerHTML = `<p class="txt">${t('detail.noHistoricalRecord')}</p><a class="btn small" href="${backUrl}">${t('detail.backToMap')}</a>`;
+                return;
+            }
+            document.title = t('detail.historicalMapTitle');
+            const title = document.getElementById('page-title');
+            title.dataset.i18n = 'detail.historicalMapTitle';
+            title.textContent = t('detail.historicalMapTitle');
+
+            const cached = sessionStorage.getItem(`historical-map:${date}`);
+            const cachedMeta = sessionStorage.getItem(`historical-meta:${date}`);
+            if (cached && cachedMeta) {
+                try {
+                    currentData = JSON.parse(cached);
+                    const meta = JSON.parse(cachedMeta);
+                    setThresholds(meta.thresholds, meta.historyDays);
+                } catch { currentData = null; }
+            }
+            if (!Array.isArray(currentData) || !currentData.length
+                || !currentData.some(sample => sample.modelInputs)) {
+                try {
+                    const response = await fetch(`${API}/api/risk/historical?${new URLSearchParams({ date })}`);
+                    const payload = await response.json();
+                    if (!response.ok) throw new Error(payload.detail || `HTTP ${response.status}`);
+                    setThresholds(payload.thresholds || null, payload.history_days);
+                    currentData = (payload.open_meteo_points || []).map(point => ({
+                        latitude: Number(point.lat), longitude: Number(point.lon),
+                        probability: Number(point.probability), source: 'grid',
+                        modelInputs: point.model_inputs || null,
+                    })).concat((payload.stations || []).filter(station => station.probability != null).map(station => ({
+                        latitude: Number(station.lat), longitude: Number(station.lon),
+                        probability: Number(station.probability), name: station.name, source: 'station',
+                    })));
+                } catch (error) {
+                    content.innerHTML = `<p class="txt">${escapeHtml(error.message || t('detail.connectionError'))}</p><a class="btn small" href="${backUrl}">${t('detail.backToMap')}</a>`;
+                    return;
+                }
+            }
+            currentData = currentData.filter(sample => Number.isFinite(sample.latitude)
+                && Number.isFinite(sample.longitude) && Number.isFinite(sample.probability));
+            render(currentData);
+        }
+
+        window.addEventListener('app-language-changed', () => {
+            document.title = t('detail.historicalMapTitle');
+            document.getElementById('page-title').textContent = t('detail.historicalMapTitle');
+            if (currentData) render(currentData);
+        });
+
+        init();
+    </script>
+</body>
+</html>

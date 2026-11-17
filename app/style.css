@@ -13,10 +13,11 @@
     --hero-ground: #12150f;
 
     /* Niveles de riesgo (los mismos que usa el mapa) */
-    --tier-low: #38a169;
-    --tier-medium: #ecc94b;
-    --tier-high: #dd6b20;
-    --tier-extreme: #e53e3e;
+    --tier-low: #00a6d6;
+    --tier-medium: #f2c500;
+    --tier-high: #f57c00;
+    --tier-very-high: #d7191c;
+    --tier-extreme: #7b2cbf;
 }
 
 * { box-sizing: border-box; }
@@ -33,6 +34,7 @@ a { color: inherit; }
 .c-low { background: var(--tier-low); }
 .c-medium { background: var(--tier-medium); }
 .c-high { background: var(--tier-high); }
+.c-very-high { background: var(--tier-very-high); }
 .c-extreme { background: var(--tier-extreme); }
 
 /* ---------- Navegacion ---------- */
@@ -340,7 +342,7 @@ progress.bar::-moz-progress-bar { background: var(--accent); }
 }
 .legend .bar {
     width: 190px; height: 8px; margin: 8px 0 6px 0;
-    background: linear-gradient(to right, #38a169, #ecc94b, #dd6b20, #e53e3e);
+    background: linear-gradient(to right, #00a6d6, #f2c500, #f57c00, #d7191c, #7b2cbf);
 }
 .legend .labels { display: flex; justify-content: space-between; color: var(--muted); }
 .legend .tiers div { margin-top: 7px; letter-spacing: 0.06em; text-transform: none; font-size: 12px; }

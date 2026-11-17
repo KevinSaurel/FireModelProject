@@ -88,13 +88,22 @@
     const EUSKADI_BOUNDS = { lat_min: 42.47, lat_max: 43.45, lon_min: -3.45, lon_max: -1.73 };
     const COS_LAT = Math.cos(43.0 * Math.PI / 180);
 
-    // Umbrales de probabilidad del modelo (tier_thresholds.json)
-    const TIERS = [
-        { key: 'LOW',     color: '#38a169', lo: 0,    hi: 0.35 },
-        { key: 'MEDIUM',  color: '#ecc94b', lo: 0.35, hi: 0.50 },
-        { key: 'HIGH',    color: '#dd6b20', lo: 0.50, hi: 0.70 },
-        { key: 'EXTREME', color: '#e53e3e', lo: 0.70, hi: 1 },
-    ];
+    // Umbrales de probabilidad: los envia el backend (thresholds; en jun-sep el juego de verano).
+    // Los valores por defecto son los del modelo antiguo, por si la respuesta no trae ninguno.
+    let TIERS = [];
+    function setThresholds(thr) {
+        const cut = thr
+            ? [thr.low, thr.medium, thr.high, thr.very_high ?? 0.85]
+            : [0.35, 0.50, 0.70, 0.85];
+        TIERS = [
+            { key: 'LOW',     color: '#00a6d6', lo: 0,      hi: cut[0] },
+            { key: 'MEDIUM',  color: '#f2c500', lo: cut[0], hi: cut[1] },
+            { key: 'HIGH',    color: '#f57c00', lo: cut[1], hi: cut[2] },
+            { key: 'VERY_HIGH', color: '#d7191c', lo: cut[2], hi: cut[3] },
+            { key: 'EXTREME', color: '#7b2cbf', lo: cut[3], hi: 1 },
+        ];
+    }
+    setThresholds(null);
     const tierOf = p => TIERS.slice().reverse().find(t => p >= t.lo) || TIERS[0];
 
     const FEATURES = {
@@ -114,8 +123,27 @@
         et0_14d:        ['feature.evapotranspiration', 'mm'],
         fwi_proxy:      ['feature.fwi', ''],
         vpd:            ['feature.vpd', 'kPa'],
+        ffmc:           ['feature.ffmc', ''],
+        dmc:            ['feature.dmc', ''],
+        dc:             ['feature.dc', ''],
+        isi:            ['feature.isi', ''],
+        bui:            ['feature.bui', ''],
+        fwi:            ['feature.fwiCode', ''],
+        tmax_3d:        ['feature.tmax3d', '°C'],
+        vpd_3d:         ['feature.vpd3d', 'kPa'],
+        vpd_7d:         ['feature.vpd7d', 'kPa'],
+        minhum_3d:      ['feature.minHumidity3d', '%'],
+        wind_max_3d:    ['feature.maxWind3d', 'km/h'],
+        hot_days_7d:    ['feature.hotDays7d', 'days'],
+        days_since_rain5: ['feature.daysSinceRain5', 'days'],
+        precip_60d:     ['feature.rain60', 'mm'],
+        precip_90d:     ['feature.rain90', 'mm'],
+        tmax_anom_30d:  ['feature.tempMaxAnomaly30d', '°C'],
+        vpd_anom_30d:   ['feature.vpdAnomaly30d', 'kPa'],
         month:          ['feature.month', ''],
         day_of_year:    ['feature.dayOfYear', ''],
+        latitude:       ['feature.modelLatitude', '°'],
+        longitude:      ['feature.modelLongitude', '°'],
     };
 
     const pct = (x, d = 1) => (x * 100).toFixed(d) + '%';
@@ -181,6 +209,7 @@
         historicalRecord = null;
         detailData = d;
         detailMessage = null;
+        setThresholds(d.thresholds);
         const p = cellProbability(d.points, d.grid_size, lat, lon);
         const riskTier = tierOf(p);
         const tierLabel = t(`tier.${riskTier.key.toLowerCase()}`);
@@ -242,24 +271,24 @@
         const keys = Object.keys(feats);
         html += row('detail.conditions', `
             <table class="t">
-                <tr><th>${t('detail.variable')}</th><th>${t('detail.value')}</th><th>${t('detail.modelImportance')}</th></tr>
+                <tr><th>${t('detail.variable')}</th><th>${t('detail.value')}</th>${imps.length ? `<th>${t('detail.modelImportance')}</th>` : ''}</tr>
                 ${keys.map(k => {
-                    const [labelKey, unit] = FEATURES[k] || [null, ''];
-                    const label = labelKey ? t(labelKey) : k;
+                    const [labelKey, unit, localLabel] = FEATURES[k] || [null, ''];
+                    const label = labelKey ? t(labelKey) : (localLabel || k);
                     const translatedUnit = unit === 'days' ? t('unit.days') : unit;
                     const imp = impMap[k];
                     const w = imp && maxImp ? Math.round(100 * imp / maxImp) : 0;
                     return `<tr>
                         <td>${esc(label)}</td>
                         <td>${num(feats[k], 1)} ${translatedUnit}</td>
-                        <td>${imp !== undefined ? `<div class="bar-wrap"><div class="bar-fill" style="width:${w}%"></div></div>` : '-'}</td>
+                        ${imps.length ? `<td>${imp !== undefined ? `<div class="bar-wrap"><div class="bar-fill" style="width:${w}%"></div></div>` : '-'}</td>` : ''}
                     </tr>`;
                 }).join('')}
             </table>
-            <p class="note">${esc(t('detail.importanceNote', {
+            ${imps.length ? `<p class="note">${esc(t('detail.importanceNote', {
                 mode: FORECAST ? t('detail.forecastValues') : t('detail.values'),
                 source: sourceName(main.s)
-            }))}</p>`);
+            }))}</p>` : ''}`);
 
         // 5. Escala
         html += row('detail.riskScale', `
@@ -280,13 +309,19 @@
         const riskTier = tierOf(probability);
         const tierLabel = t(`tier.${riskTier.key.toLowerCase()}`);
         const location = record.municipality || record.name || t('history.location');
+        const modelInputs = record.model_inputs || record;
         const featureRows = Object.keys(FEATURES)
-            .filter(key => record[key] !== null && record[key] !== undefined && Number.isFinite(Number(record[key])))
+            .filter(key => modelInputs[key] !== null && modelInputs[key] !== undefined && Number.isFinite(Number(modelInputs[key])))
             .map(key => {
-                const [labelKey, unit] = FEATURES[key];
+                const [labelKey, unit, localLabel] = FEATURES[key];
                 const translatedUnit = unit === 'days' ? t('unit.days') : unit;
-                return `<tr><td>${esc(t(labelKey))}</td><td>${num(record[key], 2)} ${translatedUnit}</td></tr>`;
+                return `<tr><td>${esc(labelKey ? t(labelKey) : localLabel)}</td><td>${num(modelInputs[key], 2)} ${translatedUnit}</td></tr>`;
             }).join('');
+        const codeRows = ['ffmc', 'dmc', 'dc', 'isi', 'bui', 'fwi']
+            .filter(key => modelInputs[key] !== null && modelInputs[key] !== undefined
+                && Number.isFinite(Number(modelInputs[key])))
+            .map(key => `<tr><td>${esc(t(FEATURES[key][0]))}</td><td>${num(modelInputs[key], 2)}</td></tr>`)
+            .join('');
 
         content.innerHTML = row('detail.result', `
             <div class="result">
@@ -305,6 +340,12 @@
                     low: pct(riskTier.lo),
                     high: pct(riskTier.hi)
                 }))}</p>`)
+            + row('detail.fireWeatherCodes', `
+                <table class="t">
+                    <tr><th>${t('detail.variable')}</th><th>${t('detail.value')}</th></tr>
+                    ${codeRows}
+                </table>
+                <p class="note">${t('detail.fireWeatherCodesNote')}</p>`)
             + row('detail.conditions', `
                 <table class="t">
                     <tr><th>${t('detail.variable')}</th><th>${t('detail.value')}</th></tr>
@@ -331,7 +372,9 @@
                 const response = await fetch(`${API}/api/risk/historical?${query}`);
                 const predictions = await response.json();
                 if (!response.ok) throw new Error(predictions.detail || `HTTP ${response.status}`);
-                const record = Array.isArray(predictions) ? predictions[index] : null;
+                setThresholds(predictions.thresholds || null);
+                const list = Array.isArray(predictions) ? predictions : (predictions.records || []);
+                const record = list[index] || null;
                 if (!record || record.risk_probability == null || !Number.isFinite(Number(record.risk_probability))) {
                     showMessage('detail.noHistoricalRecord', true);
                     return;
