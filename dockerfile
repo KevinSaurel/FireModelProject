@@ -18,8 +18,7 @@ COPY . .
 
 # Descargar el modelo binario real de 289 MB desde GitHub Releases
 # El parámetro -fL asegura que falle si la URL devuelve un error HTTP (ej. 404 o 403)
-RUN curl -fL -o Model/fireTrainModel.pkl "https://github.com/KevinSaurel/FireModelProject/releases/download/v1.0.0/fireTrainModel.pkl"
-# Exponer el puerto
+RUN curl -fL -o Model/fireTrainModel.pkl "[https://github.com/KevinSaurel/FireModelProject/releases/download/v3.0.0/fireTrainModel_v3.pkl"
 EXPOSE 8000
 
 # Iniciar Uvicorn leyendo la variable PORT dinámica de Cloud Run
