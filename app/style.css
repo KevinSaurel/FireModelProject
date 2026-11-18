@@ -459,7 +459,7 @@ a.popup-btn:hover { background: #f0a35e; color: #1a1209 !important; }
 .historical-heading h1 { margin: 0 0 8px; font-size: clamp(24px, 4vw, 38px); font-weight: 300; }
 .historical-heading p { max-width: 800px; margin: 0; color: var(--muted); line-height: 1.6; font-weight: 300; }
 .historical-controls {
-    display: flex; align-items: end; flex-wrap: wrap; gap: 12px;
+    display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px;
     margin-bottom: 18px; padding: 16px; border: 1px solid var(--line);
     background: rgba(255, 255, 255, 0.04);
 }
@@ -469,7 +469,12 @@ a.popup-btn:hover { background: #f0a35e; color: #1a1209 !important; }
     background: rgba(255,255,255,.08); color: var(--text); font: inherit; color-scheme: dark;
 }
 .historical-controls .btn { min-height: 40px; padding: 9px 16px; font-size: 10px; }
-.historical-status { flex: 1 1 100%; min-height: 18px; color: var(--muted); font-size: 12px; }
+.historical-interesting-dates { flex: 1 1 100%; margin-top: 4px; }
+.historical-interesting-dates p { margin: 0 0 6px; color: var(--muted); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; }
+.historical-interesting-dates ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 18px; margin: 0; padding: 0 0 0 18px; color: var(--muted); }
+.historical-interesting-dates button { padding: 0; border: 0; background: none; color: var(--text); font: inherit; font-size: 12px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.historical-interesting-dates button:hover { color: var(--accent); }
+.historical-status { flex: 1 1 100%; min-height: 18px; margin: 2px 0 0; color: var(--muted); font-size: 12px; }
 .historical-status.error { color: #ffb4a8; }
 .historical-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .85fr); gap: 18px; align-items: start; }
 #history-map { position: relative; inset: auto; width: 100%; height: min(68vh, 700px); min-height: 420px; z-index: 0; border: 1px solid var(--line); }
@@ -502,6 +507,7 @@ a.popup-btn:hover { background: #f0a35e; color: #1a1209 !important; }
     .historical-controls label { flex: 1 1 100%; }
     .historical-controls input[type="date"] { width: 100%; }
     .historical-controls .btn { flex: 1 1 auto; }
+    .historical-interesting-dates ul { grid-template-columns: 1fr; gap: 7px; }
     #history-map { height: 52vh; min-height: 300px; }
     .history-results-header { align-items: stretch; }
     .historical-search { width: 100%; }

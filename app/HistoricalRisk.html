@@ -44,11 +44,19 @@
         <label for="history-date" data-i18n="history.date">Select a date</label>
         <input type="date" id="history-date" min="2010-05-01">
         <button class="btn solid" id="btn-load-history" type="button" data-i18n="history.analyze">Analyze date</button>
+        <div class="historical-interesting-dates">
+            <p data-i18n="history.interestingDates">Interesting dates</p>
+            <ul>
+                <li><button type="button" data-history-date="2022-10-23" data-i18n="history.dateBalmaseda">Balmaseda wildfire - 23/10/2022</button></li>
+                <li><button type="button" data-history-date="2024-07-28" data-i18n="history.dateHeatwave2024">Summer heatwave - 28/07/2024</button></li>
+                <li><button type="button" data-history-date="2026-06-26" data-i18n="history.dateHeatwave2026">Summer heatwave - 26/06/2026</button></li>
+            </ul>
+        </div>
         <p class="historical-status" id="history-status" role="status" aria-live="polite"></p>
     </section>
 
     <div class="history-map-legend" data-i18n-attr="aria-label:history.legendLabel" aria-label="Risk legend">
-        <span><i style="background:#00a6d6"></i><span id="legend-low"></span></span>
+        <span><i style="background:#12d600a2"></i><span id="legend-low"></span></span>
         <span><i style="background:#f2c500"></i><span id="legend-medium"></span></span>
         <span><i style="background:#f57c00"></i><span id="legend-high"></span></span>
         <span><i style="background:#d7191c"></i><span id="legend-very-high"></span></span>
@@ -97,6 +105,13 @@
     const searchInput = document.getElementById('history-search');
     const analyzeButton = document.getElementById('btn-load-history');
     const queryDate = params.get('date');
+
+    document.querySelectorAll('[data-history-date]').forEach(button => {
+        button.addEventListener('click', () => {
+            dateInput.value = button.dataset.historyDate;
+            loadHistoricalDate();
+        });
+    });
 
     // Dynamic max date: Yesterday
     const yesterday = new Date();
